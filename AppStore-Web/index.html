@@ -9,13 +9,17 @@
       --accent: #e67e22;
       --accent-dark: #d35400;
       --accent-light: #f5b041;
-      --bg: #f8f9fa;
+      --red: #e74c3c;
+      --orange: #e67e22;
+      --yellow: #f1c40f;
+      --green: #27ae60;
+      --bg: #f2f2f7;
       --card: #ffffff;
       --text: #1a1a1a;
       --text-muted: #5c5c5c;
       --border: rgba(0,0,0,.08);
-      --radius: 14px;
-      --shadow: 0 2px 12px rgba(0,0,0,.06);
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,.08);
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -23,8 +27,8 @@
         --card: #2c2c2e;
         --text: #f5f5f7;
         --text-muted: #98989d;
-        --border: rgba(255,255,255,.1);
-        --shadow: 0 2px 16px rgba(0,0,0,.3);
+        --border: rgba(255,255,255,.12);
+        --shadow: 0 4px 24px rgba(0,0,0,.35);
       }
     }
     * { box-sizing: border-box; }
@@ -41,124 +45,249 @@
     .nav {
       background: var(--card);
       border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
+      padding: 14px 20px;
       position: sticky;
       top: 0;
       z-index: 10;
       box-shadow: var(--shadow);
     }
     .nav-inner {
-      max-width: 720px;
+      max-width: 800px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
     }
     .logo {
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: var(--accent);
       text-decoration: none;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
+    .logo-icon { font-size: 1.2em; }
     .logo:hover { color: var(--accent-dark); }
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      font-size: 0.95rem;
-    }
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 500;
-    }
+    .nav-links { display: flex; gap: 24px; font-size: 0.95rem; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; }
     .nav-links a:hover { color: var(--accent); }
-    main { flex: 1; padding: 32px 20px 48px; max-width: 720px; margin: 0 auto; width: 100%; }
+    main { flex: 1; padding: 40px 20px 56px; max-width: 800px; margin: 0 auto; width: 100%; }
+
+    /* Hero: icona + nome + tagline */
     .hero {
       text-align: center;
-      padding: 40px 0 32px;
+      padding: 32px 0 48px;
     }
-    .hero h1 {
-      font-size: clamp(1.75rem, 4vw, 2.25rem);
-      font-weight: 700;
-      margin: 0 0 8px;
-      letter-spacing: -0.03em;
-      color: var(--text);
-    }
-    .hero .tagline {
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      margin: 0 0 28px;
-    }
-    .hero .accent { color: var(--accent); }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-    }
-    .card h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 0 0 16px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .card h2 .icon { color: var(--accent); }
-    .features {
-      display: grid;
-      gap: 16px;
-      margin-top: 24px;
-    }
-    .feature {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      padding: 16px;
-      background: var(--bg);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-    .feature-num {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.9rem;
+    .app-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      border-radius: 26px;
+      background: linear-gradient(145deg, var(--accent-light), var(--accent));
+      box-shadow: 0 12px 40px rgba(230, 126, 34, .35);
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 56px;
+      animation: icon-float 4s ease-in-out infinite;
+    }
+    @keyframes icon-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 800;
+      margin: 0 0 12px;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+    .hero .tagline {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin: 0 0 12px;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero .sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      opacity: .9;
+    }
+
+    /* KPI cards come nell'app */
+    .kpi-section {
+      margin-bottom: 40px;
+    }
+    .kpi-section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 16px;
+      color: var(--text);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 520px) {
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .kpi-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      animation: card-in 0.5s ease-out backwards;
+    }
+    .kpi-card:nth-child(1) { animation-delay: .05s; }
+    .kpi-card:nth-child(2) { animation-delay: .1s; }
+    .kpi-card:nth-child(3) { animation-delay: .15s; }
+    .kpi-card:nth-child(4) { animation-delay: .2s; }
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .kpi-card .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .kpi-card.expiring .kpi-icon { background: rgba(231, 76, 60, .2); }
+    .kpi-card.toconsume .kpi-icon { background: rgba(230, 126, 34, .2); }
+    .kpi-card.incoming .kpi-icon { background: rgba(241, 196, 15, .25); }
+    .kpi-card.ok .kpi-icon { background: rgba(39, 174, 96, .2); }
+    .kpi-card .kpi-title { font-size: 0.9rem; font-weight: 600; margin: 0; color: var(--text); }
+    .kpi-card .kpi-desc { font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 0; }
+    .kpi-card.expiring .kpi-title { color: var(--red); }
+    .kpi-card.toconsume .kpi-title { color: var(--orange); }
+    .kpi-card.incoming .kpi-title { color: #b7950b; }
+    .kpi-card.ok .kpi-title { color: var(--green); }
+
+    /* Anello di progresso (come in app) */
+    .progress-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 40px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .progress-section h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0 0 24px;
+      color: var(--text);
+    }
+    .progress-ring-wrap {
+      display: inline-block;
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .progress-ring-wrap svg {
+      transform: rotate(-90deg);
+    }
+    .progress-ring-bg { stroke: var(--border); }
+    .progress-ring-fill {
+      stroke: var(--accent);
+      stroke-linecap: round;
+      transition: stroke-dashoffset .8s ease-out;
+    }
+    .progress-ring-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .progress-ring-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 0 0 4px;
+    }
+    .progress-ring-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Funzionalità con icone */
+    .features-section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 20px;
+      color: var(--text);
+    }
+    .features {
+      display: grid;
+      gap: 14px;
+    }
+    .feature {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(230, 126, 34, .2), rgba(230, 126, 34, .1));
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
       flex-shrink: 0;
     }
-    .feature h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; }
-    .feature p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+    .feature h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .feature p { margin: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* CTA */
     .cta {
       text-align: center;
-      padding: 24px 0;
+      padding: 40px 0 24px;
     }
     .cta a {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       background: var(--accent);
       color: #fff !important;
-      padding: 14px 28px;
-      border-radius: 12px;
+      padding: 18px 32px;
+      border-radius: 14px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: background .2s;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: transform .15s, box-shadow .2s;
+      box-shadow: 0 8px 28px rgba(230, 126, 34, .4);
     }
-    .cta a:hover { background: var(--accent-dark); }
+    .cta a:hover {
+      transform: scale(1.02);
+      box-shadow: 0 12px 36px rgba(230, 126, 34, .45);
+    }
+    .cta a:active { transform: scale(0.98); }
     footer {
       text-align: center;
-      padding: 24px 20px;
+      padding: 28px 20px;
       border-top: 1px solid var(--border);
       background: var(--card);
       font-size: 0.9rem;
@@ -166,13 +295,13 @@
     }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
-    footer .dev { margin-top: 8px; }
+    footer .dev { margin-top: 10px; }
   </style>
 </head>
 <body>
   <nav class="nav">
     <div class="nav-inner">
-      <a href="index.html" class="logo">FoodFade</a>
+      <a href="index.html" class="logo"><span class="logo-icon">🍃</span> FoodFade</a>
       <div class="nav-links">
         <a href="privacy.html">Privacy</a>
         <a href="support.html">Assistenza</a>
@@ -182,46 +311,81 @@
 
   <main>
     <section class="hero">
-      <h1>Meno sprechi,<br>più controllo</h1>
-      <p class="tagline">L’app per gestire scadenze, inventario e lista della spesa senza complicarti la vita.</p>
+      <div class="app-icon" aria-hidden="true">🍃</div>
+      <h1>FoodFade</h1>
+      <p class="tagline">Meno sprechi, più controllo.</p>
+      <p class="sub">Inventario, scadenze e lista della spesa. Tutto sotto controllo, con un’occhiata.</p>
     </section>
 
-    <section class="card">
-      <h2><span class="icon">✨</span> Cosa fa FoodFade</h2>
+    <section class="kpi-section">
+      <h2>In un colpo d’occhio</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card expiring">
+          <div class="kpi-icon">⚠️</div>
+          <p class="kpi-title">Scadono oggi</p>
+          <p class="kpi-desc">Da consumare subito</p>
+        </div>
+        <div class="kpi-card toconsume">
+          <div class="kpi-icon">🍽️</div>
+          <p class="kpi-title">Da consumare</p>
+          <p class="kpi-desc">Prossimi 1–2 giorni</p>
+        </div>
+        <div class="kpi-card incoming">
+          <div class="kpi-icon">🕐</div>
+          <p class="kpi-title">Nei prossimi giorni</p>
+          <p class="kpi-desc">In arrivo a scadenza</p>
+        </div>
+        <div class="kpi-card ok">
+          <div class="kpi-icon">✅</div>
+          <p class="kpi-title">Tutto ok</p>
+          <p class="kpi-desc">Nessuna urgenza</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="progress-section">
+      <h2>Anello di progresso</h2>
+      <div class="progress-ring-wrap">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle class="progress-ring-bg" cx="80" cy="80" r="70" fill="none" stroke-width="12"/>
+          <circle class="progress-ring-fill" cx="80" cy="80" r="70" fill="none" stroke-width="12"
+            stroke-dasharray="439.8" stroke-dashoffset="110"/>
+        </svg>
+        <span class="progress-ring-value">75%</span>
+      </div>
+      <p class="progress-ring-label">Tutto ok</p>
+      <p class="progress-ring-sub">La percentuale di prodotti al sicuro nel tuo inventario</p>
+    </section>
+
+    <section class="features-section">
+      <h2>Funzionalità</h2>
       <div class="features">
         <div class="feature">
-          <span class="feature-num">1</span>
+          <div class="feature-icon">📦</div>
           <div>
-            <h3>Inventario semplice</h3>
-            <p>Aggiungi prodotti a mano o con codice a barre, indica dove li tieni e la data di scadenza. Tutto in un colpo d’occhio.</p>
+            <h3>Inventario e codici a barre</h3>
+            <p>Aggiungi prodotti a mano o con la fotocamera. Indica dove li tieni e la data di scadenza: tutto in un colpo d’occhio.</p>
           </div>
         </div>
         <div class="feature">
-          <span class="feature-num">2</span>
+          <div class="feature-icon">🔔</div>
           <div>
             <h3>Avvisi prima della scadenza</h3>
-            <p>Notifiche personalizzabili (1–2 giorni o come preferisci) così consumi in tempo.</p>
+            <p>Notifiche personalizzabili (1–2 giorni o come preferisci) così consumi in tempo e riduci gli sprechi.</p>
           </div>
         </div>
         <div class="feature">
-          <span class="feature-num">3</span>
-          <div>
-            <h3>Riepilogo in home</h3>
-            <p>Cosa scade oggi, cosa consumare a breve e un anello di progresso per vedere quanto è “al sicuro”.</p>
-          </div>
-        </div>
-        <div class="feature">
-          <span class="feature-num">4</span>
+          <div class="feature-icon">📋</div>
           <div>
             <h3>Lista della spesa e storico</h3>
-            <p>Lista della spesa con spunta, aggiungi da ciò che hai consumato, esporta in Promemoria. Storico consumi per giorno e settimana.</p>
+            <p>Lista con spunta, aggiungi voci da ciò che hai consumato, esporta in Promemoria. Storico consumi per giorno e settimana.</p>
           </div>
         </div>
         <div class="feature">
-          <span class="feature-num">5</span>
+          <div class="feature-icon">💡</div>
           <div>
-            <h3>Statistiche e aspetto</h3>
-            <p>Andamento, consumati vs scaduti, suggerimenti. Tema e colore dell’app come preferisci.</p>
+            <h3>Suggerimenti e statistiche</h3>
+            <p>Fridgy ti suggerisce cosa consumare per primo. Statistiche su andamento, consumati vs scaduti e tema personalizzato.</p>
           </div>
         </div>
       </div>
