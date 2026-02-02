@@ -1,0 +1,9 @@
+/* InfoPlist.strings - Italian */
+/* Camera Usage Description */
+"NSCameraUsageDescription" = "FoodFade usa la fotocamera per scattare foto dei tuoi prodotti alimentari, così puoi identificarli facilmente e tenere traccia delle scadenze.";
+
+/* Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "FoodFade accede alla tua libreria foto per selezionare immagini dei prodotti alimentari, così puoi identificarli facilmente e tenere traccia delle scadenze.";
+
+/* Photo Library Add Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "FoodFade può salvare le foto dei prodotti nella tua libreria foto per un backup personale.";

@@ -1,0 +1,9 @@
+/* InfoPlist.strings - English */
+/* Camera Usage Description */
+"NSCameraUsageDescription" = "FoodFade uses the camera to take photos of your food products, so you can easily identify them and track expiration dates.";
+
+/* Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "FoodFade accesses your photo library to select images of food products, so you can easily identify them and track expiration dates.";
+
+/* Photo Library Add Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "FoodFade can save product photos to your photo library for personal backup.";

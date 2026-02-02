@@ -1,0 +1,293 @@
+/* App Name */
+"app.name" = "FoodFade";
+
+/* Common */
+"common.save" = "Save";
+"common.cancel" = "Cancel";
+"common.ok" = "OK";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.add" = "Add";
+"common.search" = "Search";
+"common.all" = "All";
+
+/* Home */
+"home.title" = "FoodFade";
+"home.greeting.morning" = "Good morning";
+"home.greeting.afternoon" = "Good afternoon";
+"home.greeting.evening" = "Good evening";
+"home.subtitle.no_items" = "Start by adding your products";
+"home.subtitle.single" = "You have 1 product to manage";
+"home.subtitle.multiple" = "You have %d products to manage";
+"home.progress.empty.title" = "No products yet";
+"home.progress.empty.subtitle" = "Add your first item to see your progress here";
+
+/* Navigation */
+"nav.home" = "Home";
+"nav.inventory" = "Inventory";
+"nav.statistics" = "Statistics";
+"nav.settings" = "Settings";
+
+/* Inventory */
+"inventory.search.prompt" = "Search product...";
+"inventory.consumed" = "Consumed";
+"inventory.mark.consumed" = "Mark as consumed";
+"item.day" = "1 day";
+"item.days" = "%d days";
+"item.accessibility.hint" = "Double tap to open details";
+"inventory.empty.title" = "No products";
+"inventory.empty.subtitle" = "Add your first product to get started";
+"inventory.empty.button" = "Add Product";
+
+/* Recipes */
+"recipe.title" = "Recipes";
+"recipe.generate" = "Generate";
+"recipe.select_up_to" = "Select up to %d ingredients";
+"recipe.expiring_section" = "Expiring soon";
+"recipe.other_ingredients" = "Other ingredients";
+"recipe.selected_count" = "%d/%d selected";
+
+/* Add Food */
+"addfood.title" = "New Product";
+"addfood.name" = "Product name";
+"addfood.category" = "Storage category";
+"addfood.foodtype" = "Food type";
+"addfood.foodtype.optional" = "Category (optional)";
+"addfood.foodtype.none" = "No category";
+"addfood.foodtype.add" = "Add category...";
+"addfood.foodtype.add.title" = "Add Category";
+"addfood.foodtype.add.message" = "Enter the name of the new category";
+"addfood.foodtype.add.name" = "Category name";
+"addfood.barcode" = "Barcode";
+"addfood.photo" = "Product photo";
+"addfood.photo.take" = "Take Photo";
+"addfood.photo.library" = "Photo Library";
+"addfood.photo.file" = "File";
+"addfood.expiration" = "Expiration date";
+"addfood.quantity" = "Quantity: %d";
+"addfood.notes" = "Notes (optional)";
+"addfood.notify" = "Notifications";
+
+/* Tags */
+"tags.section" = "Tags";
+"tags.gluten_free" = "Gluten-free";
+"tags.bio" = "Organic";
+"tags.footer" = "Filter inventory and recipes by these tags.";
+"tags.filter_all" = "All";
+"tags.filter_opened" = "Opened";
+
+/* History (Consumed) */
+"history.title" = "Consumed history";
+"history.today" = "Today";
+"history.yesterday" = "Yesterday";
+"history.this_week" = "This week";
+"history.empty.title" = "No consumed items";
+"history.empty.subtitle" = "Items you mark as consumed will appear here.";
+"history.older" = "Earlier";
+
+/* Shopping list */
+"shopping.title" = "Shopping list";
+"shopping.add.placeholder" = "What to buy?";
+"shopping.empty.title" = "List is empty";
+"shopping.empty.subtitle" = "Add items you need to buy.";
+"shopping.add_from_consumed" = "Add from consumed";
+"shopping.export_reminders" = "Add to Reminders";
+"shopping.completed" = "Completed";
+
+/* Categories */
+"category.fridge" = "Refrigerator";
+"category.freezer" = "Freezer";
+"category.pantry" = "Pantry";
+
+/* Food Types */
+"foodtype.vegetables" = "Vegetables";
+"foodtype.fruits" = "Fruits";
+"foodtype.dairy" = "Dairy";
+"foodtype.meat" = "Meat";
+"foodtype.fish" = "Fish";
+"foodtype.pasta" = "Pasta";
+"foodtype.rice" = "Rice";
+"foodtype.bread" = "Bread";
+"foodtype.sauces" = "Ready sauces";
+"foodtype.beverages" = "Beverages";
+"foodtype.snacks" = "Snacks";
+"foodtype.frozen" = "Frozen";
+"foodtype.canned" = "Canned";
+"foodtype.other" = "Other";
+
+/* Statistics */
+"stats.title" = "Statistics";
+"stats.waste_score" = "Waste Score";
+"stats.consumed" = "consumed";
+"stats.this_month" = "This month";
+"stats.consumed_items" = "Consumed";
+"stats.expiring_soon" = "Expiring soon";
+"stats.expired" = "Expired";
+"stats.most_wasted" = "Most wasted types";
+"stats.by_category" = "By category";
+"stats.advice" = "Tips for you";
+"stats.message.excellent" = "Great job! You're reducing waste.";
+"stats.message.good" = "You're doing well! Keep it up.";
+"stats.message.ok" = "You're trying, well done!";
+"stats.message.encouraging" = "Every small step counts!";
+
+/* Settings */
+"settings.title" = "Settings";
+"settings.appearance" = "Appearance";
+"settings.notifications" = "Notifications";
+"settings.notifications.enable" = "Notifications";
+"settings.notifications.message" = "Receive notifications when your products are about to expire";
+"settings.notify_me" = "Notify me";
+"settings.notify.same_day" = "Same day";
+"settings.notify.1day" = "1 day before";
+"settings.notify.2days" = "2 days before";
+"settings.sync" = "Synchronization";
+"settings.icloud" = "iCloud Synchronization";
+"settings.icloud.message" = "Synchronize your data across all devices";
+"settings.info" = "Information";
+"settings.version" = "Version";
+
+/* Appearance Settings */
+"appearance.title" = "Appearance";
+"appearance.mode" = "Appearance";
+"appearance.mode.system" = "System";
+"appearance.mode.light" = "Light";
+"appearance.mode.dark" = "Dark";
+"appearance.animations" = "Animations";
+"appearance.animations.message" = "Enable or disable animations and visual effects";
+"appearance.accent" = "Main Color";
+"appearance.accent.message" = "Choose the main color used in the app. 'Default' maintains the original multicolor scheme.";
+"appearance.accent.default" = "Default";
+
+/* Splash Screen */
+"splash.welcome.masculine" = "Welcome";
+"splash.welcome.feminine" = "Welcome";
+"splash.welcome.neutral" = "Welcome";
+"splash.appname" = "FoodFade";
+
+/* Onboarding */
+"onboarding.welcome.title" = "Welcome to FoodFade";
+"onboarding.welcome.subtitle" = "Keep track of expiration dates and avoid waste";
+"onboarding.welcome.feature1.title" = "Add products easily";
+"onboarding.welcome.feature1.description" = "By hand or with scanning";
+"onboarding.welcome.feature2.title" = "Check expiration dates";
+"onboarding.welcome.feature2.description" = "You'll always know what to consume first";
+"onboarding.welcome.feature3.title" = "Reduce waste";
+"onboarding.welcome.feature3.description" = "Less food thrown away, without stress";
+"onboarding.welcome.start" = "Start";
+"onboarding.help.title" = "We help you not forget anything";
+"onboarding.help.text" = "FoodFade shows you right away what's best to consume\nand alerts you when something is about to expire.";
+"onboarding.help.feature1.title" = "Quick choices";
+"onboarding.help.feature1.description" = "You'll understand at a glance what to do";
+"onboarding.help.feature2.title" = "Useful alerts";
+"onboarding.help.feature2.description" = "Only when you really need them";
+"onboarding.help.continue" = "Continue";
+
+"onboarding.cloud.title" = "Where do you want to save your data?";
+"onboarding.cloud.text" = "You can use FoodFade only on this device or sync your data with iCloud.";
+"onboarding.cloud.option1.title" = "Use iCloud";
+"onboarding.cloud.option1.description" = "Sync products and statistics across all devices linked to the same Apple ID";
+"onboarding.cloud.option1.syncnote" = "Synchronization happens automatically in the background";
+"onboarding.cloud.option2.title" = "Only on this device";
+"onboarding.cloud.option2.description" = "Data will be saved only on this device";
+"onboarding.cloud.note1" = "You can change your mind later in settings";
+"onboarding.cloud.note2.icloud" = "You can enable or disable iCloud sync at any time from settings.";
+"onboarding.cloud.note2.local" = "You can enable iCloud sync at any time from settings.";
+"onboarding.cloud.continue" = "Continue";
+"onboarding.cloud.continue.icloud" = "Continue with iCloud";
+"onboarding.cloud.continue.local" = "Continue without iCloud";
+
+"onboarding.notifications.title" = "Don't miss anything";
+"onboarding.notifications.text" = "Enable alerts to remind you what to consume on time.";
+"onboarding.notifications.feature.title" = "Smart alerts";
+"onboarding.notifications.feature.description" = "Receive a reminder before a product expires";
+"onboarding.notifications.enable" = "Enable alerts";
+"onboarding.notifications.enabled" = "Alerts active";
+"onboarding.notifications.skip" = "Skip for now";
+"onboarding.notifications.continue" = "Continue";
+
+"onboarding.name.title" = "What can we call you?";
+"onboarding.name.label" = "Name";
+"onboarding.name.placeholder" = "Your name";
+"onboarding.name.continue" = "Continue";
+
+"onboarding.start.title" = "You're ready!";
+"onboarding.start.text" = "Everything is set up. Start using FoodFade!";
+"onboarding.start.button" = "Let's go!";
+
+/* Welcome / Save error */
+"welcome.save.error.title" = "Save error";
+
+/* Backup & Restore */
+"backup.title" = "Backup and Restore";
+"backup.export.title" = "Manual Backup";
+"backup.export.description" = "Export all your data to a JSON file. You can save this file for a local backup or share it.";
+"backup.export.info" = "%d products, %d settings";
+"backup.export.button" = "Export Data";
+"backup.export.exporting" = "Exporting...";
+"backup.export.footer.icloud" = "With iCloud enabled, data syncs automatically. This backup is useful for an additional local backup.";
+"backup.export.footer.local" = "Export all your data to a JSON file for a local backup.";
+
+"backup.import.title" = "Restore Data";
+"backup.import.description" = "Import data from a backup file. You can choose to replace all data or merge it with existing ones.";
+"backup.import.button" = "Import Data";
+"backup.import.importing" = "Importing...";
+"backup.import.footer.icloud" = "⚠️ With iCloud enabled, imported data will be synced automatically. Make sure not to create duplicates.";
+"backup.import.footer.local" = "Import data from a backup file.";
+
+"backup.mode.title" = "Import Mode";
+"backup.mode.merge" = "Merge (Recommended)";
+"backup.mode.replace" = "Replace Everything";
+"backup.mode.message" = "How do you want to import the data?\n\n• Merge: adds only new products\n• Replace: deletes everything and imports from backup";
+
+"backup.result.title" = "Import Result";
+"backup.result.message" = "Imported: %d\nUpdated: %d\nSkipped: %d\n\nTotal in backup: %d";
+
+"settings.backup.title" = "Manual Backup";
+"backup.section.title" = "Backup and Restore";
+"backup.section.footer" = "Export or import your data manually. Useful for local backups or data transfer.";
+
+"settings.icloud.restore" = "Restore data from iCloud";
+"settings.icloud.status.active" = "Active";
+"settings.icloud.status.disabled" = "Disabled by user choice";
+"settings.icloud.status.unavailable" = "Not available";
+"settings.icloud.footer.active" = "Your data is automatically synced across devices linked to the same Apple ID. Use 'Restore data from iCloud' to force synchronization.";
+"settings.icloud.footer.unavailable" = "iCloud is not available on this device.";
+
+/* Fridgy (legacy, kept for other views) */
+"fridgy.title" = "Fridgy";
+"fridgy.toggle" = "Fridgy Suggestions";
+"fridgy.apple.intelligence" = "Apple Intelligence";
+"fridgy.available" = "Available";
+"fridgy.unavailable" = "Not available";
+"fridgy.footer.enabled.available" = "Fridgy provides personalized suggestions and tips based on your inventory.";
+"fridgy.footer.enabled.unavailable" = "Fridgy is not available on this device.";
+"fridgy.footer.disabled" = "Fridgy is disabled. The app works at 100% without intelligent suggestions.";
+
+/* Assistente (Settings - no Apple Intelligence mention) */
+"assistant.section.title" = "Assistant";
+"assistant.toggle" = "Smart suggestions";
+"assistant.status.available" = "Assistant";
+"assistant.status.unavailable" = "Assistant";
+"assistant.available" = "Available";
+"assistant.unavailable" = "Not available";
+"assistant.footer.enabled.available" = "The assistant provides personalized suggestions and tips based on your inventory.";
+"assistant.footer.enabled.unavailable" = "The assistant is not available on this device.";
+"assistant.footer.disabled" = "The assistant is disabled. The app works fully without suggestions.";
+
+/* Statistics - Insight */
+"stats.insight.title" = "Insight";
+"stats.advice.title" = "A small tip";
+"onboarding.cloud.recommended" = "Recommended";
+
+/* Add Food - Additional keys */
+"addfood.product" = "Product";
+"addfood.additional_info" = "Additional Information";
+"addfood.foodtype.footer" = "Choose the food type for better statistics";
+"addfood.is_fresh" = "Is a fresh product";
+"addfood.expiration_section" = "Expiration";
+"addfood.expiration.auto" = "Expiration will be calculated automatically";
+"addfood.expiration.manual" = "Enter the date indicated on the package";
+"addfood.notify_before" = "Notify me before expiration";
+"addfood.notifications_section" = "Alerts for this product";
+"addfood.notify.footer" = "You will receive an alert if it is about to expire";

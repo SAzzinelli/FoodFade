@@ -1,0 +1,1044 @@
+import SwiftUI
+import SwiftData
+
+/// Destinazione di navigazione
+enum NavigationDestination: Hashable {
+    case inventory
+    case expiringSoon
+    case category(FoodCategory)
+    case kpiCard(KPICardType) // Per le sottoviste dei KPI
+}
+
+/// Vista principale - Dashboard
+struct HomeView: View {
+    @Query(sort: \FoodItem.expirationDate, order: .forward) private var allItems: [FoodItem]
+    @Query private var userProfiles: [UserProfile]
+    @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var scannerService = BarcodeScannerService()
+    @State private var showingAddFood = false
+    @State private var showingScanner = false
+    @State private var showingKPISettings = false
+    @State private var selectedFilter: ExpirationStatus?
+    @AppStorage("hasShownFirstAddPrompt") private var hasShownFirstAddPrompt = false
+    @AppStorage("hasShownSmartSuggestionsBanner") private var hasShownSmartSuggestionsBanner = false
+    @State private var showingSmartSuggestionsBanner = false
+    
+    @Environment(\.modelContext) private var modelContext
+    
+    private var userName: String {
+        userProfiles.first?.displayName ?? "Utente"
+    }
+    
+    private var expiringSoonItems: [FoodItem] {
+        allItems.filter { item in
+            !item.isConsumed && (item.expirationStatus == .today || item.expirationStatus == .soon || item.expirationStatus == .expired)
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header Section
+                    headerSection
+                        .padding(.top, 8)
+                        .padding(.bottom, 24)
+                    
+                    // Progress Section
+                    progressSection
+                        .padding(.bottom, 32)
+                    
+                    // Summary Cards (riordinabili) con pulsante modifica
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Riepilogo")
+                                .font(.system(size: 20, weight: .bold, design: .default))
+                            Spacer()
+                            Button {
+                                showingKPISettings = true
+                            } label: {
+                                Image(systemName: "slider.horizontal.3")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(ThemeManager.shared.primaryColor)
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                        
+                        summaryCardsSection
+                    }
+                    .padding(.bottom, 24)
+                    
+                    // Quick Actions
+                    quickActionsSection
+                        .padding(.bottom, 24)
+                    
+                    // Scadenze a breve
+                    expiringSoonSection
+                        .padding(.bottom, 24)
+                    
+                    // Recent Items
+                    recentItemsSection
+                        .padding(.bottom, 24)
+                    
+                    // Categorie rapide
+                    categoriesQuickAccessSection
+                        .padding(.bottom, 24)
+                    
+                    // Banner informativo suggerimenti intelligenti (mostrato una volta dopo aver aggiunto/modificato un oggetto)
+                    if showingSmartSuggestionsBanner && !hasShownSmartSuggestionsBanner {
+                        smartSuggestionsInfoBanner
+                            .padding(.bottom, 24)
+                    }
+                    
+                    // Fridgy Card - Consiglio intelligente (nuova architettura)
+                    if let message = viewModel.fridgyMessage,
+                       let context = viewModel.fridgyContext {
+                        FridgyCard(context: context, message: message)
+                            .padding(.bottom, 24)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "leaf.fill")
+                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .font(.system(size: 18))
+                        Text("FoodFade")
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingAddFood = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddFood) {
+                AddFoodView()
+            }
+            .sheet(isPresented: $showingScanner) {
+                BarcodeScannerView(scannerService: scannerService) { barcode in
+                    // Quando viene scansionato un codice, apri AddFoodView con il barcode
+                    showingScanner = false
+                    showingAddFood = true
+                    // TODO: Passare il barcode a AddFoodView
+                }
+            }
+            .sheet(isPresented: $showingKPISettings) {
+                KPISettingsView(viewModel: viewModel)
+            }
+            .onAppear {
+                viewModel.setup(modelContext: modelContext)
+                viewModel.loadData()
+                
+                // Se iCloud è abilitato, forza un refresh per sincronizzare i dati
+                let useiCloud = UserDefaults.standard.bool(forKey: "iCloudSyncEnabled")
+                if useiCloud {
+                    Task {
+                        // Attendi un po' per permettere a CloudKit di sincronizzare
+                        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 secondi
+                        await MainActor.run {
+                            // Forza un save per triggerare la sincronizzazione
+                            try? modelContext.save()
+                            // Ricarica i dati
+                            viewModel.loadData()
+                            print("☁️ HomeView - Refresh dati dopo sincronizzazione CloudKit")
+                        }
+                    }
+                }
+            }
+            .onChange(of: allItems.count) { oldValue, newValue in
+                viewModel.loadData()
+                
+                // Mostra il banner informativo quando viene aggiunto un nuovo oggetto
+                if newValue > oldValue && !hasShownSmartSuggestionsBanner {
+                    showingSmartSuggestionsBanner = true
+                }
+            }
+            .onChange(of: viewModel.smartSuggestion) { oldValue, newValue in
+                // Mostra il banner informativo quando viene generato un suggerimento intelligente per la prima volta
+                if newValue != nil && oldValue == nil && !hasShownSmartSuggestionsBanner {
+                    showingSmartSuggestionsBanner = true
+                }
+            }
+            .onChange(of: settings.first?.progressRingModeRaw) { oldValue, newValue in
+                // Ricarica i dati quando cambia la modalità dell'anello
+                viewModel.loadData()
+            }
+            .navigationDestination(for: NavigationDestination.self) { destination in
+                switch destination {
+                case .inventory:
+                    InventoryView(filterStatus: nil)
+                case .expiringSoon:
+                    ExpiringSoonView()
+                case .category(let category):
+                    CategoryInventoryView(category: category)
+                case .kpiCard(let kpiType):
+                    switch kpiType {
+                    case .expiringToday:
+                        ExpiringTodayView()
+                    case .toConsume:
+                        ToConsumeView()
+                    case .incoming:
+                        IncomingView()
+                    case .allOk:
+                        AllOkView()
+                    }
+                }
+            }
+        }
+        .tint(ThemeManager.shared.primaryColor)
+    }
+    
+    // MARK: - Header Section
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(greetingText)
+                .font(.system(size: 34, weight: .bold, design: .default))
+                .foregroundColor(.primary)
+            
+            Text("Tutto sotto controllo")
+                .font(.system(size: 17, weight: .regular, design: .default))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var greetingText: String {
+        let gender = GenderHelper.getGender(from: userProfiles.first)
+        let hour = Calendar.current.component(.hour, from: Date())
+        let greetingKey: String
+        
+        switch hour {
+        case 5..<13:
+            greetingKey = "home.greeting.morning"
+        case 13..<18:
+            greetingKey = "home.greeting.afternoon"
+        default:
+            greetingKey = "home.greeting.evening"
+        }
+        
+        // Usa l'extension String.localized per ottenere la traduzione
+        // Questo dovrebbe funzionare meglio con il sistema di localizzazione
+        let baseGreeting = greetingKey.localized
+        
+        // Se la traduzione base funziona, usa GenderHelper per la variante di genere
+        if baseGreeting != greetingKey {
+            let greeting = GenderHelper.localizedString(greetingKey, gender: gender)
+            return "\(greeting), \(userName)"
+        } else {
+            // Fallback hardcoded se le traduzioni non vengono caricate
+            let fallbackGreeting: String
+            switch hour {
+            case 5..<13:
+                fallbackGreeting = "Buongiorno"
+            case 13..<18:
+                fallbackGreeting = "Buon pomeriggio"
+            default:
+                fallbackGreeting = "Buonasera"
+            }
+            return "\(fallbackGreeting), \(userName)"
+        }
+    }
+    
+    // MARK: - Progress Section
+    private var progressSection: some View {
+        VStack(spacing: 16) {
+            if viewModel.totalActiveItems == 0 {
+                // Stato vuoto: nessun prodotto in inventario
+                progressEmptyState
+            } else {
+                ZStack {
+                    AnimatedProgressRing(
+                        progress: viewModel.progressRingPercentage,
+                        size: 140,
+                        lineWidth: 14,
+                        primaryColor: ThemeManager.shared.primaryColor,
+                        primaryColorDark: ThemeManager.shared.primaryColorDark,
+                        animationsEnabled: ThemeManager.shared.animationsEnabled
+                    )
+                    
+                    VStack(spacing: 4) {
+                        Text("\(Int(viewModel.progressRingPercentage * 100))%")
+                            .font(.system(size: 36, weight: .bold, design: .default))
+                            .foregroundColor(.primary)
+                        
+                        Text(progressRingLabel)
+                            .font(.system(size: 14, weight: .medium, design: .default))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                
+                Text(progressRingSubtitle)
+                    .font(.system(size: 15, weight: .medium, design: .default))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+    }
+    
+    /// Placeholder al posto dell'anello quando non ci sono prodotti
+    private var progressEmptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "tray")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary.opacity(0.8))
+            
+            Text("home.progress.empty.title".localized)
+                .font(.system(size: 17, weight: .semibold, design: .default))
+                .foregroundColor(.primary)
+            
+            Text("home.progress.empty.subtitle".localized)
+                .font(.system(size: 14, weight: .regular, design: .default))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+        }
+        .frame(height: 160)
+        .frame(maxWidth: .infinity)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(16)
+    }
+    
+    // MARK: - Progress Ring Helpers
+    @Query private var settings: [AppSettings]
+    
+    private var currentProgressRingMode: ProgressRingMode {
+        settings.first?.progressRingMode ?? .safeItems
+    }
+    
+    private var progressRingLabel: String {
+        let percentage = viewModel.progressRingPercentage
+        
+        switch currentProgressRingMode {
+        case .safeItems:
+            if percentage >= 0.8 {
+                return "Tutto ok"
+            } else if percentage >= 0.5 {
+                return "Quasi tutto ok"
+            } else if percentage > 0 {
+                return "Attenzione"
+            } else {
+                return "Da controllare"
+            }
+            
+        case .atRisk:
+            if percentage == 0.0 {
+                return "Nessun rischio"
+            } else if percentage <= 0.2 {
+                return "Basso rischio"
+            } else if percentage <= 0.5 {
+                return "Rischio medio"
+            } else {
+                return "Alto rischio"
+            }
+            
+        case .healthScore:
+            if percentage >= 0.8 {
+                return "Ottimo"
+            } else if percentage >= 0.5 {
+                return "Buono"
+            } else if percentage > 0 {
+                return "Da migliorare"
+            } else {
+                return "Nessun dato"
+            }
+        }
+    }
+    
+    private var progressRingSubtitle: String {
+        let percentage = viewModel.progressRingPercentage
+        let urgentCount = viewModel.expiringToday.count + viewModel.toConsume.count
+        
+        switch currentProgressRingMode {
+        case .safeItems:
+            if percentage == 1.0 {
+                return "Nessuna scadenza imminente"
+            } else if urgentCount > 0 {
+                if urgentCount == 1 {
+                    return "1 prodotto richiede attenzione"
+                } else {
+                    return "\(urgentCount) prodotti richiedono attenzione"
+                }
+            } else if viewModel.incoming.count > 0 {
+                return "Alcuni prodotti scadono presto"
+            } else {
+                return "Controlla le scadenze"
+            }
+            
+        case .atRisk:
+            let atRiskCount = viewModel.expiringToday.count + viewModel.toConsume.count + viewModel.incoming.count
+            if percentage == 0.0 {
+                return "Nessun prodotto a rischio"
+            } else if atRiskCount == 1 {
+                return "1 prodotto a rischio"
+            } else {
+                return "\(atRiskCount) prodotti a rischio"
+            }
+            
+        case .healthScore:
+            // Per health score, mostra info sui prodotti consumati vs scaduti
+            let descriptor = FetchDescriptor<FoodItem>()
+            guard let allItems = try? modelContext.fetch(descriptor) else { return "Calcolo in corso..." }
+            
+            let consumed = allItems.filter { $0.isConsumed }.count
+            let expired = allItems.filter { !$0.isConsumed && $0.expirationStatus == .expired }.count
+            
+            if consumed == 0 && expired == 0 {
+                return "Aggiungi prodotti per vedere lo score"
+            } else if expired == 0 {
+                return "Ottimo! Nessun prodotto scaduto"
+            } else {
+                return "\(consumed) consumati, \(expired) scaduti"
+            }
+        }
+    }
+    
+    // MARK: - Summary Cards Section
+    private var summaryCardsSection: some View {
+        VStack(spacing: 12) {
+            // Prime due card in una riga
+            if viewModel.kpiCardOrder.count >= 2 {
+                HStack(spacing: 12) {
+                    NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[0])) {
+                        SummaryCardContent(
+                            type: viewModel.kpiCardOrder[0],
+                            count: viewModel.count(for: viewModel.kpiCardOrder[0])
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    
+                    NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[1])) {
+                        SummaryCardContent(
+                            type: viewModel.kpiCardOrder[1],
+                            count: viewModel.count(for: viewModel.kpiCardOrder[1])
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            
+            // Terza e quarta card in una riga (se presenti)
+            if viewModel.kpiCardOrder.count >= 3 {
+                HStack(spacing: 12) {
+                    NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[2])) {
+                        SummaryCardContent(
+                            type: viewModel.kpiCardOrder[2],
+                            count: viewModel.count(for: viewModel.kpiCardOrder[2])
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    
+                    if viewModel.kpiCardOrder.count >= 4 {
+                        NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[3])) {
+                            SummaryCardContent(
+                                type: viewModel.kpiCardOrder[3],
+                                count: viewModel.count(for: viewModel.kpiCardOrder[3])
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Quick Actions Section
+    private var quickActionsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Azioni Rapide")
+                .font(.system(size: 20, weight: .bold, design: .default))
+                .padding(.horizontal, 4)
+            
+            HStack(spacing: 12) {
+                QuickActionButton(
+                    icon: "barcode.viewfinder",
+                    title: "Scansiona",
+                    color: ThemeManager.shared.primaryColor
+                ) {
+                    showingScanner = true
+                }
+                
+                NavigationLink(value: NavigationDestination.expiringSoon) {
+                    QuickActionButtonContent(
+                        icon: "clock.badge.exclamationmark.fill",
+                        title: "Scadenza a breve",
+                        color: ThemeManager.shared.primaryColor
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+    
+    // MARK: - Expiring Soon Section
+    private var expiringSoonSection: some View {
+        if expiringSoonItems.isEmpty {
+            return AnyView(EmptyView())
+        }
+        
+        let itemsToShow = Array(expiringSoonItems.prefix(3))
+        
+        return AnyView(
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Scadenze Imminenti")
+                        .font(.system(size: 20, weight: .bold, design: .default))
+                    
+                    Spacer()
+                    
+                    NavigationLink(value: NavigationDestination.expiringSoon) {
+                        Text("Vedi tutti")
+                            .font(.system(size: 15, weight: .medium, design: .default))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
+                    }
+                }
+                .padding(.horizontal, 4)
+                
+                VStack(spacing: 8) {
+                    ForEach(itemsToShow) { item in
+                        NavigationLink {
+                            ItemDetailView(item: item)
+                        } label: {
+                            ExpiringItemRow(item: item)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        )
+    }
+    
+    // MARK: - Categories Quick Access Section
+    private var categoriesQuickAccessSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Categorie")
+                .font(.system(size: 20, weight: .bold, design: .default))
+                .padding(.horizontal, 4)
+            
+            HStack(spacing: 12) {
+                CategoryQuickButton(
+                    category: .fridge,
+                    icon: "refrigerator.fill",
+                    count: allItems.filter { $0.category == .fridge && !$0.isConsumed }.count
+                )
+                
+                CategoryQuickButton(
+                    category: .freezer,
+                    icon: "snowflake",
+                    count: allItems.filter { $0.category == .freezer && !$0.isConsumed }.count
+                )
+                
+                CategoryQuickButton(
+                    category: .pantry,
+                    icon: "cabinet.fill",
+                    count: allItems.filter { $0.category == .pantry && !$0.isConsumed }.count
+                )
+            }
+        }
+    }
+    
+    // MARK: - Recent Items Section
+    private var recentItemsSection: some View {
+        let recentItems = Array(allItems.filter { !$0.isConsumed }.prefix(5))
+        
+        guard !recentItems.isEmpty else { return AnyView(EmptyView()) }
+        
+        return AnyView(
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Prodotti Recenti")
+                        .font(.system(size: 20, weight: .bold, design: .default))
+                    
+                    Spacer()
+                    
+                    NavigationLink(value: NavigationDestination.inventory) {
+                        Text("Vedi tutti")
+                            .font(.system(size: 15, weight: .medium, design: .default))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 4)
+                
+                VStack(spacing: 8) {
+                    ForEach(recentItems) { item in
+                        NavigationLink {
+                            ItemDetailView(item: item)
+                        } label: {
+                            RecentItemRow(item: item)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        )
+    }
+    
+    // MARK: - Smart Suggestions Info Banner
+    private var smartSuggestionsInfoBanner: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 20))
+                    .foregroundColor(ThemeManager.shared.primaryColor)
+                    .frame(width: 32, height: 32)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Suggerimenti Intelligenti")
+                        .font(.system(size: 16, weight: .semibold, design: .default))
+                        .foregroundColor(.primary)
+                    
+                    Text("FoodFade analizza i tuoi prodotti e ti suggerisce quando consumarli per ridurre gli sprechi. I suggerimenti appaiono qui in base alle tue abitudini.")
+                        .font(.system(size: 14, weight: .regular, design: .default))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                
+                Spacer()
+                
+                Button {
+                    hasShownSmartSuggestionsBanner = true
+                    showingSmartSuggestionsBanner = false
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+    
+    // MARK: - Smart Suggestion Card
+    private func smartSuggestionCard(_ suggestion: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 20))
+                .foregroundColor(ThemeManager.shared.primaryColor)
+                .frame(width: 32, height: 32)
+            
+            Text(suggestion)
+                .font(.system(size: 15, weight: .regular, design: .default))
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+}
+
+// MARK: - Summary Card Content (senza Button, per NavigationLink)
+private struct SummaryCardContent: View {
+    let type: KPICardType
+    let count: Int
+    
+    @State private var animatedCount: Int = 0
+    @State private var glowIntensity: Double = 0.5
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Image(systemName: type.icon)
+                .font(.system(size: 24))
+                .foregroundColor(type.color)
+                .frame(width: 32, height: 32)
+            
+            Text(type.title)
+                .font(.system(size: 13, weight: .medium, design: .default))
+                .foregroundColor(.secondary)
+            
+            Text("\(animatedCount)")
+                .font(.system(size: 32, weight: .bold, design: .default))
+                .foregroundColor(type.color)
+                .opacity(type == .allOk && animatedCount == 0 ? 0.4 : 1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(cardBackgroundColor)
+        .cornerRadius(12)
+        .shadow(
+            color: cardShadowColor,
+            radius: cardShadowRadius,
+            x: 0,
+            y: cardShadowY
+        )
+        .scaleEffect(cardScale)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.5)) {
+                animatedCount = count
+            }
+            
+            // Animazione glow per "Da consumare" quando count > 0
+            if type == .toConsume && count > 0 {
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                    glowIntensity = 1.0
+                }
+            }
+        }
+        .onChange(of: count) { oldValue, newValue in
+            withAnimation(.easeOut(duration: 0.5)) {
+                animatedCount = newValue
+            }
+            
+            // Reset glow se count diventa 0
+            if type == .toConsume && newValue == 0 {
+                glowIntensity = 0.5
+            } else if type == .toConsume && newValue > 0 && oldValue == 0 {
+                // Avvia glow quando passa da 0 a > 0
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                    glowIntensity = 1.0
+                }
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties per enfasi visiva
+    
+    /// Colore dello sfondo della card
+    private var cardBackgroundColor: Color {
+        Color(.secondarySystemGroupedBackground)
+    }
+    
+    /// Colore dell'ombra (glow per "Da consumare" quando count > 0)
+    private var cardShadowColor: Color {
+        if type == .toConsume && animatedCount > 0 {
+            return type.color.opacity(0.2 * glowIntensity)
+        }
+        return Color.clear
+    }
+    
+    /// Raggio dell'ombra
+    private var cardShadowRadius: CGFloat {
+        if type == .toConsume && animatedCount > 0 {
+            return 8 * glowIntensity
+        }
+        return 0
+    }
+    
+    /// Offset Y dell'ombra
+    private var cardShadowY: CGFloat {
+        if type == .toConsume && animatedCount > 0 {
+            return 2 * glowIntensity
+        }
+        return 0
+    }
+    
+    /// Scala della card (leggermente più grande per "Da consumare" quando count > 0)
+    private var cardScale: CGFloat {
+        if type == .toConsume && animatedCount > 0 {
+            return 1.02
+        }
+        return 1.0
+    }
+}
+
+// MARK: - Summary Card Component (con Button per usi diversi)
+private struct SummaryCardView: View {
+    let type: KPICardType
+    let count: Int
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            SummaryCardContent(type: type, count: count)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Quick Action Button
+private struct QuickActionButton: View {
+    let icon: String
+    let title: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            QuickActionButtonContent(icon: icon, title: title, color: color)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct QuickActionButtonContent: View {
+    let icon: String
+    let title: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.system(size: 14, weight: .medium, design: .default))
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 80)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+}
+
+// MARK: - Expiring Item Row
+private struct ExpiringItemRow: View {
+    let item: FoodItem
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: iconForCategory(item.category))
+                .font(.system(size: 20))
+                .foregroundColor(colorForCategory(item.category))
+                .frame(width: 40, height: 40)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.name)
+                    .font(.system(size: 16, weight: .semibold, design: .default))
+                    .foregroundColor(.primary)
+                
+                Text(item.expirationStatus.displayName)
+                    .font(.system(size: 13, weight: .regular, design: .default))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Text(daysText)
+                .font(.system(size: 14, weight: .medium, design: .default))
+                .foregroundColor(statusColor)
+        }
+        .padding(12)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+    
+    private var daysText: String {
+        let days = item.daysRemaining
+        if days < 0 {
+            return "Scaduto"
+        } else if days == 0 {
+            return "Oggi"
+        } else if days == 1 {
+            return "1 giorno"
+        } else {
+            return "\(days) giorni"
+        }
+    }
+    
+    private var statusColor: Color {
+        switch item.expirationStatus {
+        case .expired, .today: return AppTheme.accentRed
+        case .soon: return AppTheme.accentOrange
+        case .safe: return AppTheme.primaryGreen
+        }
+    }
+    
+    private func iconForCategory(_ category: FoodCategory) -> String {
+        switch category {
+        case .fridge: return "refrigerator.fill"
+        case .freezer: return "snowflake"
+        case .pantry: return "cabinet.fill"
+        }
+    }
+    
+    private func colorForCategory(_ category: FoodCategory) -> Color {
+        switch category {
+        case .fridge: return .blue
+        case .freezer: return .cyan
+        case .pantry: return .orange
+        }
+    }
+}
+
+// MARK: - Category Quick Button
+private struct CategoryQuickButton: View {
+    let category: FoodCategory
+    let icon: String
+    let count: Int
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 28))
+                .foregroundColor(colorForCategory(category))
+            
+            Text(category.rawValue)
+                .font(.system(size: 13, weight: .medium, design: .default))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            
+            Text("\(count)")
+                .font(.system(size: 18, weight: .bold, design: .default))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 100)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+    
+    private func colorForCategory(_ category: FoodCategory) -> Color {
+        switch category {
+        case .fridge: return .blue
+        case .freezer: return .cyan
+        case .pantry: return .orange
+        }
+    }
+}
+
+// MARK: - Recent Item Row
+private struct RecentItemRow: View {
+    let item: FoodItem
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: iconForCategory(item.category))
+                .font(.system(size: 20))
+                .foregroundColor(colorForCategory(item.category))
+                .frame(width: 40, height: 40)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.name)
+                    .font(.system(size: 16, weight: .semibold, design: .default))
+                    .foregroundColor(.primary)
+                
+                Text(item.expirationStatus.displayName)
+                    .font(.system(size: 13, weight: .regular, design: .default))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Text(daysText)
+                .font(.system(size: 14, weight: .medium, design: .default))
+                .foregroundColor(statusColor)
+        }
+        .padding(12)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+    
+    private var daysText: String {
+        let days = item.daysRemaining
+        if days < 0 {
+            return "Scaduto"
+        } else if days == 0 {
+            return "Oggi"
+        } else if days == 1 {
+            return "1 giorno"
+        } else {
+            return "\(days) giorni"
+        }
+    }
+    
+    private var statusColor: Color {
+        switch item.expirationStatus {
+        case .expired, .today: return AppTheme.accentRed
+        case .soon: return AppTheme.accentOrange
+        case .safe: return AppTheme.primaryGreen
+        }
+    }
+    
+    private func iconForCategory(_ category: FoodCategory) -> String {
+        switch category {
+        case .fridge: return "refrigerator.fill"
+        case .freezer: return "snowflake"
+        case .pantry: return "cabinet.fill"
+        }
+    }
+    
+    private func colorForCategory(_ category: FoodCategory) -> Color {
+        switch category {
+        case .fridge: return .blue
+        case .freezer: return .cyan
+        case .pantry: return .orange
+        }
+    }
+}
+
+// MARK: - KPI Settings View
+struct KPISettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: HomeViewModel
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(Array(viewModel.kpiCardOrder.enumerated()), id: \.element) { index, kpiType in
+                        Text(kpiType.title)
+                    }
+                    .onMove { source, destination in
+                        viewModel.moveKPI(from: source, to: destination)
+                    }
+                } footer: {
+                    Text("Trascina le sezioni per riordinarle. L'ordine che imposti verrà visualizzato nella schermata Home.")
+                        .font(.system(size: 13))
+                }
+            }
+            .navigationTitle("Riordina sezioni veloci")
+            .navigationBarTitleDisplayMode(.inline)
+            .environment(\.editMode, .constant(.active))
+        }
+    }
+}
+
+// MARK: - Category Inventory View
+struct CategoryInventoryView: View {
+    let category: FoodCategory
+    @Environment(\.modelContext) private var modelContext
+    @Query private var allItems: [FoodItem]
+    
+    private var filteredItems: [FoodItem] {
+        allItems.filter { $0.category == category && !$0.isConsumed }
+    }
+    
+    var body: some View {
+        InventoryView(filterStatus: nil, categoryFilter: category)
+    }
+}
+
+// Estensione per ExpirationStatus
+extension ExpirationStatus {
+    var displayName: String {
+        switch self {
+        case .expired: return "Scaduto"
+        case .today: return "Scade oggi"
+        case .soon: return "Scade presto"
+        case .safe: return "Sicuro"
+        }
+    }
+}
+
+#Preview {
+    HomeView()
+        .modelContainer(for: [FoodItem.self, UserProfile.self])
+}

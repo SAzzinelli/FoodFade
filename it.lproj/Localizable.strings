@@ -1,0 +1,293 @@
+/* App Name */
+"app.name" = "FoodFade";
+
+/* Common */
+"common.save" = "Salva";
+"common.cancel" = "Annulla";
+"common.ok" = "OK";
+"common.delete" = "Elimina";
+"common.edit" = "Modifica";
+"common.add" = "Aggiungi";
+"common.search" = "Cerca";
+"common.all" = "Tutti";
+
+/* Home */
+"home.title" = "FoodFade";
+"home.greeting.morning" = "Buongiorno";
+"home.greeting.afternoon" = "Buon pomeriggio";
+"home.greeting.evening" = "Buonasera";
+"home.subtitle.no_items" = "Inizia aggiungendo i tuoi prodotti";
+"home.subtitle.single" = "Hai 1 prodotto da gestire";
+"home.subtitle.multiple" = "Hai %d prodotti da gestire";
+"home.progress.empty.title" = "Nessun prodotto inserito";
+"home.progress.empty.subtitle" = "Aggiungi il primo prodotto per vedere qui il tuo riepilogo";
+
+/* Navigation */
+"nav.home" = "Home";
+"nav.inventory" = "Inventario";
+"nav.statistics" = "Statistiche";
+"nav.settings" = "Impostazioni";
+
+/* Inventory */
+"inventory.search.prompt" = "Cerca prodotto...";
+"inventory.consumed" = "Consumato";
+"inventory.mark.consumed" = "Segna come consumato";
+"item.day" = "1 giorno";
+"item.days" = "%d giorni";
+"item.accessibility.hint" = "Doppio tocco per aprire i dettagli";
+"inventory.empty.title" = "Nessun prodotto";
+"inventory.empty.subtitle" = "Aggiungi il tuo primo prodotto per iniziare";
+"inventory.empty.button" = "Aggiungi Prodotto";
+
+/* Recipes */
+"recipe.title" = "Ricette";
+"recipe.generate" = "Genera";
+"recipe.select_up_to" = "Seleziona fino a %d ingredienti";
+"recipe.expiring_section" = "In scadenza";
+"recipe.other_ingredients" = "Altri ingredienti";
+"recipe.selected_count" = "%d/%d selezionati";
+
+/* Add Food */
+"addfood.title" = "Nuovo Prodotto";
+"addfood.name" = "Nome prodotto";
+"addfood.category" = "Categoria di conservazione";
+"addfood.foodtype" = "Tipo di alimento";
+"addfood.foodtype.optional" = "Categoria (opzionale)";
+"addfood.foodtype.none" = "Nessuna categoria";
+"addfood.foodtype.add" = "Aggiungi categoria...";
+"addfood.foodtype.add.title" = "Aggiungi Categoria";
+"addfood.foodtype.add.message" = "Inserisci il nome della nuova categoria";
+"addfood.foodtype.add.name" = "Nome categoria";
+"addfood.barcode" = "Codice a barre";
+"addfood.photo" = "Foto prodotto";
+"addfood.photo.take" = "Scatta Foto";
+"addfood.photo.library" = "Libreria Foto";
+"addfood.photo.file" = "File";
+"addfood.expiration" = "Data di scadenza";
+"addfood.quantity" = "Quantità: %d";
+"addfood.notes" = "Note (opzionale)";
+"addfood.notify" = "Notifiche";
+
+/* Tags */
+"tags.section" = "Tag";
+"tags.gluten_free" = "Senza glutine";
+"tags.bio" = "Bio";
+"tags.footer" = "Filtra inventario e ricette con questi tag.";
+"tags.filter_all" = "Tutti";
+"tags.filter_opened" = "Aperto";
+
+/* Storico consumi */
+"history.title" = "Storico consumi";
+"history.today" = "Oggi";
+"history.yesterday" = "Ieri";
+"history.this_week" = "Questa settimana";
+"history.empty.title" = "Nessun consumo";
+"history.empty.subtitle" = "I prodotti che segni come consumati appariranno qui.";
+"history.older" = "Precedenti";
+
+/* Lista della spesa */
+"shopping.title" = "Lista della spesa";
+"shopping.add.placeholder" = "Cosa comprare?";
+"shopping.empty.title" = "Lista vuota";
+"shopping.empty.subtitle" = "Aggiungi cosa devi comprare.";
+"shopping.add_from_consumed" = "Aggiungi da consumati";
+"shopping.export_reminders" = "Aggiungi a Promemoria";
+"shopping.completed" = "Completati";
+
+/* Categories */
+"category.fridge" = "Frigorifero";
+"category.freezer" = "Congelatore";
+"category.pantry" = "Dispensa";
+
+/* Food Types */
+"foodtype.vegetables" = "Verdure";
+"foodtype.fruits" = "Frutta";
+"foodtype.dairy" = "Latticini";
+"foodtype.meat" = "Carne";
+"foodtype.fish" = "Pesce";
+"foodtype.pasta" = "Pasta";
+"foodtype.rice" = "Riso";
+"foodtype.bread" = "Pane";
+"foodtype.sauces" = "Sughi pronti";
+"foodtype.beverages" = "Bevande";
+"foodtype.snacks" = "Snack";
+"foodtype.frozen" = "Surgelati";
+"foodtype.canned" = "Conserve";
+"foodtype.other" = "Altro";
+
+/* Statistics */
+"stats.title" = "Statistiche";
+"stats.waste_score" = "Waste Score";
+"stats.consumed" = "consumati";
+"stats.this_month" = "Questo mese";
+"stats.consumed_items" = "Consumati";
+"stats.expiring_soon" = "In scadenza";
+"stats.expired" = "Scaduti";
+"stats.most_wasted" = "Tipi più sprecati";
+"stats.by_category" = "Per categoria";
+"stats.advice" = "Consigli per te";
+"stats.message.excellent" = "Ottimo lavoro! Stai riducendo gli sprechi.";
+"stats.message.good" = "Stai facendo bene! Continua così.";
+"stats.message.ok" = "Ci stai provando, bravo!";
+"stats.message.encouraging" = "Ogni piccolo passo conta!";
+
+/* Settings */
+"settings.title" = "Impostazioni";
+"settings.appearance" = "Aspetto";
+"settings.notifications" = "Notifiche";
+"settings.notifications.enable" = "Notifiche";
+"settings.notifications.message" = "Ricevi notifiche quando i tuoi prodotti stanno per scadere";
+"settings.notify_me" = "Avvisami";
+"settings.notify.same_day" = "Lo stesso giorno";
+"settings.notify.1day" = "1 giorno prima";
+"settings.notify.2days" = "2 giorni prima";
+"settings.sync" = "Sincronizzazione";
+"settings.icloud" = "Sincronizzazione iCloud";
+"settings.icloud.message" = "Sincronizza i tuoi dati tra tutti i dispositivi";
+"settings.info" = "Informazioni";
+"settings.version" = "Versione";
+
+/* Appearance Settings */
+"appearance.title" = "Aspetto";
+"appearance.mode" = "Aspetto";
+"appearance.mode.system" = "Sistema";
+"appearance.mode.light" = "Chiaro";
+"appearance.mode.dark" = "Scuro";
+"appearance.animations" = "Animazioni";
+"appearance.animations.message" = "Abilita o disabilita le animazioni e gli effetti visivi";
+"appearance.accent" = "Colore Principale";
+"appearance.accent.message" = "Scegli il colore principale utilizzato nell'app. 'Default' mantiene lo schema multicolor originale.";
+"appearance.accent.default" = "Default";
+
+/* Splash Screen */
+"splash.welcome.masculine" = "Benvenuto";
+"splash.welcome.feminine" = "Benvenuta";
+"splash.welcome.neutral" = "Benvenuto";
+"splash.appname" = "FoodFade";
+
+/* Onboarding */
+"onboarding.welcome.title" = "Benvenuto in FoodFade";
+"onboarding.welcome.subtitle" = "Tieni sotto controllo le scadenze ed evita sprechi";
+"onboarding.welcome.feature1.title" = "Aggiungi prodotti facilmente";
+"onboarding.welcome.feature1.description" = "A mano o con la scansione";
+"onboarding.welcome.feature2.title" = "Controlla le scadenze";
+"onboarding.welcome.feature2.description" = "Saprai sempre cosa consumare prima";
+"onboarding.welcome.feature3.title" = "Riduci gli sprechi";
+"onboarding.welcome.feature3.description" = "Meno cibo buttato, senza stress";
+"onboarding.welcome.start" = "Inizia";
+"onboarding.help.title" = "Ti aiutiamo a non dimenticare nulla";
+"onboarding.help.text" = "FoodFade ti mostra subito cosa è meglio consumare\ne ti avvisa quando qualcosa sta per scadere.";
+"onboarding.help.feature1.title" = "Scelte rapide";
+"onboarding.help.feature1.description" = "Capirai a colpo d'occhio cosa fare";
+"onboarding.help.feature2.title" = "Avvisi utili";
+"onboarding.help.feature2.description" = "Solo quando serve davvero";
+"onboarding.help.continue" = "Continua";
+
+"onboarding.cloud.title" = "Dove vuoi salvare i tuoi dati?";
+"onboarding.cloud.text" = "Puoi usare FoodFade solo su questo dispositivo oppure sincronizzare i dati con iCloud.";
+"onboarding.cloud.option1.title" = "Usa iCloud";
+"onboarding.cloud.option1.description" = "Sincronizza prodotti e statistiche su tutti i dispositivi collegati allo stesso Apple ID";
+"onboarding.cloud.option1.syncnote" = "La sincronizzazione avviene automaticamente in background";
+"onboarding.cloud.option2.title" = "Solo su questo dispositivo";
+"onboarding.cloud.option2.description" = "I dati verranno salvati solo su questo dispositivo";
+"onboarding.cloud.note1" = "Potrai cambiare idea in seguito dalle impostazioni";
+"onboarding.cloud.note2.icloud" = "Puoi attivare o disattivare la sincronizzazione iCloud in qualsiasi momento dalle impostazioni.";
+"onboarding.cloud.note2.local" = "Puoi attivare la sincronizzazione iCloud in qualsiasi momento dalle impostazioni.";
+"onboarding.cloud.continue" = "Continua";
+"onboarding.cloud.continue.icloud" = "Continua con iCloud";
+"onboarding.cloud.continue.local" = "Continua senza iCloud";
+
+"onboarding.notifications.title" = "Non perdere nulla";
+"onboarding.notifications.text" = "Attiva gli avvisi per ricordarti cosa consumare in tempo.";
+"onboarding.notifications.feature.title" = "Avvisi intelligenti";
+"onboarding.notifications.feature.description" = "Ricevi un promemoria prima che un prodotto scada";
+"onboarding.notifications.enable" = "Abilita avvisi";
+"onboarding.notifications.enabled" = "Avvisi attivi";
+"onboarding.notifications.skip" = "Salta per ora";
+"onboarding.notifications.continue" = "Continua";
+
+"onboarding.name.title" = "Come possiamo chiamarti?";
+"onboarding.name.label" = "Nome";
+"onboarding.name.placeholder" = "Il tuo nome";
+"onboarding.name.continue" = "Continua";
+
+"onboarding.start.title" = "Sei pronto!";
+"onboarding.start.text" = "Tutto è configurato. Inizia a usare FoodFade!";
+"onboarding.start.button" = "Iniziamo!";
+
+/* Welcome / Save error */
+"welcome.save.error.title" = "Errore di salvataggio";
+
+/* Backup & Restore */
+"backup.title" = "Backup e Ripristino";
+"backup.export.title" = "Backup Manuale";
+"backup.export.description" = "Esporta tutti i tuoi dati in un file JSON. Puoi salvare questo file per un backup locale o condividerlo.";
+"backup.export.info" = "%d prodotti, %d impostazioni";
+"backup.export.button" = "Esporta Dati";
+"backup.export.exporting" = "Esportazione in corso...";
+"backup.export.footer.icloud" = "Con iCloud attivo, i dati si sincronizzano automaticamente. Questo backup è utile per un backup locale aggiuntivo.";
+"backup.export.footer.local" = "Esporta tutti i tuoi dati in un file JSON per un backup locale.";
+
+"backup.import.title" = "Ripristina Dati";
+"backup.import.description" = "Importa dati da un file di backup. Puoi scegliere di sostituire tutti i dati o unirli a quelli esistenti.";
+"backup.import.button" = "Importa Dati";
+"backup.import.importing" = "Importazione in corso...";
+"backup.import.footer.icloud" = "⚠️ Con iCloud attivo, i dati importati verranno sincronizzati automaticamente. Assicurati di non creare duplicati.";
+"backup.import.footer.local" = "Importa dati da un file di backup.";
+
+"backup.mode.title" = "Modalità Importazione";
+"backup.mode.merge" = "Unisci (Consigliato)";
+"backup.mode.replace" = "Sostituisci Tutto";
+"backup.mode.message" = "Come vuoi importare i dati?\n\n• Unisci: aggiunge solo i nuovi prodotti\n• Sostituisci: elimina tutto e importa dal backup";
+
+"backup.result.title" = "Risultato Importazione";
+"backup.result.message" = "Importati: %d\nAggiornati: %d\nSaltati: %d\n\nTotale nel backup: %d";
+
+"settings.backup.title" = "Backup Manuale";
+"backup.section.title" = "Backup e Ripristino";
+"backup.section.footer" = "Esporta o importa i tuoi dati manualmente. Utile per backup locali o trasferimento dati.";
+
+"settings.icloud.restore" = "Ripristina dati da iCloud";
+"settings.icloud.status.active" = "Attiva";
+"settings.icloud.status.disabled" = "Disattivata per scelta dell'utente";
+"settings.icloud.status.unavailable" = "Non disponibile";
+"settings.icloud.footer.active" = "I tuoi dati vengono sincronizzati automaticamente sui dispositivi collegati allo stesso Apple ID. Usa 'Ripristina dati da iCloud' per forzare la sincronizzazione.";
+"settings.icloud.footer.unavailable" = "iCloud non è disponibile su questo dispositivo.";
+
+/* Fridgy (legacy, kept for other views) */
+"fridgy.title" = "Fridgy";
+"fridgy.toggle" = "Suggerimenti di Fridgy";
+"fridgy.apple.intelligence" = "Apple Intelligence";
+"fridgy.available" = "Disponibile";
+"fridgy.unavailable" = "Non disponibile";
+"fridgy.footer.enabled.available" = "Fridgy fornisce suggerimenti personalizzati e consigli in base al tuo inventario.";
+"fridgy.footer.enabled.unavailable" = "Fridgy non è disponibile su questo dispositivo.";
+"fridgy.footer.disabled" = "Fridgy è disattivato. L'app funziona al 100% senza suggerimenti intelligenti.";
+
+/* Assistente (Impostazioni - senza menzione Apple Intelligence) */
+"assistant.section.title" = "Assistente";
+"assistant.toggle" = "Suggerimenti intelligenti";
+"assistant.status.available" = "Assistente";
+"assistant.status.unavailable" = "Assistente";
+"assistant.available" = "Disponibile";
+"assistant.unavailable" = "Non disponibile";
+"assistant.footer.enabled.available" = "L'assistente fornisce suggerimenti personalizzati e consigli in base al tuo inventario.";
+"assistant.footer.enabled.unavailable" = "L'assistente non è disponibile su questo dispositivo.";
+"assistant.footer.disabled" = "L'assistente è disattivato. L'app funziona al 100% senza suggerimenti.";
+
+/* Statistics - Insight */
+"stats.insight.title" = "Insight";
+"stats.advice.title" = "Un piccolo consiglio";
+"onboarding.cloud.recommended" = "Consigliata";
+
+/* Add Food - Additional keys */
+"addfood.product" = "Prodotto";
+"addfood.additional_info" = "Informazioni Aggiuntive";
+"addfood.foodtype.footer" = "Scegli il tipo di alimento per statistiche migliori";
+"addfood.is_fresh" = "È un prodotto fresco";
+"addfood.expiration_section" = "Scadenza";
+"addfood.expiration.auto" = "La scadenza verrà calcolata automaticamente";
+"addfood.expiration.manual" = "Inserisci la data indicata sulla confezione";
+"addfood.notify_before" = "Avvisami prima della scadenza";
+"addfood.notifications_section" = "Avvisi per questo prodotto";
+"addfood.notify.footer" = "Riceverai un avviso se sta per scadere";
