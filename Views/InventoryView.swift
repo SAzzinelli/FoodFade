@@ -23,6 +23,12 @@ struct InventoryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Barra ricerca (in contenuto così il titolo large non si nasconde al tap)
+                searchBar
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color(.systemGroupedBackground))
+                
                 // Filtri categoria
                 categoryFilterView
                     .padding(.vertical, 12)
@@ -37,14 +43,9 @@ struct InventoryView: View {
                     listView
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("nav.inventory".localized)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("nav.inventory".localized)
-                        .font(.system(size: 20, weight: .bold, design: .default))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingAddFood = true
@@ -56,7 +57,6 @@ struct InventoryView: View {
                     .accessibilityLabel("common.add".localized)
                 }
             }
-            .searchable(text: $searchText, prompt: "inventory.search.prompt".localized)
             .sheet(isPresented: $showingAddFood) {
                 AddFoodView()
             }
@@ -97,6 +97,21 @@ struct InventoryView: View {
                 viewModel.loadData()
             }
         }
+    }
+    
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+                .font(.system(size: 16))
+            TextField("inventory.search.prompt".localized, text: $searchText)
+                .textFieldStyle(.plain)
+                .font(.system(size: 16))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color(.tertiarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
     
     private var categoryFilterView: some View {

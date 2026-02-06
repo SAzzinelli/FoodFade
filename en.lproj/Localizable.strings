@@ -99,7 +99,10 @@
 "shopping.export_reminders" = "Add to Reminders";
 "shopping.completed" = "Completed";
 "shopping.archived" = "Archived";
+"shopping.purchased_section" = "Purchased";
 "shopping.mark_bought" = "Mark bought";
+"shopping.purchased" = "Purchased";
+"shopping.list.change_icon" = "Change icon";
 "shopping.list.count" = "%d items";
 "shopping.lists.empty.title" = "No lists";
 "shopping.lists.empty.subtitle" = "Create your first shopping list.";

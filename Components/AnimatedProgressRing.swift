@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Anello di progresso animato con glow e animazioni fluide
+/// Anello di progresso animato (senza glow)
 struct AnimatedProgressRing: View {
     let progress: Double // 0.0 - 1.0
     let size: CGFloat
@@ -10,9 +10,6 @@ struct AnimatedProgressRing: View {
     let animationsEnabled: Bool
     
     @State private var animatedProgress: Double = 0
-    @State private var glowIntensity: Double = 0.5
-    @State private var rotation: Double = 0
-    
     init(
         progress: Double,
         size: CGFloat = 140,
@@ -31,19 +28,6 @@ struct AnimatedProgressRing: View {
     
     var body: some View {
         ZStack {
-            // Glow esterno (solo se animazioni abilitate)
-            if animationsEnabled {
-                Circle()
-                    .trim(from: 0, to: animatedProgress)
-                    .stroke(
-                        primaryColor.opacity(glowIntensity * 0.3),
-                        style: StrokeStyle(lineWidth: lineWidth + 8, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90 + rotation))
-                    .frame(width: size, height: size)
-                    .blur(radius: 8)
-            }
-            
             // Background ring
             Circle()
                 .stroke(
@@ -52,7 +36,7 @@ struct AnimatedProgressRing: View {
                 )
                 .frame(width: size, height: size)
             
-            // Progress ring con gradiente
+            // Progress ring con gradiente (senza glow/shadow)
             Circle()
                 .trim(from: 0, to: animatedProgress)
                 .stroke(
@@ -65,41 +49,11 @@ struct AnimatedProgressRing: View {
                 )
                 .rotationEffect(.degrees(-90))
                 .frame(width: size, height: size)
-                .shadow(
-                    color: primaryColor.opacity(animationsEnabled ? 0.4 : 0.2),
-                    radius: animationsEnabled ? 12 : 6,
-                    x: 0,
-                    y: 0
-                )
-            
-            // Glow interno (solo se animazioni abilitate)
-            if animationsEnabled {
-                Circle()
-                    .trim(from: 0, to: animatedProgress)
-                    .stroke(
-                        primaryColor.opacity(glowIntensity * 0.2),
-                        style: StrokeStyle(lineWidth: lineWidth - 4, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: size, height: size)
-                    .blur(radius: 4)
-            }
         }
         .onAppear {
             if animationsEnabled {
-                // Animazione iniziale del progresso
                 withAnimation(.spring(response: 1.2, dampingFraction: 0.8).delay(0.2)) {
                     animatedProgress = progress
-                }
-                
-                // Animazione continua del glow
-                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                    glowIntensity = 1.0
-                }
-                
-                // Rotazione sottile (opzionale)
-                withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
-                    rotation = 360
                 }
             } else {
                 animatedProgress = progress

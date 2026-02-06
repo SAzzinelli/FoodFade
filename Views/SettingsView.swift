@@ -16,32 +16,29 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                // 0. INTRODUZIONE
+                // 0. INTRODUZIONE (header compatto)
                 Section {
-                    VStack(spacing: 10) {
+                    HStack(spacing: 12) {
                         Image(systemName: "gearshape.fill")
-                            .font(.system(size: 40))
+                            .font(.system(size: 24))
                             .foregroundStyle(
                                 AnyShapeStyle(Color(red: 1.0, green: 0.6, blue: 0.2))
                             )
-                        
-                        VStack(spacing: 6) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("Personalizza la tua esperienza")
-                                .font(.system(size: 20, weight: .bold, design: .default))
+                                .font(.system(size: 16, weight: .semibold, design: .default))
                                 .foregroundColor(.primary)
-                            
-                            Text("Configura l'aspetto, le notifiche e le preferenze di sincronizzazione per rendere FoodFade perfetto per te.")
-                                .font(.system(size: 15, weight: .regular, design: .default))
+                            Text("Configura aspetto, notifiche e sincronizzazione.")
+                                .font(.system(size: 13, weight: .regular, design: .default))
                                 .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(nil)
+                                .lineLimit(2)
                         }
-                        .padding(.horizontal, 8)
+                        Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 6)
                 }
-                .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
                 .listRowBackground(Color(.secondarySystemGroupedBackground))
                 
                 // 1. ANELLO DI PROGRESSO
@@ -80,7 +77,7 @@ struct SettingsView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "bell.fill")
                                 .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
-                            Text("Avvisami prima della scadenza")
+                            Text("Prima della scadenza")
                                 .foregroundColor(.primary)
                         }
                     }
@@ -99,7 +96,7 @@ struct SettingsView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "calendar")
                                     .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCalendar))
-                                Text("Quanto prima")
+                                Text("Quanto prima?")
                                     .foregroundColor(.primary)
                             }
                         }
@@ -240,7 +237,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Aspetto")
                 } footer: {
-                    Text("Personalizza l'interfaccia")
+                    Text("Personalizza l'aspetto e i colori dell'interfaccia")
                 }
                 
                 // 5. SINCRONIZZAZIONE
@@ -358,6 +355,7 @@ struct SettingsView: View {
             }
             .tint(ThemeManager.shared.primaryColor)
             .navigationTitle("Impostazioni")
+            .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showingCustomDaysPicker) {
                 CustomDaysPickerView(customDays: $viewModel.customNotificationDays)
                     .onDisappear {

@@ -89,9 +89,10 @@ class BarcodeScannerService: NSObject, ObservableObject {
         }
     }
     
-    /// Ferma la scansione
+    /// Ferma la scansione e spegne la torcia se accesa
     @MainActor
     func stopScanning() {
+        turnOffTorch()
         captureSession?.stopRunning()
         captureSession = nil
         videoPreviewLayer = nil
@@ -100,12 +101,25 @@ class BarcodeScannerService: NSObject, ObservableObject {
         scannedBarcode = nil
     }
     
+    /// Spegne la torcia (chiamato anche da stopScanning per evitare che resti accesa uscendo)
+    @MainActor
+    func turnOffTorch() {
+        guard let device = AVCaptureDevice.default(for: .video),
+              device.hasTorch, device.torchMode == .on else { return }
+        do {
+            try device.lockForConfiguration()
+            device.torchMode = .off
+            device.unlockForConfiguration()
+        } catch {
+            print("Errore spegnimento torcia: \(error)")
+        }
+    }
+    
     /// Attiva/disattiva la torcia
     @MainActor
     func toggleTorch() {
         guard let device = AVCaptureDevice.default(for: .video),
               device.hasTorch else { return }
-        
         do {
             try device.lockForConfiguration()
             device.torchMode = device.torchMode == .on ? .off : .on

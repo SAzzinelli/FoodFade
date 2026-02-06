@@ -32,11 +32,12 @@ struct FoodFadeApp: App {
             let primaryUIColor = UIColor(ThemeManager.shared.primaryColor)
             UITabBar.appearance().tintColor = primaryUIColor
             UINavigationBar.appearance().tintColor = primaryUIColor
+            // Titoli large e inline in nero (primary solo per pulsanti)
             UINavigationBar.appearance().largeTitleTextAttributes = [
-                .foregroundColor: primaryUIColor
+                .foregroundColor: UIColor.label
             ]
             UINavigationBar.appearance().titleTextAttributes = [
-                .foregroundColor: primaryUIColor
+                .foregroundColor: UIColor.label
             ]
         }
     }
@@ -228,13 +229,13 @@ struct ContentView: View {
             // Tab bar (tab selezionata e elementi attivi)
             UITabBar.appearance().tintColor = activeUIColor
             
-            // Navigation bar - tint per i pulsanti e titoli
+            // Navigation bar - tint solo per pulsanti; titoli in nero
             UINavigationBar.appearance().tintColor = activeUIColor
             UINavigationBar.appearance().largeTitleTextAttributes = [
-                .foregroundColor: activeUIColor
+                .foregroundColor: UIColor.label
             ]
             UINavigationBar.appearance().titleTextAttributes = [
-                .foregroundColor: activeUIColor
+                .foregroundColor: UIColor.label
             ]
             
             // Forza il refresh di tutte le navigation bar esistenti

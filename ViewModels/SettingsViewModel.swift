@@ -113,10 +113,10 @@ class SettingsViewModel: ObservableObject {
         UITabBar.appearance().tintColor = primaryUIColor
         UINavigationBar.appearance().tintColor = primaryUIColor
         UINavigationBar.appearance().largeTitleTextAttributes = [
-            .foregroundColor: primaryUIColor
+            .foregroundColor: UIColor.label
         ]
         UINavigationBar.appearance().titleTextAttributes = [
-            .foregroundColor: primaryUIColor
+            .foregroundColor: UIColor.label
         ]
         
         // Richiedi autorizzazioni notifiche se abilitate

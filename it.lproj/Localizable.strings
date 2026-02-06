@@ -100,7 +100,10 @@
 "shopping.export_reminders" = "Aggiungi a Promemoria";
 "shopping.completed" = "Completati";
 "shopping.archived" = "Archiviati";
+"shopping.purchased_section" = "Acquistati";
 "shopping.mark_bought" = "Segna comprato";
+"shopping.purchased" = "Acquistato";
+"shopping.list.change_icon" = "Cambia icona";
 "shopping.list.count" = "%d voci";
 "shopping.lists.empty.title" = "Nessuna lista";
 "shopping.lists.empty.subtitle" = "Crea la tua prima lista della spesa.";

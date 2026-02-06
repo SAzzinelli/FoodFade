@@ -3,7 +3,7 @@ import SwiftData
 
 /// Voce della lista della spesa (cosa comprare)
 @Model
-final class ShoppingItem {
+final class ShoppingItem: Identifiable {
     var id: UUID = UUID()
     var name: String = ""
     var quantity: Int = 1

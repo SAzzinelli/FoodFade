@@ -21,7 +21,7 @@ struct ShoppingListView: View {
                                 ShoppingListDetailView(list: list)
                             } label: {
                                 HStack(spacing: 12) {
-                                    Image(systemName: "list.bullet")
+                                    Image(systemName: list.iconName)
                                         .font(.system(size: 20))
                                         .foregroundColor(ThemeManager.shared.primaryColor)
                                         .frame(width: 32)
@@ -52,17 +52,18 @@ struct ShoppingListView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("shopping.title".localized)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         newListName = ""
                         showingNewList = true
                     } label: {
-                        Image(systemName: "plus.circle.fill")
+                        Image(systemName: "plus.circle")
                             .font(.system(size: 22))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(.primary)
                     }
+                    .buttonStyle(.plain)
                 }
             }
             .sheet(isPresented: $showingNewList) {
@@ -77,11 +78,12 @@ struct ShoppingListView: View {
     }
     
     private var emptyListsState: some View {
-        ContentUnavailableView(
-            "shopping.lists.empty.title".localized,
-            systemImage: "list.bullet.rectangle",
-            description: Text("shopping.lists.empty.subtitle".localized)
-        ) {
+        VStack(spacing: 24) {
+            ContentUnavailableView(
+                "shopping.lists.empty.title".localized,
+                systemImage: "list.bullet.rectangle",
+                description: Text("shopping.lists.empty.subtitle".localized)
+            )
             Button("shopping.lists.new".localized) {
                 newListName = ""
                 showingNewList = true
@@ -143,6 +145,9 @@ struct ShoppingListDetailView: View {
     @State private var showingAddFromConsumed = false
     @State private var showingRename = false
     @State private var renameText = ""
+    @State private var showingIconPicker = false
+    @State private var itemToEdit: ShoppingItem?
+    @State private var isAcquistatiExpanded = false
     
     private var pendingItems: [ShoppingItem] {
         list.pendingItems.sorted { $0.addedAt > $1.addedAt }
@@ -154,24 +159,19 @@ struct ShoppingListDetailView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Aggiungi voce
+            // Aggiungi voce (un solo + a destra)
             HStack(spacing: 12) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(ThemeManager.shared.primaryColor)
                 TextField("shopping.add.placeholder".localized, text: $newItemName)
                     .textFieldStyle(.plain)
                     .onSubmit { addCurrentItem() }
                 Button {
                     addCurrentItem()
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
-                        .background(ThemeManager.shared.primaryColor)
-                        .clipShape(Circle())
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(ThemeManager.shared.primaryColor)
                 }
+                .buttonStyle(.plain)
                 .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .padding(16)
@@ -184,18 +184,24 @@ struct ShoppingListDetailView: View {
                     if !pendingItems.isEmpty {
                         Section {
                             ForEach(pendingItems) { item in
-                                ShoppingListRow(item: item, onToggle: { markAsBought(item) }, onDelete: { deleteItem(item) })
+                                ShoppingListRow(item: item, onToggle: { markAsBought(item) }, onDelete: { deleteItem(item) }, onEdit: { itemToEdit = item })
                             }
                             .onDelete(perform: deletePendingItems)
                         }
                     }
                     
                     if !archivedItems.isEmpty {
-                        Section("shopping.archived".localized) {
-                            ForEach(archivedItems) { item in
-                                ShoppingListRow(item: item, onToggle: { unmarkBought(item) }, onDelete: { deleteItem(item) })
+                        Section {
+                            DisclosureGroup(isExpanded: $isAcquistatiExpanded) {
+                                ForEach(archivedItems) { item in
+                                    ShoppingListRow(item: item, onToggle: { unmarkBought(item) }, onDelete: { deleteItem(item) }, onEdit: { itemToEdit = item })
+                                }
+                                .onDelete(perform: deleteArchivedItems)
+                            } label: {
+                                Text("shopping.purchased_section".localized)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.secondary)
                             }
-                            .onDelete(perform: deleteArchivedItems)
                         }
                     }
                 }
@@ -205,7 +211,7 @@ struct ShoppingListDetailView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle(list.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -214,6 +220,11 @@ struct ShoppingListDetailView: View {
                         showingRename = true
                     } label: {
                         Label("common.edit".localized, systemImage: "pencil")
+                    }
+                    Button {
+                        showingIconPicker = true
+                    } label: {
+                        Label("shopping.list.change_icon".localized, systemImage: "square.grid.2x2")
                     }
                     Button {
                         showingAddFromConsumed = true
@@ -227,7 +238,9 @@ struct ShoppingListDetailView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
+                        .foregroundColor(.primary)
                 }
+                .buttonStyle(.plain)
             }
         }
         .sheet(isPresented: $showingAddFromConsumed) {
@@ -236,6 +249,13 @@ struct ShoppingListDetailView: View {
                 showingAddFromConsumed = false
             }, onDismiss: { showingAddFromConsumed = false })
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showingIconPicker) {
+            ShoppingListIconPicker(currentIconName: list.iconName) { newName in
+                list.iconName = newName
+                try? modelContext.save()
+                showingIconPicker = false
+            }
         }
         .alert("shopping.list.rename".localized, isPresented: $showingRename) {
             TextField("shopping.list.name.placeholder".localized, text: $renameText)
@@ -248,6 +268,9 @@ struct ShoppingListDetailView: View {
             }
         } message: {
             Text("shopping.list.rename.hint".localized)
+        }
+        .sheet(item: $itemToEdit) { item in
+            EditShoppingItemSheet(item: item, onDismiss: { itemToEdit = nil })
         }
     }
     
@@ -320,11 +343,12 @@ struct ShoppingListDetailView: View {
     }
 }
 
-// MARK: - Riga voce (checkbox, nome, quantità; swipe elimina / segna comprato)
+// MARK: - Riga voce (checkbox, nome tappabile per modifica, quantità; swipe Acquistato / Elimina)
 private struct ShoppingListRow: View {
     let item: ShoppingItem
     let onToggle: () -> Void
     let onDelete: () -> Void
+    let onEdit: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
@@ -337,17 +361,22 @@ private struct ShoppingListRow: View {
             }
             .buttonStyle(.plain)
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.name)
-                    .font(.system(size: 16, weight: .medium))
-                    .strikethrough(item.isCompleted, color: .secondary)
-                    .foregroundColor(item.isCompleted ? .secondary : .primary)
-                if item.quantity > 1 {
-                    Text("× \(item.quantity)")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+            Button {
+                onEdit()
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.name)
+                        .font(.system(size: 16, weight: .medium))
+                        .strikethrough(item.isCompleted, color: .secondary)
+                        .foregroundColor(item.isCompleted ? .secondary : .primary)
+                    if item.quantity > 1 {
+                        Text("× \(item.quantity)")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
+            .buttonStyle(.plain)
             
             Spacer()
         }
@@ -356,13 +385,85 @@ private struct ShoppingListRow: View {
             Button {
                 onToggle()
             } label: {
-                Label("shopping.mark_bought".localized, systemImage: "checkmark.circle.fill")
+                Label("shopping.purchased".localized, systemImage: "checkmark.circle.fill")
             }
             .tint(.green)
             Button(role: .destructive, action: onDelete) {
                 Label("common.delete".localized, systemImage: "trash")
             }
             .tint(.red)
+        }
+    }
+}
+
+// MARK: - Picker icona lista (icone di sistema)
+private struct ShoppingListIconPicker: View {
+    let currentIconName: String
+    let onSelect: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 56))], spacing: 16) {
+                ForEach(ShoppingList.availableIcons, id: \.self) { iconName in
+                    Button {
+                        onSelect(iconName)
+                        dismiss()
+                    } label: {
+                        Image(systemName: iconName)
+                            .font(.system(size: 28))
+                            .foregroundColor(iconName == currentIconName ? ThemeManager.shared.primaryColor : .primary)
+                            .frame(width: 56, height: 56)
+                            .background(iconName == currentIconName ? ThemeManager.shared.primaryColor.opacity(0.15) : Color(.secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding()
+            .navigationTitle("shopping.list.change_icon".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("common.cancel".localized) { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Sheet modifica testo voce
+private struct EditShoppingItemSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    let item: ShoppingItem
+    let onDismiss: () -> Void
+    
+    @State private var editedName: String = ""
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("shopping.add.placeholder".localized, text: $editedName)
+                    .textInputAutocapitalization(.sentences)
+            }
+            .navigationTitle("common.edit".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear { editedName = item.name }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("common.cancel".localized) { onDismiss(); dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("common.save".localized) {
+                        item.name = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if item.name.isEmpty { item.name = " " }
+                        try? modelContext.save()
+                        onDismiss(); dismiss()
+                    }
+                    .disabled(editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
         }
     }
 }

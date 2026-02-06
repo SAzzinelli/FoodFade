@@ -11,6 +11,7 @@
 		F2A0A28FE18743FBB8C822DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC994EE62F029671006D9CF0 /* Assets.xcassets */; };
 		FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */; };
 		FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE82F029671006D9CF0 /* CategoryPicker.swift */; };
+		FC21E0B92F03196000996820 /* ConsumedQuantitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */; };
 		FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */; };
 		FC2128D52F029921001A2A52 /* EnhancedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */; };
 		FC2128D62F029921001A2A52 /* EnhancedSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */; };
@@ -110,6 +111,7 @@
 		FC994EE62F029671006D9CF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedProgressRing.swift; sourceTree = "<group>"; };
 		FC994EE82F029671006D9CF0 /* CategoryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPicker.swift; sourceTree = "<group>"; };
+		FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumedQuantitySheet.swift; sourceTree = "<group>"; };
 		FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationListeningOverlay.swift; sourceTree = "<group>"; };
 		FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProgressRing.swift; sourceTree = "<group>"; };
 		FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedSummaryCard.swift; sourceTree = "<group>"; };
@@ -210,6 +212,7 @@
 		FC994EF02F029671006D9CF0 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */,
 				FC21E09D2F0319A500996820 /* MagicLoadingView.swift */,
 				FC21E0952F03164800996820 /* FridgySkeletonLoader.swift */,
 				FC21E0932F030A9300996820 /* FridgyCard.swift */,
@@ -493,6 +496,7 @@
 				FC21E0AE2F03195E00996820 /* ShoppingList.swift in Sources */,
 				FC21E0B22F03195E00996820 /* ShoppingItem.swift in Sources */,
 				FC21E0B42F03195F00996820 /* ShoppingListView.swift in Sources */,
+				FC21E0B92F03196000996820 /* ConsumedQuantitySheet.swift in Sources */,
 				FC21E0B62F03196000996820 /* ConsumedHistoryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

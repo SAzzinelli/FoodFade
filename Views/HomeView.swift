@@ -194,16 +194,10 @@ struct HomeView: View {
     
     // MARK: - Header Section
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(greetingText)
-                .font(.system(size: 34, weight: .bold, design: .default))
-                .foregroundColor(.primary)
-            
-            Text("Tutto sotto controllo")
-                .font(.system(size: 17, weight: .regular, design: .default))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        Text(greetingText)
+            .font(.system(size: 34, weight: .bold, design: .default))
+            .foregroundColor(.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var greetingText: String {
@@ -283,15 +277,11 @@ struct HomeView: View {
     /// Placeholder al posto dell'anello quando non ci sono prodotti
     private var progressEmptyState: some View {
         VStack(spacing: 12) {
-            Image(systemName: "tray")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary.opacity(0.8))
-            
-            Text("home.progress.empty.title".localized)
+            Text("📦 \("home.progress.empty.title".localized)")
                 .font(.system(size: 17, weight: .semibold, design: .default))
                 .foregroundColor(.primary)
             
-            Text("home.progress.empty.subtitle".localized)
+            Text("✨ \("home.progress.empty.subtitle".localized)")
                 .font(.system(size: 14, weight: .regular, design: .default))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -310,6 +300,7 @@ struct HomeView: View {
         settings.first?.progressRingMode ?? .safeItems
     }
     
+    /// Testo dentro l'anello (senza emoji; le emoji restano solo sotto nel subtitle)
     private var progressRingLabel: String {
         let percentage = viewModel.progressRingPercentage
         
@@ -356,43 +347,43 @@ struct HomeView: View {
         switch currentProgressRingMode {
         case .safeItems:
             if percentage == 1.0 {
-                return "Nessuna scadenza imminente"
+                return "😌 Nessuna scadenza imminente"
             } else if urgentCount > 0 {
                 if urgentCount == 1 {
-                    return "1 prodotto richiede attenzione"
+                    return "👀 1 prodotto richiede attenzione"
                 } else {
-                    return "\(urgentCount) prodotti richiedono attenzione"
+                    return "👀 \(urgentCount) prodotti richiedono attenzione"
                 }
             } else if viewModel.incoming.count > 0 {
-                return "Alcuni prodotti scadono presto"
+                return "📅 Alcuni prodotti scadono presto"
             } else {
-                return "Controlla le scadenze"
+                return "🔍 Controlla le scadenze"
             }
             
         case .atRisk:
             let atRiskCount = viewModel.expiringToday.count + viewModel.toConsume.count + viewModel.incoming.count
             if percentage == 0.0 {
-                return "Nessun prodotto a rischio"
+                return "😊 Nessun prodotto a rischio"
             } else if atRiskCount == 1 {
-                return "1 prodotto a rischio"
+                return "⚠️ 1 prodotto a rischio"
             } else {
-                return "\(atRiskCount) prodotti a rischio"
+                return "⚠️ \(atRiskCount) prodotti a rischio"
             }
             
         case .healthScore:
             // Per health score, mostra info sui prodotti consumati vs scaduti
             let descriptor = FetchDescriptor<FoodItem>()
-            guard let allItems = try? modelContext.fetch(descriptor) else { return "Calcolo in corso..." }
+            guard let allItems = try? modelContext.fetch(descriptor) else { return "⏳ Calcolo in corso..." }
             
             let consumed = allItems.filter { $0.isConsumed }.count
             let expired = allItems.filter { !$0.isConsumed && $0.expirationStatus == .expired }.count
             
             if consumed == 0 && expired == 0 {
-                return "Aggiungi prodotti per vedere lo score"
+                return "📊 Aggiungi prodotti per vedere lo score"
             } else if expired == 0 {
-                return "Ottimo! Nessun prodotto scaduto"
+                return "🎉 Ottimo! Nessun prodotto scaduto"
             } else {
-                return "\(consumed) consumati, \(expired) scaduti"
+                return "📈 \(consumed) consumati, \(expired) scaduti"
             }
         }
     }
