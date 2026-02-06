@@ -324,12 +324,15 @@ private struct WelcomeStep1View: View {
             
             ScrollView {
                 VStack(spacing: 40) {
-                    // Logo
-                    Image(systemName: "leaf.circle.fill")
-                        .font(.system(size: 100))
+                    // Icona arancione (tinta fissa per non diventare bianca col tema)
+                    Image("AppIconLogo")
+                        .renderingMode(.template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 100, height: 100)
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [leafColor, leafColorDark],
+                                colors: [ThemeManager.naturalHomeLogoColor, ThemeManager.naturalHomeLogoColor.opacity(0.85)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -956,7 +959,7 @@ private struct AnimatedFoodBackground: View {
     @State private var animationOffset: CGFloat = 0
     @State private var timer: Timer?
     
-    let foodIcons = ["leaf.fill", "carrot.fill", "apple.fill", "leaf.circle.fill", "drop.fill", "flame.fill"]
+    let foodIcons = ["leaf.fill", "carrot.fill", "heart.fill", "leaf.circle.fill", "drop.fill", "flame.fill"]
     
     var body: some View {
         GeometryReader { geometry in

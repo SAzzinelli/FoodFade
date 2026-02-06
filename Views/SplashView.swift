@@ -1,11 +1,9 @@
 import SwiftUI
-import SwiftData
 
 /// Schermata di intro animata con logo
 struct SplashView: View {
     @Binding var showWelcome: Bool
     @Environment(\.colorScheme) private var colorScheme
-    @Query private var userProfiles: [UserProfile]
     @State private var logoScale: CGFloat = 0.5
     
     private var leafColor: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor }
@@ -30,50 +28,29 @@ struct SplashView: View {
             VStack(spacing: 32) {
                 Spacer()
                 
-                // Logo animato
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    leafColor.opacity(0.2),
-                                    leafColorDark.opacity(0.1)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                // Logo animato: icona arancione (tinta fissa per non diventare bianca col tema)
+                Image("AppIconLogo")
+                    .renderingMode(.template)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 120, height: 120)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [ThemeManager.naturalHomeLogoColor, ThemeManager.naturalHomeLogoColor.opacity(0.85)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .frame(width: 200, height: 200)
-                        .blur(radius: 20)
-                    
-                    Image(systemName: "leaf.circle.fill")
-                        .font(.system(size: 120))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [leafColor, leafColorDark],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .scaleEffect(logoScale)
-                        .opacity(logoOpacity)
-                        .shadow(color: leafColor.opacity(0.3), radius: 20, x: 0, y: 10)
-                }
+                    )
+                    .scaleEffect(logoScale)
+                    .opacity(logoOpacity)
+                    .shadow(color: ThemeManager.naturalHomeLogoColor.opacity(0.3), radius: 20, x: 0, y: 10)
                 
-                // Testo di benvenuto su due righe
-                VStack(alignment: .center, spacing: 4) {
-                    Text(welcomeGreeting)
-                        .font(.system(size: 32, weight: .bold, design: .default))
-                        .foregroundColor(.primary)
-                        .opacity(textOpacity)
-                        .offset(y: textOffset)
-                    
-                    Text("splash.appname".localized)
-                        .font(.system(size: 32, weight: .bold, design: .default))
-                        .foregroundColor(leafColor)
-                        .opacity(textOpacity)
-                        .offset(y: textOffset)
-                }
+                // Solo nome app in arancione
+                Text("splash.appname".localized)
+                    .font(.system(size: 32, weight: .bold, design: .default))
+                    .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                    .opacity(textOpacity)
+                    .offset(y: textOffset)
                 
                 Spacer()
             }
@@ -86,12 +63,6 @@ struct SplashView: View {
         .onAppear {
             startAnimation()
         }
-    }
-    
-    private var welcomeGreeting: String {
-        // Usa GenderHelper per ottenere la variante corretta del saluto
-        let gender = GenderHelper.getGender(from: userProfiles.first)
-        return GenderHelper.localizedString("splash.welcome", gender: gender)
     }
     
     private func startAnimation() {

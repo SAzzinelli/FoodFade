@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UIKit
+import CoreData
 
 @main
 struct FoodFadeApp: App {
@@ -73,6 +74,13 @@ struct FoodFadeApp: App {
                 cloudKitConfig = .none  // Solo locale (utente ha scelto "solo su questo iPhone")
             }
             
+            // Diagnostica iCloud (per capire dove muore: reinstall → primo avvio → cosa stampa? dopo 10–20 s arrivano remote changes?)
+            let iCloudAvailable = FileManager.default.ubiquityIdentityToken != nil
+            print("☁️ hasChosen:", hasChosen)
+            print("☁️ iCloudSyncEnabled:", useiCloud)
+            print("☁️ cloudKitConfig:", cloudKitConfig)
+            print("☁️ iCloud available (ubiquityIdentityToken):", iCloudAvailable)
+            
             // Configurazione del container
             let configuration = ModelConfiguration(
                 isStoredInMemoryOnly: false,
@@ -81,15 +89,30 @@ struct FoodFadeApp: App {
             
             let container = try ModelContainer(for: schema, configurations: [configuration])
             
-            // Se iCloud è abilitato, configura il listener per le modifiche remote
-            if hasChosen && useiCloud {
-                print("☁️ FoodFadeApp: CloudKit abilitato - sincronizzazione automatica attiva")
-                print("☁️ FoodFadeApp: Le modifiche ai FoodItem verranno sincronizzate automaticamente con iCloud")
+            // Observer per debug: se non vedi questo log → CloudKit non sta parlando
+            if !hasChosen || useiCloud {
+                NotificationCenter.default.addObserver(
+                    forName: .NSPersistentStoreRemoteChange,
+                    object: nil,
+                    queue: .main
+                ) { _ in
+                    print("📡 CloudKit ha mandato un update (NSPersistentStoreRemoteChange)")
+                }
+            }
+            
+            // Messaggio coerente con cloudKitConfig: .automatic se !hasChosen || useiCloud
+            if !hasChosen || useiCloud {
+                print("☁️ FoodFadeApp: Container con CloudKit (.automatic) - sincronizzazione attiva")
+                if !hasChosen {
+                    print("☁️ FoodFadeApp: Primo avvio/reinstall: UserDefaults non ancora impostati, i dati iCloud possono arrivare in seguito")
+                }
             } else {
-                print("📱 FoodFadeApp: CloudKit disabilitato - solo storage locale")
+                print("📱 FoodFadeApp: CloudKit disabilitato - solo storage locale (utente ha scelto «solo su questo iPhone»)")
             }
             
             // Inizializza le impostazioni di default se necessario (dopo la creazione del container)
+            // ATTENZIONE: con .automatic, creare AppSettings subito può sovrascrivere prima del merge CloudKit.
+            // Se dopo reinstall "non ripristina", provare a ritardare questo bootstrap o aspettare un remote change.
             let context = container.mainContext
             let descriptor = FetchDescriptor<AppSettings>()
             
@@ -193,7 +216,11 @@ struct ContentView: View {
                 .tag(shoppingListTabEnabled ? 4 : 3)
         }
         .onChange(of: shoppingListTabEnabled) { oldValue, newValue in
-            if !newValue {
+            if newValue {
+                // Abilitando: Statistics era 2 → diventa 3, Impostazioni era 3 → diventa 4
+                if selectedTab == 2 { selectedTab = 3 }
+                else if selectedTab == 3 { selectedTab = 4 }
+            } else {
                 if selectedTab == 2 { selectedTab = 0 }
                 else if selectedTab == 3 { selectedTab = 2 }
                 else if selectedTab == 4 { selectedTab = 3 }

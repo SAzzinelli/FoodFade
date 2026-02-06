@@ -156,7 +156,7 @@ struct ShoppingListDetailView: View {
             .padding(16)
             .background(Color(.secondarySystemGroupedBackground))
             
-            if list.items.isEmpty {
+            if (list.items ?? []).isEmpty {
                 emptyListState
             } else {
                 List {

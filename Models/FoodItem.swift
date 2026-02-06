@@ -40,7 +40,7 @@ struct FoodType: Codable, Hashable, Identifiable {
     let icon: String
     
     // Categorie estese
-    static let fruits = FoodType(rawValue: "Frutta", icon: "apple.fill")
+    static let fruits = FoodType(rawValue: "Frutta", icon: "leaf.fill")
     static let vegetables = FoodType(rawValue: "Verdura", icon: "carrot.fill")
     static let potatoes = FoodType(rawValue: "Patate", icon: "leaf.fill")
     static let legumes = FoodType(rawValue: "Legumi", icon: "leaf.fill")

@@ -10,8 +10,9 @@ final class ShoppingList {
     var iconName: String = "list.bullet"
     var createdAt: Date = Date()
     
+    /// CloudKit richiede che tutte le relazioni siano opzionali.
     @Relationship(deleteRule: .cascade, inverse: \ShoppingItem.list)
-    var items: [ShoppingItem] = []
+    var items: [ShoppingItem]?
     
     init(id: UUID = UUID(), name: String, iconName: String = "list.bullet", createdAt: Date = Date()) {
         self.id = id
@@ -28,10 +29,10 @@ final class ShoppingList {
     ]
     
     var pendingItems: [ShoppingItem] {
-        items.filter { !$0.isCompleted }
+        (items ?? []).filter { !$0.isCompleted }
     }
     
     var archivedItems: [ShoppingItem] {
-        items.filter { $0.isCompleted }
+        (items ?? []).filter { $0.isCompleted }
     }
 }
