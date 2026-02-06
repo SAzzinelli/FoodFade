@@ -87,13 +87,17 @@ struct PhotoPickerView: View {
                         Label("addfood.photo.file".localized, systemImage: "doc.fill")
                     }
                 } label: {
-                    VStack(spacing: 8) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.accentColor)
-                        Text("Foto prodotto")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.primary)
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        VStack(spacing: 8) {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.accentColor)
+                            Text("addfood.photo".localized)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
+                        }
+                        Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 120)

@@ -97,11 +97,11 @@ struct HomeView: View {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 6) {
                         Image(systemName: "leaf.fill")
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
                             .font(.system(size: 18))
                         Text("FoodFade")
                             .font(.system(size: 20, weight: .bold, design: .default))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
                     }
                 }
                 
@@ -255,8 +255,8 @@ struct HomeView: View {
                         progress: viewModel.progressRingPercentage,
                         size: 140,
                         lineWidth: 14,
-                        primaryColor: ThemeManager.shared.primaryColor,
-                        primaryColorDark: ThemeManager.shared.primaryColorDark,
+                        primaryColor: ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor,
+                        primaryColorDark: ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColorDark,
                         animationsEnabled: ThemeManager.shared.animationsEnabled
                     )
                     

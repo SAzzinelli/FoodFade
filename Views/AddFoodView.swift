@@ -32,6 +32,7 @@ struct AddFoodView: View {
                     expirationSection
                     notificationsSection
                 }
+                .tint(ThemeManager.shared.primaryColor)
                 
                 suggestionsOverlay
             }
@@ -277,7 +278,7 @@ struct AddFoodView: View {
         Section {
             Toggle(isOn: $viewModel.isGlutenFree) {
                 HStack(spacing: 8) {
-                    Image(systemName: "leaf.fill")
+                    Image(systemName: "heart.text.square.fill")
                         .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagGlutenFree))
                     Text("tags.gluten_free".localized)
                         .foregroundColor(.primary)
@@ -285,7 +286,7 @@ struct AddFoodView: View {
             }
             Toggle(isOn: $viewModel.isBio) {
                 HStack(spacing: 8) {
-                    Image(systemName: "leaf.circle.fill")
+                    Image(systemName: "leaf.fill")
                         .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagBio))
                     Text("tags.bio".localized)
                         .foregroundColor(.primary)

@@ -35,6 +35,8 @@
 "item.day" = "1 giorno";
 "item.days" = "%d giorni";
 "item.accessibility.hint" = "Doppio tocco per aprire i dettagli";
+"itemdetail.title" = "Dettaglio prodotto";
+"itemdetail.opened.button" = "L'hai aperto?";
 "inventory.empty.title" = "Nessun prodotto";
 "inventory.empty.subtitle" = "Aggiungi il tuo primo prodotto per iniziare";
 "inventory.empty.button" = "Aggiungi Prodotto";
@@ -301,8 +303,8 @@
 
 /* Settings - Inserimento scadenza */
 "settings.expiration.section" = "Inserimento scadenza";
-"settings.expiration.input.title" = "Come inserire la scadenza";
-"settings.expiration.input.short" = "Come inserire";
+"settings.expiration.input.title" = "Modalità inserimento";
+"settings.expiration.input.short" = "Modalità inserimento";
 "settings.expiration.calendar" = "Calendario";
 "settings.expiration.dictation" = "Dettatura";
-"settings.expiration.footer" = "Scegli se usare il date picker o la dettatura vocale per la data di scadenza.";
+"settings.expiration.footer" = "Scegli se usare il calendario o la dettatura per la data di scadenza.";

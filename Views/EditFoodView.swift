@@ -83,7 +83,7 @@ struct EditFoodView: View {
                 Section {
                     Toggle(isOn: $isGlutenFree) {
                         HStack(spacing: 8) {
-                            Image(systemName: "leaf.fill")
+                            Image(systemName: "heart.text.square.fill")
                                 .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagGlutenFree))
                             Text("tags.gluten_free".localized)
                                 .foregroundColor(.primary)
@@ -91,7 +91,7 @@ struct EditFoodView: View {
                     }
                     Toggle(isOn: $isBio) {
                         HStack(spacing: 8) {
-                            Image(systemName: "leaf.circle.fill")
+                            Image(systemName: "leaf.fill")
                                 .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagBio))
                             Text("tags.bio".localized)
                                 .foregroundColor(.primary)
@@ -222,6 +222,7 @@ struct EditFoodView: View {
                     Text("Preferenze")
                 }
             }
+            .tint(ThemeManager.shared.primaryColor)
             .fullScreenCover(isPresented: $showingDictationOverlay) {
                 DictationListeningOverlay(
                     isPresented: $showingDictationOverlay,

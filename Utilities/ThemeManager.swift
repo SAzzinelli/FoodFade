@@ -15,11 +15,22 @@ class ThemeManager: ObservableObject {
     /// Stile Naturale: icone variegate e testi neri (non un solo colore accent).
     var isNaturalStyle: Bool { accentColor == .natural }
     
-    /// Ottiene il colore principale basato sulla selezione. In stile Naturale è nero (testi/bordi).
+    /// Colore per i toggle quando attivi (in Naturale = verde, altrimenti primary).
+    var toggleTint: Color {
+        isNaturalStyle ? Color(red: 0.2, green: 0.7, blue: 0.35) : primaryColor
+    }
+    
+    /// Grigio scuro per elementi "neri" in stile Naturale (es. #212121).
+    static let naturalElementColor = Color(red: 33/255, green: 33/255, blue: 33/255)
+    
+    /// Arancione per il logo/titolo app in Home quando stile Naturale.
+    static let naturalHomeLogoColor = Color(red: 1.0, green: 0.6, blue: 0.2)
+    
+    /// Ottiene il colore principale basato sulla selezione. In stile Naturale è grigio scuro (navbar, pulsanti, testi accent).
     var primaryColor: Color {
         switch accentColor {
         case .natural:
-            return Color.primary
+            return Self.naturalElementColor
         case .green:
             return Color(red: 0.2, green: 0.8, blue: 0.4)
         case .blue:
@@ -39,7 +50,7 @@ class ThemeManager: ObservableObject {
     var primaryColorDark: Color {
         switch accentColor {
         case .natural:
-            return Color.primary
+            return Self.naturalElementColor
         case .green:
             return Color(red: 0.15, green: 0.7, blue: 0.35)
         case .blue:
@@ -59,7 +70,7 @@ class ThemeManager: ObservableObject {
     var primaryColorLight: Color {
         switch accentColor {
         case .natural:
-            return Color.primary
+            return Self.naturalElementColor
         case .green:
             return Color(red: 0.3, green: 0.9, blue: 0.5)
         case .blue:
@@ -109,7 +120,7 @@ class ThemeManager: ObservableObject {
         case .settingsExpirationInput:
             return Color(red: 0.95, green: 0.55, blue: 0.15)
         case .settingsSuggestions:
-            return Color(red: 0.6, green: 0.35, blue: 0.9)
+            return Color(red: 0.2, green: 0.7, blue: 0.35)
         case .settingsAvailable:
             return Color(red: 0.2, green: 0.7, blue: 0.35)
         case .settingsGear:
@@ -119,7 +130,7 @@ class ThemeManager: ObservableObject {
         case .settingsCloud:
             return Color(red: 0.35, green: 0.6, blue: 0.95)
         case .settingsBackup:
-            return Color(red: 0.95, green: 0.6, blue: 0.2)
+            return Color(red: 0.35, green: 0.6, blue: 0.95)
         case .settingsInfo:
             return Color(red: 0.4, green: 0.5, blue: 0.6)
         case .settingsReset:

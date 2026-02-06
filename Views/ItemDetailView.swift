@@ -133,24 +133,6 @@ struct ItemDetailView: View {
                     }
                 }
                 
-                // Timeline
-                Section {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Timeline")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                        
-                        TimelineBar(
-                            currentDate: Date(),
-                            createdAt: item.createdAt,
-                            expirationDate: item.effectiveExpirationDate,
-                            status: item.expirationStatus
-                        )
-                    }
-                    .padding(.vertical, 4)
-                }
-                
                 // Dettagli aggiuntivi
                 if item.isFresh || item.isOpened || item.useAdvancedExpiry || item.notes != nil || item.barcode != nil {
                     Section {
@@ -219,17 +201,15 @@ struct ItemDetailView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Dettaglio prodotto")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("")
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("itemdetail.title".localized)
+                        .font(.system(size: 17, weight: .semibold))
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        Button {
-                            isEditing = true
-                        } label: {
-                            Image(systemName: "pencil")
-                        }
-                        Menu {
+                    Menu {
                             Button {
                                 isEditing = true
                             } label: {
@@ -241,12 +221,13 @@ struct ItemDetailView: View {
                             } label: {
                                 Label("Elimina", systemImage: "trash.fill")
                             }
+                            .tint(.red)
                         } label: {
-                            Image(systemName: "ellipsis.circle")
-                        }
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
+            .presentationDragIndicator(.visible)
             .sheet(isPresented: $isEditing) {
                 EditFoodView(item: item)
             }
@@ -310,7 +291,7 @@ struct ItemDetailView: View {
                 Button {
                     toggleOpenedStatus()
                 } label: {
-                    Text("Aperto")
+                    Text("itemdetail.opened.button".localized)
                         .font(.system(size: 16, weight: .medium))
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
@@ -398,56 +379,6 @@ struct ItemDetailView: View {
             dismiss()
         } catch {
             print("Errore nell'eliminazione: \(error)")
-        }
-    }
-}
-
-private struct TimelineBar: View {
-    let currentDate: Date
-    let createdAt: Date
-    let expirationDate: Date
-    let status: ExpirationStatus
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                // Sfondo grigio (barra "piena")
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color(.systemGray5))
-                    .frame(height: 6)
-                
-                // Parte colorata: si svuota man mano che si avvicina la scadenza (pieno = tanto tempo, vuoto = scaduto)
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(progressColor)
-                    .frame(width: progressWidth(in: geometry.size.width), height: 6)
-            }
-        }
-        .frame(height: 6)
-    }
-    
-    private func progressWidth(in totalWidth: CGFloat) -> CGFloat {
-        let calendar = Calendar.current
-        let now = calendar.startOfDay(for: currentDate)
-        let expiry = calendar.startOfDay(for: expirationDate)
-        let created = calendar.startOfDay(for: createdAt)
-        
-        guard let daysRemaining = calendar.dateComponents([.day], from: now, to: expiry).day,
-              let totalDays = calendar.dateComponents([.day], from: created, to: expiry).day,
-              totalDays > 0 else {
-            return 0
-        }
-        
-        // Frazione tempo rimanente: 1 = pieno, 0 = vuoto (scaduto)
-        let fraction = max(0, min(1, Double(daysRemaining) / Double(totalDays)))
-        return totalWidth * CGFloat(fraction)
-    }
-    
-    private var progressColor: Color {
-        switch status {
-        case .expired: return .red
-        case .today: return .orange
-        case .soon: return .yellow
-        case .safe: return .green
         }
     }
 }

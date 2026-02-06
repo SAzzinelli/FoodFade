@@ -104,7 +104,7 @@ struct InventoryView: View {
             HStack(spacing: 10) {
                 CategoryFilterButton(
                     title: "common.all".localized,
-                    icon: "square.grid.2x2",
+                    icon: "square.grid.2x2.fill",
                     isSelected: selectedCategory == nil,
                     color: ThemeManager.shared.primaryColor
                 ) {
@@ -116,7 +116,7 @@ struct InventoryView: View {
                 ForEach(FoodCategory.allCases, id: \.self) { category in
                     CategoryFilterButton(
                         title: category.rawValue,
-                        icon: category.icon,
+                        icon: category.iconFill,
                         isSelected: selectedCategory == category,
                         color: AppTheme.color(for: category)
                     ) {
@@ -146,6 +146,7 @@ struct InventoryView: View {
                     }
                 )
                 .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     // Azione principale: Consuma (swipe completo)
@@ -156,12 +157,13 @@ struct InventoryView: View {
                     }
                     .tint(.green)
                     
-                    // Azione secondaria: Elimina
+                    // Azione secondaria: Elimina (sempre sfondo rosso)
                     Button(role: .destructive) {
                         viewModel.deleteItem(item)
                     } label: {
                         Label("common.delete".localized, systemImage: "trash.fill")
                     }
+                    .tint(.red)
                 }
                 .swipeActions(edge: .leading, allowsFullSwipe: false) {
                     // Azione sinistra: Modifica

@@ -15,7 +15,7 @@ struct FoodItemRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             // Icona categoria (dimensione fissa)
-            Image(systemName: item.category.icon)
+            Image(systemName: item.category.iconFill)
                 .font(.system(size: 20))
                 .foregroundColor(categoryColor)
                 .frame(width: 40, height: 40)
@@ -84,6 +84,7 @@ struct FoodItemRow: View {
             Button(role: .destructive, action: onDelete) {
                 Label("common.delete".localized, systemImage: "trash")
             }
+            .tint(.red)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(item.name), \(item.daysRemaining == 1 ? "item.day".localized : String(format: "item.days".localized, item.daysRemaining)), \(item.expirationStatus.rawValue)")

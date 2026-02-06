@@ -68,6 +68,7 @@ struct ExpiringTodayView: View {
                             } label: {
                                 Label("Elimina", systemImage: "trash.fill")
                             }
+                            .tint(.red)
                         }
                     }
                 }

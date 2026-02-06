@@ -35,6 +35,8 @@
 "item.day" = "1 day";
 "item.days" = "%d days";
 "item.accessibility.hint" = "Double tap to open details";
+"itemdetail.title" = "Product detail";
+"itemdetail.opened.button" = "Did you open it?";
 "inventory.empty.title" = "No products";
 "inventory.empty.subtitle" = "Add your first product to get started";
 "inventory.empty.button" = "Add Product";
@@ -301,8 +303,8 @@
 
 /* Settings - Expiration input */
 "settings.expiration.section" = "Expiration input";
-"settings.expiration.input.title" = "How to enter expiration";
-"settings.expiration.input.short" = "How to enter";
+"settings.expiration.input.title" = "Input mode";
+"settings.expiration.input.short" = "Input mode";
 "settings.expiration.calendar" = "Calendar";
 "settings.expiration.dictation" = "Dictation";
-"settings.expiration.footer" = "Choose whether to use the date picker or voice dictation for the expiration date.";
+"settings.expiration.footer" = "Choose whether to use the calendar or dictation for the expiration date.";

@@ -22,16 +22,7 @@ struct SettingsView: View {
                         Image(systemName: "gearshape.fill")
                             .font(.system(size: 40))
                             .foregroundStyle(
-                                ThemeManager.shared.isNaturalStyle
-                                ? AnyShapeStyle(ThemeManager.shared.semanticIconColor(for: .settingsGear))
-                                : AnyShapeStyle(LinearGradient(
-                                    colors: [
-                                        ThemeManager.shared.primaryColor,
-                                        ThemeManager.shared.primaryColorDark
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
+                                AnyShapeStyle(Color(red: 1.0, green: 0.6, blue: 0.2))
                             )
                         
                         VStack(spacing: 6) {
@@ -93,6 +84,7 @@ struct SettingsView: View {
                                 .foregroundColor(.primary)
                         }
                     }
+                    .tint(ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
                     .onChange(of: viewModel.notificationsEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
                     }
@@ -190,6 +182,7 @@ struct SettingsView: View {
                                 .foregroundColor(.primary)
                         }
                     }
+                    .tint(ThemeManager.shared.semanticIconColor(for: .settingsSuggestions))
                     .onChange(of: viewModel.intelligenceEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
                         IntelligenceManager.shared.isEnabled = newValue
@@ -361,6 +354,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .tint(ThemeManager.shared.primaryColor)
             .navigationTitle("Impostazioni")
             .sheet(isPresented: $showingCustomDaysPicker) {
                 CustomDaysPickerView(customDays: $viewModel.customNotificationDays)

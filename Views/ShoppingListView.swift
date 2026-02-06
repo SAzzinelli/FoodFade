@@ -178,6 +178,7 @@ private struct ShoppingListRow: View {
             Button(role: .destructive, action: onDelete) {
                 Label("common.delete".localized, systemImage: "trash")
             }
+            .tint(.red)
         }
     }
 }

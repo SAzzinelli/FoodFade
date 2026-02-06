@@ -77,6 +77,7 @@ struct AppearanceSettingsView: View {
                     Text("Naturale: icone a colori (mela rossa, bio verde…) e testi neri. Gli altri stili usano un unico colore accent.")
                 }
             }
+            .tint(ThemeManager.shared.primaryColor)
             .navigationTitle("Aspetto")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
