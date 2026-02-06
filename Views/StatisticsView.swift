@@ -406,89 +406,99 @@ private struct WasteScoreDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                VStack(spacing: 16) {
-                    Text("Waste Score")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.primary)
-                    ZStack {
-                        Circle()
-                            .stroke(Color(.systemGray5), lineWidth: 18)
-                            .frame(width: 160, height: 160)
-                        Circle()
-                            .trim(from: 0, to: animatedWasteScore)
-                            .stroke(primaryColor, style: StrokeStyle(lineWidth: 18, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                            .frame(width: 160, height: 160)
-                            .animation(.spring(response: 1.5, dampingFraction: 0.8), value: animatedWasteScore)
-                        VStack(spacing: 6) {
-                            Text(emoji(percentage: data.wasteScore)).font(.system(size: 40))
-                            Text("\(Int(animatedWasteScore * 100))%").font(.system(size: 36, weight: .bold)).foregroundColor(.primary)
-                        }
-                    }
-                    Text(title(percentage: data.wasteScore)).font(.system(size: 18, weight: .bold)).foregroundColor(.primary)
-                    Text("\(Int(data.wasteScore * 100))% di spreco evitato").font(.system(size: 15)).foregroundColor(.secondary)
-                    Text(subtitle(wasted: data.monthlyStats.expired)).font(.system(size: 14)).foregroundColor(.secondary).multilineTextAlignment(.center)
-                    Text("Quanto hai usato in tempo rispetto a quanto è scaduto. 100% = hai consumato tutto prima della scadenza; più basso = più prodotti scaduti senza uso.")
-                        .font(.system(size: 13)).foregroundColor(.secondary).multilineTextAlignment(.center)
-                    Button("Continua così") { }.font(.system(size: 16, weight: .medium)).foregroundColor(primaryColor).buttonStyle(.plain)
-                }
-                .padding(24)
-                .frame(maxWidth: .infinity)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
-                
+            VStack(alignment: .leading, spacing: 20) {
+                // Contenuto: score e periodo
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Nel periodo")
+                    Text("stats.section.content".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
-                    HStack(spacing: 16) {
-                        Label("\(data.monthlyStats.consumed) consumati", systemImage: "checkmark.circle.fill")
-                            .font(.system(size: 15))
-                            .foregroundColor(.green)
-                        Label("\(data.monthlyStats.expired) scaduti", systemImage: "xmark.circle.fill")
-                            .font(.system(size: 15))
-                            .foregroundColor(.red)
+                    VStack(spacing: 16) {
+                        Text("Waste Score")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                        ZStack {
+                            Circle()
+                                .stroke(Color(.systemGray5), lineWidth: 18)
+                                .frame(width: 160, height: 160)
+                            Circle()
+                                .trim(from: 0, to: animatedWasteScore)
+                                .stroke(primaryColor, style: StrokeStyle(lineWidth: 18, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                                .frame(width: 160, height: 160)
+                                .animation(.spring(response: 1.5, dampingFraction: 0.8), value: animatedWasteScore)
+                            VStack(spacing: 6) {
+                                Text(emoji(percentage: data.wasteScore)).font(.system(size: 40))
+                                Text("\(Int(animatedWasteScore * 100))%").font(.system(size: 36, weight: .bold)).foregroundColor(.primary)
+                            }
+                        }
+                        Text(title(percentage: data.wasteScore)).font(.system(size: 18, weight: .bold)).foregroundColor(.primary)
+                        Text("\(Int(data.wasteScore * 100))% di spreco evitato").font(.system(size: 15)).foregroundColor(.secondary)
+                        Text(subtitle(wasted: data.monthlyStats.expired)).font(.system(size: 14)).foregroundColor(.secondary).multilineTextAlignment(.center)
+                        Button("Continua così") { }.font(.system(size: 16, weight: .medium)).foregroundColor(primaryColor).buttonStyle(.plain)
                     }
+                    .padding(24)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Nel periodo")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.secondary)
+                        HStack(spacing: 16) {
+                            Label("\(data.monthlyStats.consumed) consumati", systemImage: "checkmark.circle.fill")
+                                .font(.system(size: 15))
+                                .foregroundColor(.green)
+                            Label("\(data.monthlyStats.expired) scaduti", systemImage: "xmark.circle.fill")
+                                .font(.system(size: 15))
+                                .foregroundColor(.red)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
                 
-                VStack(alignment: .leading, spacing: 10) {
-                    Label("Spiegazione", systemImage: "book.closed.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
-                    Text("Il Waste Score è la percentuale di prodotti che hai consumato prima della scadenza. 100% significa che nulla è andato sprecato; più il valore è basso, più prodotti sono scaduti senza essere usati. Controlla spesso le scadenze e pianifica i pasti per migliorare.")
-                        .font(.system(size: 14))
+                // Cos'è? e come migliorare
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
-                
-                VStack(alignment: .leading, spacing: 10) {
-                    Label("Come migliorare", systemImage: "lightbulb.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
-                    if isLoadingImprove {
-                        FridgySkeletonLoader()
-                    } else if let tip = improveTip {
-                        Text(tip)
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                    } else if !IntelligenceManager.shared.isFridgyAvailable {
-                        Text("Attiva i suggerimenti Fridgy nelle Impostazioni per ricevere consigli personalizzati.")
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("stats.what_is".localized, systemImage: "book.closed.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                        Text("Il Waste Score è la percentuale di prodotti che hai consumato prima della scadenza. 100% significa che nulla è andato sprecato; più il valore è basso, più prodotti sono scaduti senza essere usati. Controlla spesso le scadenze e pianifica i pasti per migliorare.")
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("Come migliorare", systemImage: "lightbulb.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                        if isLoadingImprove {
+                            FridgySkeletonLoader()
+                        } else if let tip = improveTip {
+                            Text(tip)
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        } else if !IntelligenceManager.shared.isFridgyAvailable {
+                            Text("Attiva i suggerimenti Fridgy nelle Impostazioni per ricevere consigli personalizzati.")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
             }
             .padding(20)
         }
@@ -530,43 +540,64 @@ private struct UsedVsWastedDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Cibo usato vs sprecato")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.primary)
-                    Text("Confronto tra prodotti consumati e scaduti")
+            VStack(alignment: .leading, spacing: 20) {
+                // Cos'è?
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    Text("stats.used_vs_wasted.description".localized)
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
-                    if let weeklyData = data.weeklyData {
-                        Text("Ultime 4 settimane")
-                            .font(.system(size: 13))
-                            .foregroundColor(.secondary)
-                        Chart(weeklyData) { point in
-                            BarMark(x: .value("Data", point.dateLabel), y: .value("Consumati", point.consumed))
-                                .foregroundStyle(primaryColor)
-                            BarMark(x: .value("Data", point.dateLabel), y: .value("Scaduti", point.expired))
-                                .foregroundStyle(.red)
-                        }
-                        .chartXAxis { AxisMarks(values: .automatic) { _ in AxisValueLabel().font(.system(size: 11)) } }
-                        .chartYAxis { AxisMarks { _ in AxisValueLabel().font(.system(size: 11)) } }
-                        .frame(height: 220)
-                        HStack(spacing: 20) {
-                            HStack(spacing: 6) {
-                                RoundedRectangle(cornerRadius: 4).fill(primaryColor).frame(width: 12, height: 12)
-                                Text("Consumati").font(.system(size: 13)).foregroundColor(.secondary)
-                            }
-                            HStack(spacing: 6) {
-                                RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 12, height: 12)
-                                Text("Scaduti").font(.system(size: 13)).foregroundColor(.secondary)
-                            }
-                        }
-                    }
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
                 .background(Color(.secondarySystemGroupedBackground))
                 .cornerRadius(16)
+                
+                // Contenuto
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("stats.section.content".localized)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Cibo usato vs sprecato")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                        Text("Confronto tra prodotti consumati e scaduti")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                        if let weeklyData = data.weeklyData {
+                            Text("Ultime 4 settimane")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                            Chart(weeklyData) { point in
+                                BarMark(x: .value("Data", point.dateLabel), y: .value("Consumati", point.consumed))
+                                    .foregroundStyle(primaryColor)
+                                BarMark(x: .value("Data", point.dateLabel), y: .value("Scaduti", point.expired))
+                                    .foregroundStyle(.red)
+                            }
+                            .chartXAxis { AxisMarks(values: .automatic) { _ in AxisValueLabel().font(.system(size: 11)) } }
+                            .chartYAxis { AxisMarks { _ in AxisValueLabel().font(.system(size: 11)) } }
+                            .frame(height: 220)
+                            HStack(spacing: 20) {
+                                HStack(spacing: 6) {
+                                    RoundedRectangle(cornerRadius: 4).fill(primaryColor).frame(width: 12, height: 12)
+                                    Text("Consumati").font(.system(size: 13)).foregroundColor(.secondary)
+                                }
+                                HStack(spacing: 6) {
+                                    RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 12, height: 12)
+                                    Text("Scaduti").font(.system(size: 13)).foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                }
             }
             .padding(20)
         }
@@ -587,52 +618,73 @@ private struct CategoryDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Per categoria")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.primary)
-                    Text("\(totalItems) prodotti nel periodo · Consumati vs totali per luogo")
-                        .font(.system(size: 13))
+            VStack(alignment: .leading, spacing: 20) {
+                // Cos'è?
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
-                    ForEach(data.categoryStats, id: \.category) { stat in
-                        HStack(spacing: 12) {
-                            Image(systemName: stat.category.iconFill)
-                                .font(.system(size: 22))
-                                .foregroundColor(AppTheme.color(for: stat.category))
-                                .frame(width: 32)
-                            Text(stat.category.rawValue)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.primary)
-                            if stat.total > 0 && stat.consumed == stat.total {
-                                Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-                                Text("100% ok").font(.system(size: 14)).foregroundColor(.secondary)
-                            }
-                            Spacer(minLength: 8)
-                            GeometryReader { geo in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 4).fill(Color(.systemGray5)).frame(height: 8)
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(AppTheme.color(for: stat.category))
-                                        .frame(width: stat.total > 0 ? geo.size.width * CGFloat(stat.consumed) / CGFloat(stat.total) : 0, height: 8)
-                                }
-                            }
-                            .frame(width: 60, height: 8)
-                            Text("\(stat.consumed)/\(stat.total)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-                                .frame(width: 32, alignment: .trailing)
-                        }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
-                        .background(Color(.tertiarySystemGroupedBackground))
-                        .cornerRadius(12)
-                    }
+                    Text("stats.by_category.description".localized)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
                 .background(Color(.secondarySystemGroupedBackground))
                 .cornerRadius(16)
+                
+                // Contenuto
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("stats.section.content".localized)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Per categoria")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                        Text("\(totalItems) prodotti nel periodo · Consumati vs totali per luogo")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                        ForEach(data.categoryStats, id: \.category) { stat in
+                            HStack(spacing: 12) {
+                                Image(systemName: stat.category.iconFill)
+                                    .font(.system(size: 22))
+                                    .foregroundColor(AppTheme.color(for: stat.category))
+                                    .frame(width: 32)
+                                Text(stat.category.rawValue)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.primary)
+                                if stat.total > 0 && stat.consumed == stat.total {
+                                    Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                                    Text("100% ok").font(.system(size: 14)).foregroundColor(.secondary)
+                                }
+                                Spacer(minLength: 8)
+                                GeometryReader { geo in
+                                    ZStack(alignment: .leading) {
+                                        RoundedRectangle(cornerRadius: 4).fill(Color(.systemGray5)).frame(height: 8)
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .fill(AppTheme.color(for: stat.category))
+                                            .frame(width: stat.total > 0 ? geo.size.width * CGFloat(stat.consumed) / CGFloat(stat.total) : 0, height: 8)
+                                    }
+                                }
+                                .frame(width: 60, height: 8)
+                                Text("\(stat.consumed)/\(stat.total)")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 32, alignment: .trailing)
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color(.tertiarySystemGroupedBackground))
+                            .cornerRadius(12)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                }
             }
             .padding(20)
         }
@@ -713,80 +765,101 @@ private struct DetailsDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Prodotti più aggiunti")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.primary)
-                    Text("\(data.topAddedProducts.count) prodotti · \(totalAdded) inserimenti totali")
-                        .font(.system(size: 13))
+            VStack(alignment: .leading, spacing: 20) {
+                // Cos'è?
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
-                    if data.topAddedProducts.isEmpty {
-                        Text("I dettagli compariranno man mano che usi l'app")
-                            .font(.system(size: 15))
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(Array(data.topAddedProducts.prefix(10).enumerated()), id: \.element.name) { index, item in
-                            HStack(spacing: 12) {
-                                Text("\(index + 1)")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .frame(width: 28, height: 28)
-                                    .background(Color(red: 0.5, green: 0.4, blue: 0.8))
-                                    .clipShape(Circle())
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(item.name)
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.primary)
-                                    Text("aggiunto \(item.count) \(item.count == 1 ? "volta" : "volte")")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                                Text("\(item.count)")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.vertical, 8)
-                        }
-                    }
+                    Text("stats.details.description".localized)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
                 .background(Color(.secondarySystemGroupedBackground))
                 .cornerRadius(16)
                 
-                if !data.topWastedProducts.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Prodotti più sprecati")
+                // Contenuto
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("stats.section.content".localized)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Prodotti più aggiunti")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
-                        Text("\(data.topWastedProducts.count) prodotti scaduti senza consumo")
+                        Text("\(data.topAddedProducts.count) prodotti · \(totalAdded) inserimenti totali")
                             .font(.system(size: 13))
                             .foregroundColor(.secondary)
-                        ForEach(Array(data.topWastedProducts.prefix(5).enumerated()), id: \.element.name) { index, item in
-                            HStack(spacing: 12) {
-                                Text("\(index + 1)")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.red)
-                                    .clipShape(Circle())
-                                Text(item.name)
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Text("\(item.count)")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.secondary)
+                        if data.topAddedProducts.isEmpty {
+                            Text("I dettagli compariranno man mano che usi l'app")
+                                .font(.system(size: 15))
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(Array(data.topAddedProducts.prefix(10).enumerated()), id: \.element.name) { index, item in
+                                HStack(spacing: 12) {
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(width: 28, height: 28)
+                                        .background(Color(red: 0.5, green: 0.4, blue: 0.8))
+                                        .clipShape(Circle())
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.name)
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.primary)
+                                        Text("aggiunto \(item.count) \(item.count == 1 ? "volta" : "volte")")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Text("\(item.count)")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 8)
                             }
-                            .padding(.vertical, 8)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(20)
                     .background(Color(.secondarySystemGroupedBackground))
                     .cornerRadius(16)
+                    
+                    if !data.topWastedProducts.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Prodotti più sprecati")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.primary)
+                            Text("\(data.topWastedProducts.count) prodotti scaduti senza consumo")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                            ForEach(Array(data.topWastedProducts.prefix(5).enumerated()), id: \.element.name) { index, item in
+                                HStack(spacing: 12) {
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(width: 28, height: 28)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                    Text(item.name)
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Text("\(item.count)")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 8)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(20)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .cornerRadius(16)
+                    }
                 }
             }
             .padding(20)

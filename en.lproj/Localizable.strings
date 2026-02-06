@@ -33,6 +33,7 @@
 "inventory.search.prompt" = "Search product...";
 "inventory.consumed" = "Consumed";
 "inventory.mark.consumed" = "Mark as consumed";
+"consumed_quantity_sheet.prompt" = "How many did you consume?";
 "item.day" = "1 day";
 "item.days" = "%d days";
 "item.accessibility.hint" = "Double tap to open details";
@@ -146,6 +147,12 @@
 "stats.expired" = "Expired";
 "stats.most_wasted" = "Most wasted types";
 "stats.by_category" = "By category";
+"stats.used_vs_wasted.description" = "This section compares the food you used in time versus what expired. It helps you see if you're using your fridge well or if you tend to let too much go to waste. The chart shows how this trend changes over the last weeks.";
+"stats.by_category.description" = "Here you see stats by storage place: Fridge, Freezer, and Pantry. For each category you see how many items you consumed vs the total. Useful to spot where you waste more (e.g. fridge vs pantry) and where to improve.";
+"stats.section.content" = "Content";
+"stats.section.instructions" = "Instructions";
+"stats.what_is" = "What is it?";
+"stats.details.description" = "Usage details: which products you add most often and which expire without being used. Helps you spot habits (e.g. items you buy too much or forget about) and reduce waste with more conscious choices.";
 "stats.advice" = "Tips for you";
 "stats.message.excellent" = "Great job! You're reducing waste.";
 "stats.message.good" = "You're doing well! Keep it up.";

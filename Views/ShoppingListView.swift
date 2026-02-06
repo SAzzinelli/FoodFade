@@ -364,7 +364,7 @@ private struct ShoppingListRow: View {
     }
 }
 
-// MARK: - Sheet Modifica lista (nome + icona)
+// MARK: - Sheet Modifica lista (nome + scelta icona nella stessa view)
 private struct EditShoppingListSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -372,7 +372,7 @@ private struct EditShoppingListSheet: View {
     let onDismiss: () -> Void
     
     @State private var editName: String = ""
-    @State private var showingIconPicker = false
+    @State private var selectedIconName: String = ""
     
     var body: some View {
         NavigationStack {
@@ -382,23 +382,32 @@ private struct EditShoppingListSheet: View {
                         .textInputAutocapitalization(.sentences)
                 }
                 Section {
-                    Button {
-                        showingIconPicker = true
-                    } label: {
-                        HStack {
-                            Text("shopping.list.change_icon".localized)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: list.iconName)
-                                .font(.system(size: 20))
-                                .foregroundColor(ThemeManager.shared.primaryColor)
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 56))], spacing: 16) {
+                        ForEach(ShoppingList.availableIcons, id: \.self) { iconName in
+                            Button {
+                                selectedIconName = iconName
+                            } label: {
+                                Image(systemName: iconName)
+                                    .font(.system(size: 28))
+                                    .foregroundColor(iconName == selectedIconName ? ThemeManager.shared.primaryColor : .primary)
+                                    .frame(width: 56, height: 56)
+                                    .background(iconName == selectedIconName ? ThemeManager.shared.primaryColor.opacity(0.15) : Color(.secondarySystemGroupedBackground))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
+                    .padding(.vertical, 8)
+                } header: {
+                    Text("shopping.list.change_icon".localized)
                 }
             }
             .navigationTitle("common.edit".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { editName = list.name }
+            .onAppear {
+                editName = list.name
+                selectedIconName = list.iconName
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("common.cancel".localized) { onDismiss(); dismiss() }
@@ -407,53 +416,11 @@ private struct EditShoppingListSheet: View {
                     Button("common.save".localized) {
                         list.name = editName.trimmingCharacters(in: .whitespacesAndNewlines)
                         if list.name.isEmpty { list.name = "shopping.list.default_name".localized }
+                        list.iconName = selectedIconName
                         try? modelContext.save()
                         onDismiss(); dismiss()
                     }
                     .disabled(editName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-            .sheet(isPresented: $showingIconPicker) {
-                ShoppingListIconPicker(currentIconName: list.iconName) { newName in
-                    list.iconName = newName
-                    try? modelContext.save()
-                    showingIconPicker = false
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Picker icona lista (icone di sistema)
-private struct ShoppingListIconPicker: View {
-    let currentIconName: String
-    let onSelect: (String) -> Void
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationStack {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 56))], spacing: 16) {
-                ForEach(ShoppingList.availableIcons, id: \.self) { iconName in
-                    Button {
-                        onSelect(iconName)
-                        dismiss()
-                    } label: {
-                        Image(systemName: iconName)
-                            .font(.system(size: 28))
-                            .foregroundColor(iconName == currentIconName ? ThemeManager.shared.primaryColor : .primary)
-                            .frame(width: 56, height: 56)
-                            .background(iconName == currentIconName ? ThemeManager.shared.primaryColor.opacity(0.15) : Color(.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding()
-            .navigationTitle("shopping.list.change_icon".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("common.cancel".localized) { dismiss() }
                 }
             }
         }

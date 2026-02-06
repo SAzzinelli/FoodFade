@@ -61,7 +61,9 @@ struct InventoryView: View {
                 AddFoodView()
             }
             .sheet(item: $selectedItem) { item in
-                ItemDetailView(item: item)
+                NavigationStack {
+                    ItemDetailView(item: item)
+                }
             }
             .onAppear {
                 viewModel.setup(modelContext: modelContext)
@@ -199,6 +201,14 @@ struct InventoryView: View {
         .background(Color(.systemGroupedBackground))
     }
     
+    /// Colore per il pulsante empty state: se c’è un filtro categoria usa il colore della sezione, altrimenti primary.
+    private var emptyStateButtonColor: Color {
+        if let category = selectedCategory {
+            return AppTheme.color(for: category)
+        }
+        return ThemeManager.shared.primaryColor
+    }
+    
     private var emptyState: some View {
         VStack(spacing: 20) {
             Spacer()
@@ -217,16 +227,19 @@ struct InventoryView: View {
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
             
-            Button {
-                showingAddFood = true
-            } label: {
-                Text("inventory.empty.button".localized)
-                    .font(.system(size: 17, weight: .semibold, design: .default))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: 200)
-                    .frame(height: 50)
-                    .background(ThemeManager.shared.primaryColor)
-                    .cornerRadius(12)
+            // Mostra "Aggiungi Prodotto" solo se l’empty state non è dovuto alla ricerca (ricerca senza risultati = solo messaggio)
+            if searchText.isEmpty {
+                Button {
+                    showingAddFood = true
+                } label: {
+                    Text("inventory.empty.button".localized)
+                        .font(.system(size: 17, weight: .semibold, design: .default))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: 200)
+                        .frame(height: 50)
+                        .background(emptyStateButtonColor)
+                        .cornerRadius(12)
+                }
             }
             
             Spacer()

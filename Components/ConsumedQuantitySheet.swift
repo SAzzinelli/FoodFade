@@ -15,20 +15,21 @@ struct ConsumedQuantitySheet: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
-                Text("Riduci la quantità in casa del numero che hai usato.")
+            VStack(spacing: 24) {
+                Text("consumed_quantity_sheet.prompt".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
                 
-                // Controllo quantità: [ − ] numero [ + ]
+                // Controllo quantità: [ − ] numero [ + ] — centrato, meno grigio, più nero
                 HStack(spacing: 24) {
                     Button {
                         if quantityToConsume > 1 { quantityToConsume -= 1 }
                     } label: {
                         Image(systemName: "minus.circle.fill")
                             .font(.system(size: 44))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
                     .disabled(quantityToConsume <= 1)
@@ -44,7 +45,7 @@ struct ConsumedQuantitySheet: View {
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 44))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(.primary)
                     }
                     .buttonStyle(.plain)
                     .disabled(quantityToConsume >= maxQuantity)
@@ -52,9 +53,8 @@ struct ConsumedQuantitySheet: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Color(.tertiarySystemFill))
                 .cornerRadius(16)
-                .padding(.horizontal)
                 
                 if maxQuantity > 1 {
                     Button {
@@ -62,30 +62,39 @@ struct ConsumedQuantitySheet: View {
                     } label: {
                         Text("Tutti (\(maxQuantity))")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(.primary)
                     }
-                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color(.tertiarySystemFill))
+                    .cornerRadius(12)
                 }
                 
-                Spacer()
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 20)
             .padding(.top, 8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemBackground))
             .navigationTitle(item.name)
             .navigationBarTitleDisplayMode(.inline)
             .presentationDetents([.fraction(0.38), .medium, .large])
             .presentationDragIndicator(.visible)
+            .presentationBackground(Color(.systemBackground))
+            .toolbarBackground(Color(.systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Annulla") {
                         dismiss()
                     }
+                    .foregroundColor(.secondary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Conferma") {
                         confirm()
                     }
                     .fontWeight(.semibold)
-                    .foregroundColor(ThemeManager.shared.primaryColor)
+                    .foregroundColor(.primary)
                 }
             }
             .onAppear {

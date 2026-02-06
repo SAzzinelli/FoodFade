@@ -33,6 +33,7 @@
 "inventory.search.prompt" = "Cerca prodotto...";
 "inventory.consumed" = "Consumato";
 "inventory.mark.consumed" = "Segna come consumato";
+"consumed_quantity_sheet.prompt" = "Quanti ne hai consumati?";
 "item.day" = "1 giorno";
 "item.days" = "%d giorni";
 "item.accessibility.hint" = "Doppio tocco per aprire i dettagli";
@@ -147,6 +148,12 @@
 "stats.expired" = "Scaduti";
 "stats.most_wasted" = "Tipi più sprecati";
 "stats.by_category" = "Per categoria";
+"stats.used_vs_wasted.description" = "Questa sezione mostra il confronto tra i prodotti che hai consumato in tempo e quelli scaduti. Serve a capire se stai usando il frigo bene o se tendi a lasciar scadere troppo. Il grafico delle ultime settimane ti aiuta a vedere l’andamento nel tempo.";
+"stats.by_category.description" = "Qui vedi le statistiche divise per luogo di conservazione: Frigorifero, Congelatore e Dispensa. Per ogni categoria puoi vedere quanti prodotti hai consumato rispetto al totale. Utile per capire dove sprechi di più (es. frigo vs dispensa) e dove migliorare.";
+"stats.section.content" = "Contenuto";
+"stats.section.instructions" = "Istruzioni";
+"stats.what_is" = "Cos'è?";
+"stats.details.description" = "Dettagli di utilizzo dell’app: quali prodotti aggiungi più spesso e quali scadono senza essere consumati. Ti aiuta a identificare abitudini (es. prodotti che compri troppo o che dimentichi) e a ridurre gli sprechi con scelte più consapevoli.";
 "stats.advice" = "Consigli per te";
 "stats.message.excellent" = "Ottimo lavoro! Stai riducendo gli sprechi.";
 "stats.message.good" = "Stai facendo bene! Continua così.";

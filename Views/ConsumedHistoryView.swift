@@ -61,6 +61,7 @@ struct ConsumedHistoryView: View {
                                         } label: {
                                             Label("common.delete".localized, systemImage: "trash.fill")
                                         }
+                                        .tint(.red)
                                     }
                             }
                         } header: {
@@ -79,6 +80,7 @@ struct ConsumedHistoryView: View {
                             } label: {
                                 Label("history.delete_all".localized, systemImage: "trash")
                             }
+                            .foregroundColor(.primary)
                         }
                     }
                 }
