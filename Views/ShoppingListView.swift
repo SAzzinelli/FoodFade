@@ -59,9 +59,9 @@ struct ShoppingListView: View {
                         newListName = ""
                         showingNewList = true
                     } label: {
-                        Image(systemName: "plus.circle")
-                            .font(.system(size: 22))
-                            .foregroundColor(.primary)
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
                     }
                     .buttonStyle(.plain)
                 }
