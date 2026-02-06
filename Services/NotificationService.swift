@@ -39,7 +39,7 @@ class NotificationService: ObservableObject {
         content.categoryIdentifier = "FOOD_EXPIRATION"
         
         let calendar = Calendar.current
-        let expirationDate = item.expirationDate
+        let expirationDate = item.effectiveExpirationDate
         
         // Programma la notifica per il giorno di scadenza o giorni prima
         var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: expirationDate)
@@ -47,7 +47,8 @@ class NotificationService: ObservableObject {
         dateComponents.minute = 0
         
         if let triggerDate = calendar.date(from: dateComponents) {
-            let adjustedDate = calendar.date(byAdding: .day, value: -daysBefore, to: triggerDate) ?? triggerDate
+            let clampedDaysBefore = min(daysBefore, max(days, 0))
+            let adjustedDate = calendar.date(byAdding: .day, value: -clampedDaysBefore, to: triggerDate) ?? triggerDate
             
             let trigger = UNCalendarNotificationTrigger(
                 dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: adjustedDate),

@@ -655,24 +655,17 @@ private struct CategoryDetailView: View {
                                 Text(stat.category.rawValue)
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.primary)
-                                if stat.total > 0 && stat.consumed == stat.total {
-                                    Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-                                    Text("100% ok").font(.system(size: 14)).foregroundColor(.secondary)
-                                }
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.85)
                                 Spacer(minLength: 8)
-                                GeometryReader { geo in
-                                    ZStack(alignment: .leading) {
-                                        RoundedRectangle(cornerRadius: 4).fill(Color(.systemGray5)).frame(height: 8)
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(AppTheme.color(for: stat.category))
-                                            .frame(width: stat.total > 0 ? geo.size.width * CGFloat(stat.consumed) / CGFloat(stat.total) : 0, height: 8)
-                                    }
+                                if stat.total > 0 && stat.consumed == stat.total {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.system(size: 16))
                                 }
-                                .frame(width: 60, height: 8)
                                 Text("\(stat.consumed)/\(stat.total)")
-                                    .font(.system(size: 13, weight: .medium))
+                                    .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(.secondary)
-                                    .frame(width: 32, alignment: .trailing)
                             }
                             .padding(.vertical, 8)
                             .padding(.horizontal, 16)

@@ -29,7 +29,9 @@ struct FoodFadeApp: App {
         
         // Aggiorniamo la tab bar e navigation bar con il colore corrente
         DispatchQueue.main.async {
-            let primaryUIColor = UIColor(ThemeManager.shared.primaryColor)
+            let primaryUIColor: UIColor = ThemeManager.shared.isNaturalStyle
+                ? .label  // in Naturale adattivo: nero in light, bianco in dark
+                : UIColor(ThemeManager.shared.primaryColor)
             UITabBar.appearance().tintColor = primaryUIColor
             UINavigationBar.appearance().tintColor = primaryUIColor
             // Titoli large e inline in nero (primary solo per pulsanti)
@@ -55,22 +57,20 @@ struct FoodFadeApp: App {
             ])
             
             // Leggi la scelta dell'utente da UserDefaults
-            // Se l'utente non ha ancora fatto la scelta, usa localOnly (default)
             let useiCloud = UserDefaults.standard.bool(forKey: "iCloudSyncEnabled")
             let hasChosen = UserDefaults.standard.bool(forKey: "hasChosenCloudUsage")
             
             // Determina la configurazione CloudKit
-            // IMPORTANTE: CloudKit ha due ambienti separati:
-            // - Development: usato quando l'app è in debug/development
-            // - Production: usato quando l'app è in release/production
-            // I dati NON si sincronizzano tra i due ambienti!
-            // Se crei dati in development, non li vedrai in production e viceversa.
-            // Per testare la sincronizzazione tra dispositivi, usa una build Release/Production.
+            // - Se l'utente NON ha ancora scelto (prima apertura o dopo reinstall): usa CloudKit
+            //   così i dati su iCloud possono sincronizzarsi subito dopo reinstall.
+            // - Se ha scelto iCloud: usa CloudKit.
+            // - Se ha scelto "solo dispositivo": solo locale.
+            // IMPORTANTE: Development vs Production sono ambienti separati; per test tra dispositivi usa build Release.
             let cloudKitConfig: ModelConfiguration.CloudKitDatabase
-            if hasChosen && useiCloud {
-                cloudKitConfig = .automatic  // Abilita sincronizzazione iCloud (usa l'ambiente corretto automaticamente)
+            if !hasChosen || useiCloud {
+                cloudKitConfig = .automatic  // Abilita iCloud (prima scelta o utente ha scelto iCloud)
             } else {
-                cloudKitConfig = .none  // Solo locale
+                cloudKitConfig = .none  // Solo locale (utente ha scelto "solo su questo iPhone")
             }
             
             // Configurazione del container
@@ -152,6 +152,11 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @Environment(\.modelContext) private var modelContext
     @StateObject private var themeManager = ThemeManager.shared
+    @Query private var settings: [AppSettings]
+    
+    private var shoppingListTabEnabled: Bool {
+        settings.first?.shoppingListTabEnabled ?? false
+    }
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -167,28 +172,32 @@ struct ContentView: View {
                 }
                 .tag(1)
             
-            ShoppingListView()
-                .tabItem {
-                    Label("Lista spesa", systemImage: "cart.fill")
-                }
-                .tag(2)
+            if shoppingListTabEnabled {
+                ShoppingListView()
+                    .tabItem {
+                        Label("Lista spesa", systemImage: "cart.fill")
+                    }
+                    .tag(2)
+            }
             
             StatisticsView()
                 .tabItem {
                     Label("Statistiche", systemImage: "chart.bar.fill")
                 }
-                .tag(3)
-            
-            // Ricette temporaneamente nascosta (instabile)
-            // RecipesView()
-            //     .tabItem { Label("Ricette", systemImage: "book.fill") }
-            //     .tag(4)
+                .tag(shoppingListTabEnabled ? 3 : 2)
             
             SettingsView()
                 .tabItem {
                     Label("Impostazioni", systemImage: "gearshape.fill")
                 }
-                .tag(4)
+                .tag(shoppingListTabEnabled ? 4 : 3)
+        }
+        .onChange(of: shoppingListTabEnabled) { oldValue, newValue in
+            if !newValue {
+                if selectedTab == 2 { selectedTab = 0 }
+                else if selectedTab == 3 { selectedTab = 2 }
+                else if selectedTab == 4 { selectedTab = 3 }
+            }
         }
         .tint(themeManager.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : themeManager.primaryColor)
         .preferredColorScheme(preferredColorScheme)
@@ -222,14 +231,15 @@ struct ContentView: View {
     
     private func updateTabBarColor() {
         DispatchQueue.main.async {
-            // In modalità Naturale: elementi attivi (tab, navbar) arancione; altrimenti primary
-            let activeColor = themeManager.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : themeManager.primaryColor
-            let activeUIColor = UIColor(activeColor)
+            // In modalità Naturale: colore adattivo (nero in light, bianco in dark) per tab e navbar
+            let activeUIColor: UIColor = themeManager.isNaturalStyle
+                ? .label
+                : UIColor(themeManager.primaryColor)
             
             // Tab bar (tab selezionata e elementi attivi)
             UITabBar.appearance().tintColor = activeUIColor
             
-            // Navigation bar - tint solo per pulsanti; titoli in nero
+            // Navigation bar - tint per pulsanti
             UINavigationBar.appearance().tintColor = activeUIColor
             UINavigationBar.appearance().largeTitleTextAttributes = [
                 .foregroundColor: UIColor.label
@@ -257,6 +267,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [FoodItem.self, AppSettings.self, UserProfile.self], inMemory: true)
+        .modelContainer(for: [FoodItem.self, AppSettings.self, UserProfile.self, ShoppingList.self, ShoppingItem.self], inMemory: true)
 }
 

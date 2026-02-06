@@ -23,7 +23,7 @@ struct ShoppingListView: View {
                                 HStack(spacing: 12) {
                                     Image(systemName: list.iconName)
                                         .font(.system(size: 20))
-                                        .foregroundColor(ThemeManager.shared.primaryColor)
+                                        .foregroundColor(ThemeManager.shared.isNaturalStyle ? Color.primary : ThemeManager.shared.primaryColor)
                                         .frame(width: 32)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(list.name)
@@ -61,18 +61,13 @@ struct ShoppingListView: View {
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(ThemeManager.shared.isNaturalStyle ? Color.primary : ThemeManager.shared.primaryColor)
                     }
                     .buttonStyle(.plain)
                 }
             }
             .sheet(isPresented: $showingNewList) {
                 newListSheet
-            }
-            .onAppear {
-                if allLists.isEmpty {
-                    createDefaultListIfNeeded()
-                }
             }
         }
     }
@@ -107,12 +102,6 @@ struct ShoppingListView: View {
                 }
             }
         }
-    }
-    
-    private func createDefaultListIfNeeded() {
-        guard allLists.isEmpty else { return }
-        let defaultName = "shopping.list.default_name".localized
-        createList(name: defaultName)
     }
     
     private func createList(name: String) {
@@ -159,7 +148,7 @@ struct ShoppingListDetailView: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
+                        .foregroundColor(ThemeManager.shared.isNaturalStyle ? Color.primary : ThemeManager.shared.primaryColor)
                 }
                 .buttonStyle(.plain)
                 .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -209,21 +198,25 @@ struct ShoppingListDetailView: View {
                         showingEditList = true
                     } label: {
                         Label("common.edit".localized, systemImage: "pencil")
+                            .foregroundStyle(.primary)
                     }
                     Button {
                         showingAddFromConsumed = true
                     } label: {
                         Label("shopping.add_from_consumed".localized, systemImage: "clock.arrow.circlepath")
+                            .foregroundStyle(.primary)
                     }
                     Button {
                         exportListToReminders()
                     } label: {
                         Label("shopping.export_reminders".localized, systemImage: "calendar.badge.plus")
+                            .foregroundStyle(.primary)
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                 }
+                .tint(.primary)
                 .buttonStyle(.plain)
             }
         }
@@ -325,7 +318,7 @@ private struct ShoppingListRow: View {
             } label: {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
-                    .foregroundColor(item.isCompleted ? .green : ThemeManager.shared.primaryColor)
+                    .foregroundColor(item.isCompleted ? .green : (ThemeManager.shared.isNaturalStyle ? Color.primary : ThemeManager.shared.primaryColor))
             }
             .buttonStyle(.plain)
             
@@ -389,7 +382,7 @@ private struct EditShoppingListSheet: View {
                             } label: {
                                 Image(systemName: iconName)
                                     .font(.system(size: 28))
-                                    .foregroundColor(iconName == selectedIconName ? ThemeManager.shared.primaryColor : .primary)
+                                    .foregroundColor(iconName == selectedIconName ? (ThemeManager.shared.isNaturalStyle ? Color.primary : ThemeManager.shared.primaryColor) : .primary)
                                     .frame(width: 56, height: 56)
                                     .background(iconName == selectedIconName ? ThemeManager.shared.primaryColor.opacity(0.15) : Color(.secondarySystemGroupedBackground))
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -484,7 +477,7 @@ private struct AddFromConsumedSheet: View {
                             Text(item.name)
                             Spacer()
                             Image(systemName: "plus.circle.fill")
-                                .foregroundColor(ThemeManager.shared.primaryColor)
+                                .foregroundColor(ThemeManager.shared.isNaturalStyle ? Color.primary : ThemeManager.shared.primaryColor)
                         }
                     }
                 }

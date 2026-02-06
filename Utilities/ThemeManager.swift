@@ -26,11 +26,16 @@ class ThemeManager: ObservableObject {
     /// Arancione per il logo/titolo app in Home quando stile Naturale.
     static let naturalHomeLogoColor = Color(red: 1.0, green: 0.6, blue: 0.2)
     
-    /// Ottiene il colore principale basato sulla selezione. In stile Naturale è grigio scuro (navbar, pulsanti, testi accent).
+    /// Colore per pulsanti CTA in onboarding: in stile Naturale sempre arancione (testo bianco), altrimenti primary.
+    var onboardingButtonColor: Color {
+        isNaturalStyle ? Self.naturalHomeLogoColor : primaryColor
+    }
+    
+    /// Ottiene il colore principale basato sulla selezione. In stile Naturale usa Color.primary (nero in light, bianco in dark).
     var primaryColor: Color {
         switch accentColor {
         case .natural:
-            return Self.naturalElementColor
+            return Color.primary
         case .green:
             return Color(red: 0.2, green: 0.8, blue: 0.4)
         case .blue:
@@ -50,7 +55,7 @@ class ThemeManager: ObservableObject {
     var primaryColorDark: Color {
         switch accentColor {
         case .natural:
-            return Self.naturalElementColor
+            return Color.primary.opacity(0.8)
         case .green:
             return Color(red: 0.15, green: 0.7, blue: 0.35)
         case .blue:
@@ -70,7 +75,7 @@ class ThemeManager: ObservableObject {
     var primaryColorLight: Color {
         switch accentColor {
         case .natural:
-            return Self.naturalElementColor
+            return Color.primary
         case .green:
             return Color(red: 0.3, green: 0.9, blue: 0.5)
         case .blue:

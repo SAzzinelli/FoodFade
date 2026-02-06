@@ -206,7 +206,7 @@ struct InventoryView: View {
         if let category = selectedCategory {
             return AppTheme.color(for: category)
         }
-        return ThemeManager.shared.primaryColor
+        return ThemeManager.shared.onboardingButtonColor
     }
     
     private var emptyState: some View {
@@ -234,12 +234,14 @@ struct InventoryView: View {
                 } label: {
                     Text("inventory.empty.button".localized)
                         .font(.system(size: 17, weight: .semibold, design: .default))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: 200)
                         .frame(height: 50)
                         .background(emptyStateButtonColor)
                         .cornerRadius(12)
                 }
+                .buttonStyle(.plain)
+                .tint(.white)
             }
             
             Spacer()

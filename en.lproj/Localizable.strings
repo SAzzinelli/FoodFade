@@ -324,6 +324,11 @@
 "addfood.dictation.listening" = "Listening... Speak the expiration date (e.g. March 7, 2026).";
 "addfood.dictation.error.title" = "Error";
 "addfood.dictation.error.message" = "I didn't hear anything..";
+"addfood.dictation.error.no_date" = "Date not recognized. Try again (e.g. March 7, 2026).";
+"addfood.dictation.error.title.no_date" = "Invalid date";
+"addfood.dictation.error.message.no_date" = "Try again.";
+"addfood.dictation.error.title.not_heard" = "I didn't understand..";
+"addfood.dictation.error.message.not_heard" = "Can you repeat?";
 
 /* Settings - Expiration input */
 "settings.expiration.section" = "Expiration input";

@@ -290,7 +290,7 @@ private struct OnboardingProgressIndicator: View {
         HStack(spacing: 8) {
             ForEach(0..<totalSteps, id: \.self) { step in
                 Circle()
-                    .fill(step <= currentStep ? ThemeManager.shared.primaryColor : Color.secondary.opacity(0.3))
+                    .fill(step <= currentStep ? ThemeManager.shared.onboardingButtonColor : Color.secondary.opacity(0.3))
                     .frame(width: 10, height: 10)
                     .animation(.spring(response: 0.4, dampingFraction: 0.7), value: currentStep)
             }
@@ -306,7 +306,11 @@ private struct WelcomeStep1View: View {
     let currentStep: Int
     let totalSteps: Int
     let onNext: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
     @Query private var userProfiles: [UserProfile]
+    
+    private var leafColor: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor }
+    private var leafColorDark: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor.opacity(0.8) : ThemeManager.shared.primaryColorDark }
     
     private var welcomeTitle: String {
         let gender = GenderHelper.getGender(from: userProfiles.first)
@@ -325,10 +329,7 @@ private struct WelcomeStep1View: View {
                         .font(.system(size: 100))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [
-                                    ThemeManager.shared.primaryColor,
-                                    ThemeManager.shared.primaryColorDark
-                                ],
+                                colors: [leafColor, leafColorDark],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -383,7 +384,7 @@ private struct WelcomeStep1View: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(ThemeManager.shared.primaryColor)
+                        .background(ThemeManager.shared.onboardingButtonColor)
                         .cornerRadius(12)
                 }
                 .padding(.horizontal, 40)
@@ -450,7 +451,7 @@ private struct WelcomeStep2View: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(ThemeManager.shared.primaryColor)
+                        .background(ThemeManager.shared.onboardingButtonColor)
                         .cornerRadius(12)
                 }
                 .padding(.horizontal, 40)
@@ -569,7 +570,7 @@ private struct WelcomeStep3CloudView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(selectedOption != nil ? ThemeManager.shared.primaryColor : Color.gray)
+                    .background(selectedOption != nil ? ThemeManager.shared.onboardingButtonColor : Color.gray)
                     .cornerRadius(12)
             }
             .disabled(selectedOption == nil)
@@ -599,15 +600,20 @@ private struct CloudOptionButton: View {
     let syncNote: String?
     let action: () -> Void
     
+    /// Colore icona quando non selezionato (tematizzato: iCloud blu, iPhone grigio)
+    private var unselectedIconColor: Color {
+        icon == "icloud.fill" ? Color(red: 0.2, green: 0.5, blue: 0.95) : Color(red: 0.45, green: 0.45, blue: 0.5)
+    }
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
                 // Icona
                 Image(systemName: icon)
                     .font(.system(size: 24))
-                    .foregroundColor(isSelected ? .white : ThemeManager.shared.primaryColor)
+                    .foregroundColor(isSelected ? .white : unselectedIconColor)
                     .frame(width: 44, height: 44)
-                    .background(isSelected ? Color.white.opacity(0.2) : ThemeManager.shared.primaryColor.opacity(0.1))
+                    .background(isSelected ? Color.white.opacity(0.2) : unselectedIconColor.opacity(0.15))
                     .cornerRadius(10)
                     .layoutPriority(0)
                 
@@ -617,17 +623,17 @@ private struct CloudOptionButton: View {
                         if isRecommended {
                             Text("onboarding.cloud.recommended".localized)
                                 .font(.system(size: 12, weight: .medium, design: .default))
-                                .foregroundColor(isSelected ? .white.opacity(0.9) : ThemeManager.shared.primaryColor)
+                                .foregroundColor(isSelected ? .white.opacity(0.9) : unselectedIconColor)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 2)
-                                .background(isSelected ? Color.white.opacity(0.2) : ThemeManager.shared.primaryColor.opacity(0.15))
+                                .background(isSelected ? Color.white.opacity(0.2) : unselectedIconColor.opacity(0.2))
                                 .cornerRadius(6)
                         }
                     
-                    // Titolo - con spazio sufficiente per evitare tagli
+                    // Titolo - quando non selezionato testo nero su sfondo chiaro (sempre leggibile)
                     Text(title)
                         .font(.system(size: 17, weight: .semibold, design: .default))
-                        .foregroundColor(isSelected ? .white : .primary)
+                        .foregroundColor(isSelected ? .white : Color(white: 0.15))
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.leading)
@@ -636,7 +642,7 @@ private struct CloudOptionButton: View {
                     // Descrizione
                     Text(description)
                         .font(.system(size: 14, weight: .regular, design: .default))
-                        .foregroundColor(isSelected ? .white.opacity(0.9) : .secondary)
+                        .foregroundColor(isSelected ? .white.opacity(0.9) : Color(white: 0.35))
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.leading)
@@ -646,7 +652,7 @@ private struct CloudOptionButton: View {
                     if let syncNote = syncNote {
                         Text(syncNote)
                             .font(.system(size: 12, weight: .regular, design: .default))
-                            .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary.opacity(0.8))
+                            .foregroundColor(isSelected ? .white.opacity(0.8) : Color(white: 0.45))
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
                             .multilineTextAlignment(.leading)
@@ -666,11 +672,11 @@ private struct CloudOptionButton: View {
                 }
             }
             .padding(16)
-            .background(isSelected ? ThemeManager.shared.primaryColor : Color(.secondarySystemGroupedBackground))
+            .background(isSelected ? ThemeManager.shared.onboardingButtonColor : Color(white: 0.95))
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? ThemeManager.shared.primaryColor : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? ThemeManager.shared.onboardingButtonColor : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(.plain)
@@ -735,7 +741,7 @@ private struct WelcomeStep4NotificationsView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(ThemeManager.shared.primaryColor)
+                    .background(ThemeManager.shared.onboardingButtonColor)
                     .cornerRadius(12)
                 }
                         .padding(.horizontal, 40)
@@ -774,7 +780,7 @@ private struct WelcomeStep4NotificationsView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .background(ThemeManager.shared.primaryColor)
+                                .background(ThemeManager.shared.onboardingButtonColor)
                                 .cornerRadius(12)
                         }
                         .padding(.horizontal, 40)
@@ -825,7 +831,7 @@ private struct WelcomeStep5NameView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "person.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
+                        .foregroundColor(ThemeManager.shared.onboardingButtonColor)
                     Text("onboarding.name.label".localized)
                         .font(.system(size: 15, weight: .medium, design: .default))
                         .foregroundColor(.secondary)
@@ -839,7 +845,7 @@ private struct WelcomeStep5NameView: View {
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(firstName.isEmpty ? Color.clear : ThemeManager.shared.primaryColor, lineWidth: 2)
+                            .stroke(firstName.isEmpty ? Color.clear : ThemeManager.shared.onboardingButtonColor, lineWidth: 2)
                     )
             }
                     .padding(.horizontal, 40)
@@ -857,7 +863,7 @@ private struct WelcomeStep5NameView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(firstName.isEmpty ? Color.gray : ThemeManager.shared.primaryColor)
+                        .background(firstName.isEmpty ? Color.gray : ThemeManager.shared.onboardingButtonColor)
                         .cornerRadius(12)
                 }
                 .disabled(firstName.isEmpty)
@@ -889,12 +895,12 @@ private struct WelcomeStep6StartView: View {
                         // Checkmark animato
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 80))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundColor(ThemeManager.shared.onboardingButtonColor)
                             .scaleEffect(checkmarkScale)
                             .opacity(checkmarkOpacity)
                             .overlay(
                                 Circle()
-                                    .stroke(ThemeManager.shared.primaryColor, lineWidth: 3)
+                                    .stroke(ThemeManager.shared.onboardingButtonColor, lineWidth: 3)
                                     .scaleEffect(checkmarkScale * 1.2)
                                     .opacity(checkmarkOpacity * 0.5)
                             )
@@ -934,7 +940,7 @@ private struct WelcomeStep6StartView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(ThemeManager.shared.primaryColor)
+                        .background(ThemeManager.shared.onboardingButtonColor)
                         .cornerRadius(12)
                 }
                 .padding(.horizontal, 40)
@@ -992,16 +998,29 @@ private struct FeatureRow: View {
     let title: String
     let description: String
     
+    /// Colore tematizzato per icona (topic di riferimento)
+    private var iconColor: Color {
+        switch icon {
+        case "plus.circle.fill": return ThemeManager.naturalHomeLogoColor
+        case "calendar": return Color(red: 0.2, green: 0.5, blue: 0.95)
+        case "leaf.fill": return Color(red: 0.2, green: 0.7, blue: 0.35)
+        case "checkmark.circle.fill": return Color(red: 0.2, green: 0.7, blue: 0.35)
+        case "bell.fill": return Color(red: 1.0, green: 0.5, blue: 0.2)
+        default: return ThemeManager.shared.onboardingButtonColor
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.system(size: 28))
-                .foregroundColor(ThemeManager.shared.primaryColor)
+                .foregroundColor(iconColor)
                 .frame(width: 50, height: 50)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 17, weight: .semibold, design: .default))
+                    .foregroundColor(.primary)
                 Text(description)
                     .font(.system(size: 15, weight: .regular, design: .default))
                     .foregroundColor(.secondary)

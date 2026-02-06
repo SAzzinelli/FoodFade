@@ -22,6 +22,7 @@ class SettingsViewModel: ObservableObject {
     @Published var accentColor: AccentColor = .natural
     @Published var progressRingMode: ProgressRingMode = .safeItems
     @Published var expirationInputMethod: ExpirationInputMethod = .calendar
+    @Published var shoppingListTabEnabled: Bool = false
     
     private var modelContext: ModelContext?
     private let notificationService = NotificationService.shared
@@ -56,6 +57,7 @@ class SettingsViewModel: ObservableObject {
             accentColor = settings.accentColor
             progressRingMode = settings.progressRingMode
             expirationInputMethod = settings.expirationInputMethod
+            shoppingListTabEnabled = settings.shoppingListTabEnabled
             
             // Aggiorna ThemeManager
             ThemeManager.shared.appearanceMode = appearanceMode
@@ -90,6 +92,7 @@ class SettingsViewModel: ObservableObject {
             settings.accentColor = accentColor
             settings.progressRingMode = progressRingMode
             settings.expirationInputMethod = expirationInputMethod
+            settings.shoppingListTabEnabled = shoppingListTabEnabled
             
             try? modelContext.save()
         } else {
@@ -102,14 +105,17 @@ class SettingsViewModel: ObservableObject {
                 animationsEnabled: animationsEnabled,
                 accentColor: accentColor,
                 progressRingMode: progressRingMode,
-                expirationInputMethod: expirationInputMethod
+                expirationInputMethod: expirationInputMethod,
+                shoppingListTabEnabled: shoppingListTabEnabled
             )
             modelContext.insert(newSettings)
             try? modelContext.save()
         }
         
         // Aggiorna anche la tab bar e navigation bar
-        let primaryUIColor = UIColor(ThemeManager.shared.primaryColor)
+        let primaryUIColor: UIColor = ThemeManager.shared.isNaturalStyle
+            ? .label
+            : UIColor(ThemeManager.shared.primaryColor)
         UITabBar.appearance().tintColor = primaryUIColor
         UINavigationBar.appearance().tintColor = primaryUIColor
         UINavigationBar.appearance().largeTitleTextAttributes = [

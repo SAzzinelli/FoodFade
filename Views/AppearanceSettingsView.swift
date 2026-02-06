@@ -8,6 +8,7 @@ struct AppearanceSettingsView: View {
     @StateObject private var themeManager = ThemeManager.shared
     
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         List {
@@ -77,7 +78,7 @@ struct AppearanceSettingsView: View {
                     Text("Naturale: icone a colori (mela rossa, bio verde…) e testi neri. Gli altri stili usano un unico colore accent.")
                 }
             }
-            .tint(ThemeManager.shared.primaryColor)
+            .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
             .navigationTitle("Aspetto")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

@@ -5,6 +5,7 @@ import SwiftData
 struct ItemDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     
     let item: FoodItem
     @StateObject private var viewModel = ItemDetailViewModel()
@@ -214,6 +215,7 @@ struct ItemDetailView: View {
                                 isEditing = true
                             } label: {
                                 Label("Modifica", systemImage: "pencil")
+                                    .foregroundStyle(.primary)
                             }
                             Divider()
                             Button(role: .destructive) {
@@ -224,7 +226,9 @@ struct ItemDetailView: View {
                             .tint(.red)
                         } label: {
                         Image(systemName: "ellipsis.circle")
+                            .foregroundStyle(.primary)
                     }
+                    .tint(.primary)
                 }
             }
             .presentationDragIndicator(.visible)
@@ -301,10 +305,13 @@ struct ItemDetailView: View {
                 } label: {
                     Text("itemdetail.opened.button".localized)
                         .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(colorScheme == .dark ? .black : .primary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
+                .background(colorScheme == .dark ? Color(white: 0.92) : Color(.secondarySystemGroupedBackground))
+                .cornerRadius(10)
             }
             
             // Pulsante Consumato - se quantità > 1 apre sheet scelta quantità, altrimenti segna consumato

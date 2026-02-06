@@ -80,7 +80,7 @@ struct ConsumedHistoryView: View {
                             } label: {
                                 Label("history.delete_all".localized, systemImage: "trash")
                             }
-                            .foregroundColor(.primary)
+                            .tint(.primary)
                         }
                     }
                 }

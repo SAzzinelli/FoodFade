@@ -73,18 +73,21 @@ struct PhotoPickerView: View {
                         }
                     } label: {
                         Label("addfood.photo.take".localized, systemImage: "camera.fill")
+                            .foregroundStyle(.primary)
                     }
                     
                     Button {
                         showingImagePicker = true
                     } label: {
                         Label("addfood.photo.library".localized, systemImage: "photo.on.rectangle")
+                            .foregroundStyle(.primary)
                     }
                     
                     Button {
                         showingDocumentPicker = true
                     } label: {
                         Label("addfood.photo.file".localized, systemImage: "doc.fill")
+                            .foregroundStyle(.primary)
                     }
                 } label: {
                     HStack(spacing: 0) {
@@ -104,6 +107,7 @@ struct PhotoPickerView: View {
                     .background(Color(.secondarySystemGroupedBackground))
                     .cornerRadius(12)
                 }
+                .tint(.primary)
             }
         }
         .sheet(isPresented: $showingImagePicker) {

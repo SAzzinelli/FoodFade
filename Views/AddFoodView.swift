@@ -5,6 +5,7 @@ import SwiftData
 struct AddFoodView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     
     @Query private var settings: [AppSettings]
     @StateObject private var viewModel = AddFoodViewModel()
@@ -15,6 +16,7 @@ struct AddFoodView: View {
     @State private var showingDictationOverlay = false
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var errorTitle = ""
     @State private var savedSuccessfully = false
     @State private var showingSuggestions = false
     @State private var showingFullScreenImage = false
@@ -32,13 +34,12 @@ struct AddFoodView: View {
                     expirationSection
                     notificationsSection
                 }
-                .tint(ThemeManager.shared.primaryColor)
+                .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
                 
                 suggestionsOverlay
             }
             .navigationTitle("addfood.title".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Annulla") {
@@ -82,7 +83,7 @@ struct AddFoodView: View {
                     onDismiss: { dictationService.stopListening() }
                 )
             }
-            .alert("addfood.dictation.error.title".localized, isPresented: $showingError) {
+            .alert(errorTitle, isPresented: $showingError) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage)
@@ -209,10 +210,10 @@ struct AddFoodView: View {
                         .font(.system(size: 13, weight: .medium))
                 }
             }
-            .foregroundColor(ThemeManager.shared.primaryColor)
+            .foregroundColor(colorScheme == .dark ? .black : .primary)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(ThemeManager.shared.primaryColor.opacity(0.15))
+            .background(colorScheme == .dark ? Color(white: 0.92) : Color(.secondarySystemGroupedBackground))
             .cornerRadius(8)
         }
         .buttonStyle(.plain)
@@ -317,8 +318,14 @@ struct AddFoodView: View {
                                         viewModel.validateDate()
                                         showingDictationOverlay = false
                                     },
-                                    onError: { _ in
-                                        errorMessage = "addfood.dictation.error.message".localized
+                                    onError: { key in
+                                        if key == "addfood.dictation.error.no_date" {
+                                            errorTitle = "addfood.dictation.error.title.no_date".localized
+                                            errorMessage = "addfood.dictation.error.message.no_date".localized
+                                        } else {
+                                            errorTitle = "addfood.dictation.error.title.not_heard".localized
+                                            errorMessage = "addfood.dictation.error.message.not_heard".localized
+                                        }
                                         showingError = true
                                         showingDictationOverlay = false
                                     }
@@ -331,10 +338,10 @@ struct AddFoodView: View {
                                 Text("addfood.dictation.button".localized)
                                     .font(.system(size: 15, weight: .medium))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .dark ? .black : .white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(ThemeManager.shared.primaryColor)
+                            .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
                             .cornerRadius(10)
                         }
                         .buttonStyle(.plain)

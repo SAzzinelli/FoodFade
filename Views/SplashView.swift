@@ -4,8 +4,12 @@ import SwiftData
 /// Schermata di intro animata con logo
 struct SplashView: View {
     @Binding var showWelcome: Bool
+    @Environment(\.colorScheme) private var colorScheme
     @Query private var userProfiles: [UserProfile]
     @State private var logoScale: CGFloat = 0.5
+    
+    private var leafColor: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor }
+    private var leafColorDark: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor.opacity(0.8) : ThemeManager.shared.primaryColorDark }
     @State private var logoOpacity: Double = 0.0
     @State private var textOpacity: Double = 0.0
     @State private var textOffset: CGFloat = 20
@@ -16,7 +20,7 @@ struct SplashView: View {
             LinearGradient(
                 colors: [
                     Color(.systemBackground),
-                    ThemeManager.shared.primaryColor.opacity(0.1)
+                    leafColor.opacity(0.1)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -32,8 +36,8 @@ struct SplashView: View {
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    ThemeManager.shared.primaryColor.opacity(0.2),
-                                    ThemeManager.shared.primaryColorDark.opacity(0.1)
+                                    leafColor.opacity(0.2),
+                                    leafColorDark.opacity(0.1)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -46,17 +50,14 @@ struct SplashView: View {
                         .font(.system(size: 120))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [
-                                    ThemeManager.shared.primaryColor,
-                                    ThemeManager.shared.primaryColorDark
-                                ],
+                                colors: [leafColor, leafColorDark],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .scaleEffect(logoScale)
                         .opacity(logoOpacity)
-                        .shadow(color: ThemeManager.shared.primaryColor.opacity(0.3), radius: 20, x: 0, y: 10)
+                        .shadow(color: leafColor.opacity(0.3), radius: 20, x: 0, y: 10)
                 }
                 
                 // Testo di benvenuto su due righe
@@ -69,7 +70,7 @@ struct SplashView: View {
                     
                     Text("splash.appname".localized)
                         .font(.system(size: 32, weight: .bold, design: .default))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
+                        .foregroundColor(leafColor)
                         .opacity(textOpacity)
                         .offset(y: textOffset)
                 }

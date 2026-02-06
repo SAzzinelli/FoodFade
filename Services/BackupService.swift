@@ -261,17 +261,31 @@ class BackupService {
             let key = makeItemKey(
                 name: backupItem.name,
                 category: category,
-                expirationDate: backupItem.expirationDate
+                expirationDate: effectiveExpirationDate(for: backupItem)
             )
             
             if let existingItem = existingMap[key] {
                 // Item esiste già: aggiorna se il backup è più recente
                 if backupItem.lastUpdated > existingItem.lastUpdated {
+                    let foodType = backupItem.foodTypeRaw.flatMap { rawValue in
+                        FoodType.defaultTypes.first { $0.rawValue == rawValue }
+                    }
+
                     existingItem.name = backupItem.name
+                    existingItem.category = category
+                    existingItem.expirationDate = backupItem.expirationDate
                     existingItem.quantity = backupItem.quantity
                     existingItem.notes = backupItem.notes
+                    existingItem.barcode = backupItem.barcode
                     existingItem.lastUpdated = backupItem.lastUpdated
+                    existingItem.notify = backupItem.notify
                     existingItem.isConsumed = backupItem.isConsumed
+                    existingItem.photoData = backupItem.photoData
+                    existingItem.foodType = foodType
+                    existingItem.isFresh = backupItem.isFresh
+                    existingItem.isOpened = backupItem.isOpened
+                    existingItem.openedDate = backupItem.openedDate
+                    existingItem.useAdvancedExpiry = backupItem.useAdvancedExpiry
                     updated += 1
                 } else {
                     skipped += 1
@@ -311,6 +325,20 @@ class BackupService {
         return (imported, updated, skipped)
     }
     
+    private func effectiveExpirationDate(for backupItem: BackupFoodItem) -> Date {
+        let calendar = Calendar.current
+        if backupItem.isFresh {
+            return calendar.date(byAdding: .day, value: 3, to: backupItem.createdAt) ?? backupItem.expirationDate
+        }
+        if backupItem.isOpened, let openedDate = backupItem.openedDate {
+            return calendar.date(byAdding: .day, value: 3, to: openedDate) ?? backupItem.expirationDate
+        }
+        if backupItem.useAdvancedExpiry && !backupItem.isOpened {
+            return calendar.date(byAdding: .day, value: 120, to: backupItem.createdAt) ?? backupItem.expirationDate
+        }
+        return backupItem.expirationDate
+    }
+
     private func makeItemKey(item: FoodItem) -> String {
         makeItemKey(
             name: item.name,

@@ -5,6 +5,7 @@ import SwiftData
 struct EditFoodView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     
     @Query private var settings: [AppSettings]
     @ObservedObject private var dictationService = ExpirationDictationService.shared
@@ -15,6 +16,7 @@ struct EditFoodView: View {
     @State private var showingDictationOverlay = false
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var errorTitle = ""
     @State private var category: FoodCategory
     @State private var foodType: FoodType?
     @State private var expirationDate: Date
@@ -133,8 +135,14 @@ struct EditFoodView: View {
                                                 expirationDate = date
                                                 showingDictationOverlay = false
                                             },
-                                            onError: { _ in
-                                                errorMessage = "addfood.dictation.error.message".localized
+                                            onError: { key in
+                                                if key == "addfood.dictation.error.no_date" {
+                                                    errorTitle = "addfood.dictation.error.title.no_date".localized
+                                                    errorMessage = "addfood.dictation.error.message.no_date".localized
+                                                } else {
+                                                    errorTitle = "addfood.dictation.error.title.not_heard".localized
+                                                    errorMessage = "addfood.dictation.error.message.not_heard".localized
+                                                }
                                                 showingError = true
                                                 showingDictationOverlay = false
                                             }
@@ -147,10 +155,10 @@ struct EditFoodView: View {
                                         Text("addfood.dictation.button".localized)
                                             .font(.system(size: 15, weight: .medium))
                                     }
-                                    .foregroundColor(.white)
+                                    .foregroundColor(colorScheme == .dark ? .black : .white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(ThemeManager.shared.primaryColor)
+                                    .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
                                     .cornerRadius(10)
                                 }
                                 .buttonStyle(.plain)
@@ -222,14 +230,14 @@ struct EditFoodView: View {
                     Text("Preferenze")
                 }
             }
-            .tint(ThemeManager.shared.primaryColor)
+            .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
             .fullScreenCover(isPresented: $showingDictationOverlay) {
                 DictationListeningOverlay(
                     isPresented: $showingDictationOverlay,
                     onDismiss: { dictationService.stopListening() }
                 )
             }
-            .alert("addfood.dictation.error.title".localized, isPresented: $showingError) {
+            .alert(errorTitle, isPresented: $showingError) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage)

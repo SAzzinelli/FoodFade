@@ -324,6 +324,11 @@
 "addfood.dictation.listening" = "Sto ascoltando... Parla per dettare la data di scadenza (es. 7 marzo 2026).";
 "addfood.dictation.error.title" = "Errore";
 "addfood.dictation.error.message" = "Non ho sentito niente..";
+"addfood.dictation.error.no_date" = "Data non riconosciuta. Riprova (es. 7 marzo 2026).";
+"addfood.dictation.error.title.no_date" = "Data non valida";
+"addfood.dictation.error.message.no_date" = "Riprova.";
+"addfood.dictation.error.title.not_heard" = "Non ho capito..";
+"addfood.dictation.error.message.not_heard" = "Puoi ripetere?";
 
 /* Settings - Inserimento scadenza */
 "settings.expiration.section" = "Inserimento scadenza";

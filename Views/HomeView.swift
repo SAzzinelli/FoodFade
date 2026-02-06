@@ -24,6 +24,12 @@ struct HomeView: View {
     @State private var showingSmartSuggestionsBanner = false
     
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+    
+    /// In dark mode logo/titolo sempre arancione; in light segue tema
+    private var homeLogoColor: Color {
+        colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : (ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+    }
     
     private var userName: String {
         userProfiles.first?.displayName ?? "Utente"
@@ -89,11 +95,11 @@ struct HomeView: View {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 6) {
                         Image(systemName: "leaf.fill")
-                            .foregroundColor(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+                            .foregroundColor(homeLogoColor)
                             .font(.system(size: 18))
                         Text("FoodFade")
                             .font(.system(size: 20, weight: .bold, design: .default))
-                            .foregroundColor(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+                            .foregroundColor(homeLogoColor)
                     }
                 }
                 
@@ -680,11 +686,16 @@ private struct QuickActionButtonContent: View {
     let title: String
     let color: Color
     
+    /// In stile Naturale usiamo Color.primary così le icone sono chiare in dark mode
+    private var iconColor: Color {
+        ThemeManager.shared.isNaturalStyle ? Color.primary : color
+    }
+    
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 24))
-                .foregroundColor(color)
+                .foregroundColor(iconColor)
             
             Text(title)
                 .font(.system(size: 14, weight: .medium, design: .default))

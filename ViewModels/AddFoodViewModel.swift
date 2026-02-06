@@ -328,10 +328,12 @@ class AddFoodViewModel: ObservableObject {
             // Carica le impostazioni per i giorni di anticipo
             let settingsDescriptor = FetchDescriptor<AppSettings>()
             if let settings = try? modelContext.fetch(settingsDescriptor).first {
-                await notificationService.scheduleNotifications(
-                    for: item,
-                    daysBefore: settings.effectiveNotificationDays
-                )
+                if settings.notificationsEnabled {
+                    await notificationService.scheduleNotifications(
+                        for: item,
+                        daysBefore: settings.effectiveNotificationDays
+                    )
+                }
             } else {
                 await notificationService.scheduleNotifications(for: item, daysBefore: 1)
             }

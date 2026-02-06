@@ -18,6 +18,7 @@ final class AppSettings {
     var accentColorRaw: String = AccentColor.natural.rawValue
     var progressRingModeRaw: String = ProgressRingMode.safeItems.rawValue // ProgressRingMode.rawValue
     var expirationInputMethodRaw: String = ExpirationInputMethod.calendar.rawValue
+    var shoppingListTabEnabled: Bool = false // Voce "Lista della spesa" in tab bar (off di default)
     
     var appearanceMode: AppearanceMode {
         get {
@@ -68,7 +69,8 @@ final class AppSettings {
         accentColor: AccentColor = .natural,
         progressRingMode: ProgressRingMode = .safeItems,
         expirationInputMethod: ExpirationInputMethod = .calendar,
-        hasChosenCloudUsage: Bool = false
+        hasChosenCloudUsage: Bool = false,
+        shoppingListTabEnabled: Bool = false
     ) {
         self.id = id
         self.notificationsEnabled = notificationsEnabled
@@ -82,6 +84,7 @@ final class AppSettings {
         self.progressRingModeRaw = progressRingMode.rawValue
         self.expirationInputMethodRaw = expirationInputMethod.rawValue
         self.hasChosenCloudUsage = hasChosenCloudUsage
+        self.shoppingListTabEnabled = shoppingListTabEnabled
     }
     
     

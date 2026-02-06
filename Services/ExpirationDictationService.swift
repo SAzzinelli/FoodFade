@@ -18,6 +18,8 @@ final class ExpirationDictationService: ObservableObject {
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
+    /// Task che rileva il silenzio e chiude l'ascolto automaticamente.
+    private var silenceDetectionTask: Task<Void, Never>?
     
     private init() {
         speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "it-IT"))
@@ -108,6 +110,31 @@ final class ExpirationDictationService: ObservableObject {
             return
         }
         
+        // Rilevamento silenzio: dopo 1 s di warmup, se il livello resta basso per ~1.5 s interrompi e elabora
+        let silenceThreshold: Float = 0.03
+        let warmupSeconds: UInt64 = 1_000_000_000 // 1 s
+        let checkInterval: UInt64 = 200_000_000   // 0.2 s
+        let silenceStepsToTrigger = 8             // 8 * 0.2 s = 1.6 s di silenzio
+        silenceDetectionTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: warmupSeconds)
+            var consecutiveSilence = 0
+            while !Task.isCancelled, self?.isListening == true {
+                try? await Task.sleep(nanoseconds: checkInterval)
+                guard let self = self, self.isListening else { break }
+                if self.audioLevel < silenceThreshold {
+                    consecutiveSilence += 1
+                    if consecutiveSilence >= silenceStepsToTrigger {
+                        await MainActor.run {
+                            self.recognitionRequest?.endAudio()
+                        }
+                        break
+                    }
+                } else {
+                    consecutiveSilence = 0
+                }
+            }
+        }
+        
         recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
             Task { @MainActor in
                 guard let self = self else { return }
@@ -121,15 +148,21 @@ final class ExpirationDictationService: ObservableObject {
                 }
                 guard let result = result, result.isFinal else { return }
                 let text = result.bestTranscription.formattedString.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !text.isEmpty, let date = Self.parseDate(from: text) {
+                if let date = Self.parseDate(from: text) {
                     self.stopListening()
                     onDate(date)
+                } else {
+                    self.stopListening()
+                    let errorKey = text.isEmpty ? "addfood.dictation.error.message" : "addfood.dictation.error.no_date"
+                    onError?(errorKey)
                 }
             }
         }
     }
     
     func stopListening() {
+        silenceDetectionTask?.cancel()
+        silenceDetectionTask = nil
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()

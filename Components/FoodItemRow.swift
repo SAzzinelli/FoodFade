@@ -70,10 +70,12 @@ struct FoodItemRow: View {
         .contextMenu {
             Button(action: onConsume) {
                 Label("inventory.mark.consumed".localized, systemImage: "checkmark.circle")
+                    .foregroundStyle(.primary)
             }
             
             Button(action: onEdit) {
                 Label("common.edit".localized, systemImage: "pencil")
+                    .foregroundStyle(.primary)
             }
             
             Divider()

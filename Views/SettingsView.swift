@@ -7,11 +7,16 @@ struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @State private var showingCustomDaysPicker = false
     @State private var showingResetAlert = false
-    @State private var showingiCloudRestoreInfo = false
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     @AppStorage("hasShownFirstAddPrompt") private var hasShownFirstAddPrompt = false
     
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+    
+    /// In dark mode i dropdown/picker devono essere bianchi, non arancioni
+    private var listTint: Color {
+        colorScheme == .dark ? Color.primary : ThemeManager.shared.primaryColor
+    }
     
     var body: some View {
         NavigationStack {
@@ -65,10 +70,23 @@ struct SettingsView: View {
                     .onChange(of: viewModel.progressRingMode) { oldValue, newValue in
                         viewModel.saveSettings()
                     }
+                    
+                    Toggle(isOn: $viewModel.shoppingListTabEnabled) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "cart.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
+                            Text("Lista della spesa")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsRing))
+                    .onChange(of: viewModel.shoppingListTabEnabled) { oldValue, newValue in
+                        viewModel.saveSettings()
+                    }
                 } header: {
-                    Text("Anello")
+                    Text("Funzionalità")
                 } footer: {
-                    Text("Scegli come visualizzare l'anello nella schermata Home")
+                    Text("Scegli come visualizzare l'anello nella schermata Home e quali funzionalità mostrare nella barra in basso.")
                 }
                 
                 // 2. AVVISI
@@ -81,7 +99,7 @@ struct SettingsView: View {
                                 .foregroundColor(.primary)
                         }
                     }
-                    .tint(ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
+                    .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
                     .onChange(of: viewModel.notificationsEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
                     }
@@ -162,6 +180,7 @@ struct SettingsView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+                        .tint(.primary)
                     }
                 } header: {
                     Text("settings.expiration.section".localized)
@@ -179,7 +198,7 @@ struct SettingsView: View {
                                 .foregroundColor(.primary)
                         }
                     }
-                    .tint(ThemeManager.shared.semanticIconColor(for: .settingsSuggestions))
+                    .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsSuggestions))
                     .onChange(of: viewModel.intelligenceEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
                         IntelligenceManager.shared.isEnabled = newValue
@@ -256,25 +275,12 @@ struct SettingsView: View {
                     // Azione manuale di ripristino (solo se iCloud è attivo)
                     if viewModel.iCloudStatus == "Attiva" {
                         Button {
-                            showingiCloudRestoreInfo = true
                             viewModel.restoreFromiCloud()
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: "arrow.down.circle")
                                     .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
                                 Text("Ripristina dati da iCloud")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        
-                        // Verifica stato sincronizzazione
-                        Button {
-                            viewModel.checkCloudKitSyncStatus()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "checkmark.circle")
-                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
-                                Text("Verifica stato sincronizzazione")
                                     .foregroundColor(.primary)
                             }
                         }
@@ -353,7 +359,7 @@ struct SettingsView: View {
                     Text("settings.reset.footer".localized)
                 }
             }
-            .tint(ThemeManager.shared.primaryColor)
+            .tint(listTint)
             .navigationTitle("Impostazioni")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showingCustomDaysPicker) {
@@ -376,13 +382,8 @@ struct SettingsView: View {
             } message: {
                 Text("Tutti i prodotti, le statistiche e le impostazioni verranno cancellati. Questa azione non può essere annullata.")
             }
-            .alert("Ripristino da iCloud", isPresented: $showingiCloudRestoreInfo) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("La sincronizzazione è stata avviata. Potrebbe richiedere alcuni minuti.")
             }
-        }
-        .tint(ThemeManager.shared.primaryColor)
+        .tint(listTint)
     }
     
     private func performReset() {
