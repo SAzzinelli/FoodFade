@@ -122,18 +122,11 @@ class HomeViewModel: ObservableObject {
             // 4. Tutto ok: tutto il resto
             allOk = remainingItems
             
-            // Genera suggerimento Fridgy usando la nuova architettura
-            // Mostra solo se ci sono almeno 2 alimenti compatibili
-            if activeItems.count >= 2 {
-                Task {
-                    await loadFridgySuggestion(for: activeItems)
-                }
-            } else {
-                fridgyMessage = nil
-                fridgyContext = nil
-                fridgySuggestion = nil
-                smartSuggestion = nil
-            }
+            // Fridgy non è più mostrato in Home; suggerimenti solo nelle viste singole (Scadono oggi, Da consumare, ecc.)
+            fridgyMessage = nil
+            fridgyContext = nil
+            fridgySuggestion = nil
+            smartSuggestion = nil
             
             // Ricarica la modalità dell'anello (potrebbe essere cambiata nelle impostazioni)
             loadProgressRingMode()

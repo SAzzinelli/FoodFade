@@ -83,7 +83,7 @@ private struct SafeItemCard: View {
                     Label("\(item.daysRemaining) giorni", systemImage: "calendar")
                     Text("•")
                         .foregroundColor(.secondary)
-                    Label("\(item.quantity)", systemImage: "number")
+                    Text("Qtà. \(item.quantity)")
                 }
                 .font(.system(size: 15, weight: .regular, design: .default))
                 .foregroundColor(.secondary)

@@ -5,6 +5,10 @@ import SwiftData
 struct ToConsumeView: View {
     @Query(sort: \FoodItem.expirationDate, order: .forward) private var allItems: [FoodItem]
     @Environment(\.modelContext) private var modelContext
+    @State private var fridgyMessage: String?
+    @State private var fridgyContext: FridgyContext?
+    @State private var isLoadingFridgy = false
+    private let fridgyService = FridgyServiceImpl.shared
     
     private var toConsumeItems: [FoodItem] {
         let calendar = Calendar.current
@@ -77,11 +81,53 @@ struct ToConsumeView: View {
                             .tint(.red)
                         }
                     }
+                    if IntelligenceManager.shared.isFridgyAvailable {
+                        Section {
+                            if isLoadingFridgy {
+                                FridgySkeletonLoader()
+                            } else if let message = fridgyMessage, let context = fridgyContext {
+                                FridgyCard(context: context, message: message)
+                            }
+                        } header: {
+                            Text("Suggerimenti di Fridgy")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
             }
         }
         .navigationTitle("Da consumare")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            if !toConsumeItems.isEmpty { loadFridgy() }
+        }
+        .onChange(of: toConsumeItems.count) { _, _ in
+            if !toConsumeItems.isEmpty { loadFridgy() }
+        }
+    }
+    
+    private func loadFridgy() {
+        guard IntelligenceManager.shared.isFridgyAvailable,
+              let payload = FridgyPayload.forToConsumeSection(items: toConsumeItems) else { return }
+        isLoadingFridgy = true
+        Task {
+            do {
+                let text = try await fridgyService.generateMessage(from: payload.promptContext)
+                let sanitized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                await MainActor.run {
+                    fridgyMessage = sanitized.isEmpty ? nil : String(sanitized.prefix(100))
+                    fridgyContext = payload.context
+                    isLoadingFridgy = false
+                }
+            } catch {
+                await MainActor.run {
+                    fridgyMessage = nil
+                    fridgyContext = nil
+                    isLoadingFridgy = false
+                }
+            }
+        }
     }
 }
 
@@ -113,6 +159,13 @@ private struct ToConsumeCard: View {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.orange)
                     }
+                    
+                    Text("·")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    Text("Qtà. \(item.quantity)")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
                 }
             }
             

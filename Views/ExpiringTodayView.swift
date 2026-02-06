@@ -5,6 +5,10 @@ import SwiftData
 struct ExpiringTodayView: View {
     @Query(sort: \FoodItem.expirationDate, order: .forward) private var allItems: [FoodItem]
     @Environment(\.modelContext) private var modelContext
+    @State private var fridgyMessage: String?
+    @State private var fridgyContext: FridgyContext?
+    @State private var isLoadingFridgy = false
+    private let fridgyService = FridgyServiceImpl.shared
     
     private var expiringTodayItems: [FoodItem] {
         let calendar = Calendar.current
@@ -71,11 +75,53 @@ struct ExpiringTodayView: View {
                             .tint(.red)
                         }
                     }
+                    if IntelligenceManager.shared.isFridgyAvailable {
+                        Section {
+                            if isLoadingFridgy {
+                                FridgySkeletonLoader()
+                            } else if let message = fridgyMessage, let context = fridgyContext {
+                                FridgyCard(context: context, message: message)
+                            }
+                        } header: {
+                            Text("Suggerimenti di Fridgy")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
             }
         }
         .navigationTitle("Scadono oggi")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            if !expiringTodayItems.isEmpty { loadFridgy() }
+        }
+        .onChange(of: expiringTodayItems.count) { _, _ in
+            if !expiringTodayItems.isEmpty { loadFridgy() }
+        }
+    }
+    
+    private func loadFridgy() {
+        guard IntelligenceManager.shared.isFridgyAvailable,
+              let payload = FridgyPayload.forExpiringTodaySection(items: expiringTodayItems) else { return }
+        isLoadingFridgy = true
+        Task {
+            do {
+                let text = try await fridgyService.generateMessage(from: payload.promptContext)
+                let sanitized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                await MainActor.run {
+                    fridgyMessage = sanitized.isEmpty ? nil : String(sanitized.prefix(100))
+                    fridgyContext = payload.context
+                    isLoadingFridgy = false
+                }
+            } catch {
+                await MainActor.run {
+                    fridgyMessage = nil
+                    fridgyContext = nil
+                    isLoadingFridgy = false
+                }
+            }
+        }
     }
 }
 
@@ -109,6 +155,13 @@ private struct ExpiringTodayCard: View {
                     Text(isExpired ? "Scaduto" : "Oggi")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(isExpired ? .red : .orange)
+                    
+                    Text("·")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    Text("Qtà. \(item.quantity)")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
                 }
             }
             

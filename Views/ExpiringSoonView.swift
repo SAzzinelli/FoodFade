@@ -83,7 +83,7 @@ private struct ExpiringSoonItemCard: View {
                     .foregroundColor(.primary)
                 
                 HStack(spacing: 16) {
-                    Label("\(item.quantity)", systemImage: "number")
+                    Text("Qtà. \(item.quantity)")
                     Text("•")
                         .foregroundColor(.secondary)
                     Label(item.category.rawValue, systemImage: item.category.icon)

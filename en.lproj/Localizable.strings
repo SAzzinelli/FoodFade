@@ -90,6 +90,8 @@
 "history.empty.title" = "No consumed items";
 "history.empty.subtitle" = "Items you mark as consumed will appear here.";
 "history.older" = "Earlier";
+"history.delete_all" = "Delete all";
+"history.delete_all.message" = "Delete all items from consumed history? This cannot be undone.";
 
 /* Shopping list */
 "shopping.title" = "Shopping list";

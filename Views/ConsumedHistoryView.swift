@@ -5,6 +5,7 @@ import SwiftData
 struct ConsumedHistoryView: View {
     @Query(sort: \FoodItem.consumedDate, order: .reverse) private var allItems: [FoodItem]
     @Environment(\.modelContext) private var modelContext
+    @State private var showingDeleteAllAlert = false
     
     private var consumedItems: [FoodItem] {
         allItems.filter { $0.isConsumed && $0.consumedDate != nil }
@@ -53,6 +54,14 @@ struct ConsumedHistoryView: View {
                         Section {
                             ForEach(items) { item in
                                 ConsumedHistoryRow(item: item)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            modelContext.delete(item)
+                                            try? modelContext.save()
+                                        } label: {
+                                            Label("common.delete".localized, systemImage: "trash.fill")
+                                        }
+                                    }
                             }
                         } header: {
                             Text(sectionTitle)
@@ -62,6 +71,25 @@ struct ConsumedHistoryView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .toolbar {
+                    if !consumedItems.isEmpty {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(role: .destructive) {
+                                showingDeleteAllAlert = true
+                            } label: {
+                                Label("history.delete_all".localized, systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+                .alert("history.delete_all".localized, isPresented: $showingDeleteAllAlert) {
+                    Button("common.cancel".localized, role: .cancel) { }
+                    Button("common.delete".localized, role: .destructive) {
+                        deleteAllConsumed()
+                    }
+                } message: {
+                    Text("history.delete_all.message".localized)
+                }
             }
         }
         .navigationTitle("history.title".localized)
@@ -74,6 +102,13 @@ struct ConsumedHistoryView: View {
             systemImage: "checkmark.circle",
             description: Text("history.empty.subtitle".localized)
         )
+    }
+    
+    private func deleteAllConsumed() {
+        for item in consumedItems {
+            modelContext.delete(item)
+        }
+        try? modelContext.save()
     }
 }
 

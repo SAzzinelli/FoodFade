@@ -91,6 +91,8 @@
 "history.empty.title" = "Nessun consumo";
 "history.empty.subtitle" = "I prodotti che segni come consumati appariranno qui.";
 "history.older" = "Precedenti";
+"history.delete_all" = "Elimina tutti";
+"history.delete_all.message" = "Vuoi eliminare tutti gli oggetti dallo storico consumi? Questa azione non può essere annullata.";
 
 /* Lista della spesa */
 "shopping.title" = "Lista della spesa";

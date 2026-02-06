@@ -70,14 +70,6 @@ struct HomeView: View {
                     recentItemsSection
                         .padding(.bottom, 24)
                     
-                    // Fridgy Card - Consiglio intelligente (sotto Prodotti Recenti, sopra Categorie)
-                    if let message = viewModel.fridgyMessage,
-                       let context = viewModel.fridgyContext {
-                        FridgyCard(context: context, message: message)
-                            .padding(.bottom, 24)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                    
                     // Categorie rapide
                     categoriesQuickAccessSection
                         .padding(.bottom, 24)

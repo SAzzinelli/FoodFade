@@ -324,4 +324,66 @@ struct FridgyPayload {
         
         return nil
     }
+    
+    /// Payload per suggerimento "Come migliorare" nello Waste Score (solo statistiche)
+    static func forWasteScoreImprovement(statistics: StatisticsData) -> FridgyPayload? {
+        return FridgyPayload(
+            context: statistics.monthlyStats.expired > 0 ? .warning : .tip,
+            promptContext: """
+            Waste score: \(Int(statistics.wasteScore * 100))%. Questo mese: \(statistics.monthlyStats.consumed) consumati, \(statistics.monthlyStats.expired) scaduti.
+            Suggerisci UNA breve idea pratica per migliorare (es. controllare scadenze, pianificare i pasti). Massimo 25 parole, tono amichevole.
+            """
+        )
+    }
+    
+    /// Payload per sezione "Scadono oggi"
+    static func forExpiringTodaySection(items: [FoodItem]) -> FridgyPayload? {
+        guard !items.isEmpty else { return nil }
+        let list = items.prefix(3).map { $0.name }.joined(separator: ", ")
+        return FridgyPayload(
+            context: .warning,
+            promptContext: """
+            Prodotti che scadono oggi: \(list).
+            Suggerisci un'idea per consumarli oggi (ricetta o utilizzo). Massimo 20 parole.
+            """
+        )
+    }
+    
+    /// Payload per sezione "Da consumare"
+    static func forToConsumeSection(items: [FoodItem]) -> FridgyPayload? {
+        guard !items.isEmpty else { return nil }
+        let list = items.prefix(3).map { $0.name }.joined(separator: ", ")
+        return FridgyPayload(
+            context: .reminder,
+            promptContext: """
+            Prodotti da consumare entro domani: \(list).
+            Suggerisci un'idea per utilizzarli. Massimo 20 parole.
+            """
+        )
+    }
+    
+    /// Payload per sezione "Nei prossimi giorni"
+    static func forIncomingSection(items: [FoodItem]) -> FridgyPayload? {
+        guard !items.isEmpty else { return nil }
+        let list = items.prefix(3).map { $0.name }.joined(separator: ", ")
+        return FridgyPayload(
+            context: .tip,
+            promptContext: """
+            Prodotti che scadono nei prossimi giorni: \(list).
+            Suggerisci un consiglio per pianificarne l'uso. Massimo 20 parole.
+            """
+        )
+    }
+    
+    /// Payload per sezione "Tutto ok"
+    static func forAllOkSection(items: [FoodItem]) -> FridgyPayload? {
+        guard items.count >= 2 else { return nil }
+        return FridgyPayload(
+            context: .tip,
+            promptContext: """
+            L'utente ha \(items.count) prodotti in buono stato (scadenza lontana).
+            Suggerisci un consiglio per mantenerli in ordine o un'idea d'uso. Massimo 20 parole.
+            """
+        )
+    }
 }

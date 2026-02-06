@@ -2,12 +2,6 @@ import SwiftUI
 import SwiftData
 import Charts
 
-/// Periodo per le statistiche (allineato agli screen)
-enum StatisticsPeriod: String, CaseIterable {
-    case week = "Settimana"
-    case month = "Mese"
-}
-
 /// Vista delle statistiche - UI/UX basata su screen (Waste Score, grafico, per categoria, dettagli)
 struct StatisticsView: View {
     @Query(sort: \FoodItem.createdAt, order: .reverse) private var allItems: [FoodItem]
@@ -16,11 +10,6 @@ struct StatisticsView: View {
     
     @StateObject private var themeManager = ThemeManager.shared
     @State private var statsData: StatisticsData?
-    @State private var selectedPeriod: StatisticsPeriod = .month
-    @State private var animatedWasteScore: Double = 0.0
-    @State private var fridgyInsights: [(message: String, context: FridgyContext)] = []
-    @State private var isLoadingFridgy: Bool = false
-    private let fridgyService: FridgyService = FridgyServiceImpl.shared
     
     private var userGender: GenderHelper.Gender {
         GenderHelper.getGender(from: userProfiles.first)
@@ -34,39 +23,74 @@ struct StatisticsView: View {
         NavigationStack {
             ScrollView {
                 if let data = statsData {
-                    VStack(spacing: 24) {
-                        // Selector periodo
-                        periodSelector
-                        
-                        // Riepilogo Consumati | Scaduti
-                        summaryRow(data: data)
-                        
-                        // Waste Score (anello, emoji, Perfetto!, spiegazione, Continua così)
-                        wasteScoreCard(data: data)
-                        
-                        // Grafico Cibo usato vs sprecato
-                        if data.hasChartData {
-                            usedVsWastedChartCard(data: data)
-                        }
-                        
-                        // Per categoria
-                        if data.hasCategoryStats {
-                            categoryCard(data: data)
-                        }
-                        
-                        // Quanto tieni i prodotti
-                        if data.averageConsumptionDays != nil {
-                            averageDaysCard(data: data)
-                        }
-                        
-                        // Dettagli - Prodotti più aggiunti
-                        if data.hasDetails {
-                            detailsCard(data: data)
-                        }
-                        
-                        // Fridgy (se disponibile)
-                        if IntelligenceManager.shared.isFridgyAvailable {
-                            fridgyInsightsSection(data: data)
+                    VStack(spacing: 20) {
+                        // Card di ingresso alle viste dettaglio
+                        VStack(spacing: 12) {
+                            NavigationLink {
+                                WasteScoreDetailView(data: data, primaryColor: primaryColor, primaryColorDark: themeManager.primaryColorDark)
+                            } label: {
+                                StatEntryCard(
+                                    icon: "chart.pie.fill",
+                                    title: "Waste Score",
+                                    description: "Quanto hai usato in tempo rispetto a quanto è scaduto. 100% = nessuno spreco.",
+                                    iconColor: primaryColor
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            
+                            if data.hasChartData {
+                                NavigationLink {
+                                    UsedVsWastedDetailView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(
+                                        icon: "chart.bar.fill",
+                                        title: "Cibo usato vs sprecato",
+                                        description: "Confronto tra prodotti consumati e scaduti nel tempo.",
+                                        iconColor: .blue
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            
+                            if data.hasCategoryStats {
+                                NavigationLink {
+                                    CategoryDetailView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(
+                                        icon: "square.grid.2x2.fill",
+                                        title: "Per categoria",
+                                        description: "Andamento per Frigorifero, Congelatore e Dispensa.",
+                                        iconColor: .green
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            
+                            if data.averageConsumptionDays != nil {
+                                NavigationLink {
+                                    AverageDaysDetailView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(
+                                        icon: "clock.badge.checkmark",
+                                        title: "Quanto tieni i prodotti",
+                                        description: "In media dopo quanti giorni consumi i prodotti.",
+                                        iconColor: Color(red: 0.2, green: 0.6, blue: 0.7)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            
+                            NavigationLink {
+                                DetailsDetailView(data: data, primaryColor: primaryColor)
+                            } label: {
+                                StatEntryCard(
+                                    icon: "list.bullet.rectangle",
+                                    title: "Dettagli",
+                                    description: "Prodotti più aggiunti e statistiche di utilizzo.",
+                                    iconColor: Color(red: 0.5, green: 0.4, blue: 0.8)
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -80,344 +104,54 @@ struct StatisticsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        calculateStatistics()
-                        loadFridgyInsights()
+                    NavigationLink {
+                        ConsumedHistoryView()
                     } label: {
                         Image(systemName: "clock.arrow.circlepath")
                             .font(.system(size: 18))
-                            .foregroundColor(primaryColor)
+                            .foregroundColor(.primary)
                     }
                 }
             }
             .tint(primaryColor)
-            .onAppear {
-                calculateStatistics()
-                loadFridgyInsights()
-            }
-            .onChange(of: allItems.count) { _, _ in
-                calculateStatistics()
-                loadFridgyInsights()
-            }
-            .onChange(of: selectedPeriod) { _, _ in
-                calculateStatistics()
-            }
+            .onAppear { calculateStatistics() }
+            .onChange(of: allItems.count) { _, _ in calculateStatistics() }
         }
     }
     
-    private var periodSelector: some View {
-        VStack(spacing: 8) {
-            Picker("Periodo", selection: $selectedPeriod) {
-                ForEach(StatisticsPeriod.allCases, id: \.self) { period in
-                    Text(period.rawValue).tag(period)
-                }
-            }
-            .pickerStyle(.segmented)
-            Text("Tocca per cambiare periodo")
-                .font(.system(size: 13))
-                .foregroundColor(.secondary)
-        }
-    }
-    
-    private func summaryRow(data: StatisticsData) -> some View {
-        HStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Image(systemName: "checkmark.circle.fill")
+    // MARK: - Card di ingresso (icona colorata, descrizione, freccia)
+    private struct StatEntryCard: View {
+        let icon: String
+        let title: String
+        let description: String
+        let iconColor: Color
+        
+        var body: some View {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
                     .font(.system(size: 28))
-                    .foregroundColor(.green)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(data.monthlyStats.consumed)")
-                        .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(iconColor)
+                    .frame(width: 48, height: 48)
+                    .background(iconColor.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.primary)
-                    Text("Consumati")
+                    Text(description)
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
+                        .lineLimit(2)
                 }
-                Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(.tertiaryLabel))
             }
-            .frame(maxWidth: .infinity)
-            
-            HStack(spacing: 12) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(.red)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(data.monthlyStats.expired)")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.primary)
-                    Text("Scaduti")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-    }
-    
-    // MARK: - Waste Score Card (anello, emoji, Perfetto!, spiegazione, Continua così)
-    private func wasteScoreCard(data: StatisticsData) -> some View {
-        VStack(spacing: 16) {
-            Text("Waste Score")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
-            
-            ZStack {
-                Circle()
-                    .stroke(Color(.systemGray5), lineWidth: 18)
-                    .frame(width: 160, height: 160)
-                Circle()
-                    .trim(from: 0, to: animatedWasteScore)
-                    .stroke(
-                        LinearGradient(
-                            colors: [primaryColor, themeManager.primaryColorDark],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 18, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 160, height: 160)
-                    .animation(.spring(response: 1.5, dampingFraction: 0.8), value: animatedWasteScore)
-                
-                VStack(spacing: 6) {
-                    Text(wasteScoreEmoji(percentage: data.wasteScore))
-                        .font(.system(size: 40))
-                    Text("\(Int(animatedWasteScore * 100))%")
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundColor(.primary)
-                }
-            }
-            
-            Text(wasteScoreTitle(percentage: data.wasteScore))
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.primary)
-            Text("\(Int(data.wasteScore * 100))% di spreco evitato")
-                .font(.system(size: 15))
-                .foregroundColor(.secondary)
-            Text(wasteScoreSubtitle(wastedCount: data.monthlyStats.expired))
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Text("Quanto hai usato in tempo rispetto a quanto è scaduto. 100% = hai consumato tutto prima della scadenza; più basso = più prodotti scaduti senza uso.")
-                .font(.system(size: 13))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Button("Continua così") { }
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(primaryColor)
-                .buttonStyle(.plain)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(24)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .onAppear {
-            withAnimation(.spring(response: 1.5, dampingFraction: 0.8)) { animatedWasteScore = data.wasteScore }
-        }
-        .onChange(of: data.wasteScore) { _, newValue in
-            withAnimation(.spring(response: 1.5, dampingFraction: 0.8)) { animatedWasteScore = newValue }
-        }
-    }
-    
-    private func wasteScoreEmoji(percentage: Double) -> String {
-        if percentage >= 1.0 { return "🎉" }
-        if percentage >= 0.8 { return "👍" }
-        return "⚠️"
-    }
-    
-    private func wasteScoreTitle(percentage: Double) -> String {
-        if percentage >= 1.0 { return "Perfetto!" }
-        if percentage >= 0.8 { return "Quasi perfetto" }
-        return "Attenzione agli sprechi"
-    }
-    
-    // MARK: - Chart Cibo usato vs sprecato (bar chart)
-    private func usedVsWastedChartCard(data: StatisticsData) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Cibo usato vs sprecato")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
-            Text("Confronto tra prodotti consumati e scaduti")
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-            
-            if let weeklyData = data.weeklyData {
-                Chart(weeklyData) { point in
-                    BarMark(x: .value("Data", point.dateLabel), y: .value("Consumati", point.consumed))
-                        .foregroundStyle(primaryColor)
-                    BarMark(x: .value("Data", point.dateLabel), y: .value("Scaduti", point.expired))
-                        .foregroundStyle(.red)
-                }
-                .chartXAxis {
-                    AxisMarks(values: .automatic) { _ in
-                        AxisValueLabel().font(.system(size: 11))
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks { _ in
-                        AxisValueLabel().font(.system(size: 11))
-                    }
-                }
-                .frame(height: 200)
-                
-                HStack(spacing: 20) {
-                    HStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(primaryColor)
-                            .frame(width: 12, height: 12)
-                        Text("Consumati").font(.system(size: 13)).foregroundColor(.secondary)
-                    }
-                    HStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.red)
-                            .frame(width: 12, height: 12)
-                        Text("Scaduti").font(.system(size: 13)).foregroundColor(.secondary)
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-    }
-    
-    // MARK: - Per categoria
-    private func categoryCard(data: StatisticsData) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Per categoria")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
-            
-            ForEach(data.categoryStats, id: \.category) { stat in
-                HStack(spacing: 12) {
-                    Image(systemName: stat.category.iconFill)
-                        .font(.system(size: 22))
-                        .foregroundColor(AppTheme.color(for: stat.category))
-                        .frame(width: 32)
-                    Text(stat.category.rawValue)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    if stat.total > 0 && stat.consumed == stat.total {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                        Text("100% ok")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer(minLength: 8)
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color(.systemGray5))
-                                .frame(height: 8)
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(primaryColor)
-                                .frame(width: stat.total > 0 ? geo.size.width * CGFloat(stat.consumed) / CGFloat(stat.total) : 0, height: 8)
-                        }
-                    }
-                    .frame(width: 60, height: 8)
-                    Text("\(stat.consumed)/\(stat.total)")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .frame(width: 32, alignment: .trailing)
-                }
-                .padding(.vertical, 4)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-    }
-    
-    // MARK: - Quanto tieni i prodotti
-    private func averageDaysCard(data: StatisticsData) -> some View {
-        guard let avgDays = data.averageConsumptionDays else { return AnyView(EmptyView()) }
-        return AnyView(
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Quanto tieni i prodotti")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                HStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .stroke(primaryColor.opacity(0.3), lineWidth: 2)
-                            .frame(width: 48, height: 48)
-                        Image(systemName: "clock.badge.checkmark")
-                            .font(.system(size: 22))
-                            .foregroundColor(primaryColor)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("In media li consumi dopo")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.primary)
-                        HStack(spacing: 8) {
-                            Text("\(avgDays)")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(primaryColor)
-                                .clipShape(Circle())
-                            Text(avgDays == 1 ? "giorno" : "giorni")
-                                .font(.system(size: 15))
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Spacer(minLength: 0)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
             .background(Color(.secondarySystemGroupedBackground))
             .cornerRadius(16)
-        )
-    }
-    
-    // MARK: - Dettagli (Prodotti più aggiunti con numeri arancioni)
-    private func detailsCard(data: StatisticsData) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Dettagli")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
-            Text("Prodotti più aggiunti")
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-            
-            if data.topAddedProducts.isEmpty {
-                Text("I dettagli compariranno man mano che usi l'app")
-                    .font(.system(size: 15))
-                    .foregroundColor(.secondary)
-            } else {
-                ForEach(Array(data.topAddedProducts.prefix(5).enumerated()), id: \.element.name) { index, item in
-                    HStack(spacing: 12) {
-                        Text("\(index + 1)")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 28, height: 28)
-                            .background(primaryColor)
-                            .clipShape(Circle())
-                        Text(item.name)
-                            .font(.system(size: 16))
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Text("\(item.count)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(16)
     }
     
     private var emptyState: some View {
@@ -439,39 +173,12 @@ struct StatisticsView: View {
         .padding(40)
     }
     
-    // MARK: - Helper Functions
-    private func wasteScoreLabel(percentage: Double) -> String {
-        let percent = Int(percentage * 100)
-        if percent == 100 {
-            return "Tutto ok"
-        } else if percent >= 80 {
-            return "Qualche spreco"
-        } else {
-            return "Attenzione agli sprechi"
-        }
-    }
-    
-    private func wasteScoreSubtitle(wastedCount: Int) -> String {
-        if wastedCount == 0 {
-            return "Nessun prodotto scaduto questo mese"
-        } else {
-            return "\(wastedCount) \(wastedCount == 1 ? "prodotto scaduto" : "prodotti scaduti") questo mese"
-        }
-    }
-    
     // MARK: - Statistics Calculation
     private func calculateStatistics() {
         let calendar = Calendar.current
         let now = Date()
         
-        let periodStart: Date
-        switch selectedPeriod {
-        case .week:
-            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
-            periodStart = startOfWeek
-        case .month:
-            periodStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
-        }
+        let periodStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
         
         let periodItems = allItems.filter { $0.createdAt >= periodStart }
         
@@ -670,100 +377,423 @@ struct StatisticsView: View {
         return weeklyPoints.isEmpty ? nil : weeklyPoints.reversed()
     }
     
-    // MARK: - Fridgy Insights Section
-    private func fridgyInsightsSection(data: StatisticsData) -> some View {
-        // Debug
-        print("🔍 fridgyInsightsSection: isLoadingFridgy = \(isLoadingFridgy), fridgyInsights.count = \(fridgyInsights.count)")
-        
-        // Mostra skeleton loader se sta caricando
-        if isLoadingFridgy {
-            return AnyView(
-                VStack(spacing: 12) {
-                    FridgySkeletonLoader()
-                        .frame(maxWidth: CGFloat.infinity, alignment: .leading)
-                }
-            )
-        }
-        
-        // Mostra Fridgy se ha messaggi
-        guard !fridgyInsights.isEmpty else {
-            print("🔍 fridgyInsightsSection: fridgyInsights è vuoto, mostrando EmptyView")
-            return AnyView(EmptyView())
-        }
-        
-        print("🔍 fridgyInsightsSection: mostrando FridgyCard")
-        return AnyView(
-            VStack(spacing: 12) {
-                ForEach(Array(fridgyInsights.enumerated()), id: \.offset) { index, insight in
-                    FridgyCard(context: insight.context, message: insight.message)
-                        .frame(maxWidth: CGFloat.infinity, alignment: .leading)
-                }
-            }
-        )
+    }
+
+// MARK: - Dettaglio Waste Score
+private struct WasteScoreDetailView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    let primaryColorDark: Color
+    @State private var animatedWasteScore: Double = 0
+    @State private var improveTip: String?
+    @State private var isLoadingImprove = false
+    private let fridgyService = FridgyServiceImpl.shared
+    
+    private func emoji(percentage: Double) -> String {
+        if percentage >= 1.0 { return "🎉" }
+        if percentage >= 0.8 { return "👍" }
+        return "⚠️"
+    }
+    private func title(percentage: Double) -> String {
+        if percentage >= 1.0 { return "Perfetto!" }
+        if percentage >= 0.8 { return "Quasi perfetto" }
+        return "Attenzione agli sprechi"
+    }
+    private func subtitle(wasted: Int) -> String {
+        if wasted == 0 { return "Nessun prodotto scaduto questo mese" }
+        return "\(wasted) \(wasted == 1 ? "prodotto scaduto" : "prodotti scaduti") questo mese"
     }
     
-    private func loadFridgyInsights() {
-        // La VIEW decide se mostrare Fridgy (controlla se è abilitato)
-        guard IntelligenceManager.shared.isFridgyAvailable else {
-            print("🔍 Fridgy: non disponibile (isFridgyAvailable = false)")
-            fridgyInsights = []
-            isLoadingFridgy = false
-            return
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                VStack(spacing: 16) {
+                    Text("Waste Score")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+                    ZStack {
+                        Circle()
+                            .stroke(Color(.systemGray5), lineWidth: 18)
+                            .frame(width: 160, height: 160)
+                        Circle()
+                            .trim(from: 0, to: animatedWasteScore)
+                            .stroke(primaryColor, style: StrokeStyle(lineWidth: 18, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                            .frame(width: 160, height: 160)
+                            .animation(.spring(response: 1.5, dampingFraction: 0.8), value: animatedWasteScore)
+                        VStack(spacing: 6) {
+                            Text(emoji(percentage: data.wasteScore)).font(.system(size: 40))
+                            Text("\(Int(animatedWasteScore * 100))%").font(.system(size: 36, weight: .bold)).foregroundColor(.primary)
+                        }
+                    }
+                    Text(title(percentage: data.wasteScore)).font(.system(size: 18, weight: .bold)).foregroundColor(.primary)
+                    Text("\(Int(data.wasteScore * 100))% di spreco evitato").font(.system(size: 15)).foregroundColor(.secondary)
+                    Text(subtitle(wasted: data.monthlyStats.expired)).font(.system(size: 14)).foregroundColor(.secondary).multilineTextAlignment(.center)
+                    Text("Quanto hai usato in tempo rispetto a quanto è scaduto. 100% = hai consumato tutto prima della scadenza; più basso = più prodotti scaduti senza uso.")
+                        .font(.system(size: 13)).foregroundColor(.secondary).multilineTextAlignment(.center)
+                    Button("Continua così") { }.font(.system(size: 16, weight: .medium)).foregroundColor(primaryColor).buttonStyle(.plain)
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Nel periodo")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    HStack(spacing: 16) {
+                        Label("\(data.monthlyStats.consumed) consumati", systemImage: "checkmark.circle.fill")
+                            .font(.system(size: 15))
+                            .foregroundColor(.green)
+                        Label("\(data.monthlyStats.expired) scaduti", systemImage: "xmark.circle.fill")
+                            .font(.system(size: 15))
+                            .foregroundColor(.red)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Spiegazione", systemImage: "book.closed.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    Text("Il Waste Score è la percentuale di prodotti che hai consumato prima della scadenza. 100% significa che nulla è andato sprecato; più il valore è basso, più prodotti sono scaduti senza essere usati. Controlla spesso le scadenze e pianifica i pasti per migliorare.")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Come migliorare", systemImage: "lightbulb.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    if isLoadingImprove {
+                        FridgySkeletonLoader()
+                    } else if let tip = improveTip {
+                        Text(tip)
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                    } else if !IntelligenceManager.shared.isFridgyAvailable {
+                        Text("Attiva i suggerimenti Fridgy nelle Impostazioni per ricevere consigli personalizzati.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+            }
+            .padding(20)
         }
-        
-        guard let data = statsData else {
-            print("🔍 Fridgy: statsData è nil")
-            fridgyInsights = []
-            isLoadingFridgy = false
-            return
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Waste Score")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            withAnimation(.spring(response: 1.5, dampingFraction: 0.8)) { animatedWasteScore = data.wasteScore }
+            loadImproveTip()
         }
-        
-        print("🔍 Fridgy: items.count = \(allItems.count), statsData presente")
-        
-        // La BUSINESS LOGIC decide il payload
-        guard let payload = FridgyPayload.forStatistics(items: allItems, statistics: data) else {
-            print("🔍 Fridgy: payload è nil (nessun suggerimento generato)")
-            fridgyInsights = []
-            isLoadingFridgy = false
-            return
-        }
-        
-        print("🔍 Fridgy: payload generato, context = \(payload.context), caricamento in corso...")
-        
-        // Mostra skeleton loader
-        isLoadingFridgy = true
-        
-        // Il SERVIZIO genera il testo
+    }
+    
+    private func loadImproveTip() {
+        guard IntelligenceManager.shared.isFridgyAvailable,
+              let payload = FridgyPayload.forWasteScoreImprovement(statistics: data) else { return }
+        isLoadingImprove = true
         Task {
             do {
                 let text = try await fridgyService.generateMessage(from: payload.promptContext)
-                
-                print("🔍 Fridgy: testo generato = '\(text)'")
-                
-                // Validazione: controlla che il testo sia valido
                 let sanitized = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !sanitized.isEmpty && sanitized.count <= 100 {
-                    await MainActor.run {
-                        fridgyInsights = [(message: sanitized, context: payload.context)]
-                        isLoadingFridgy = false
-                        print("🔍 Fridgy: messaggio salvato, fridgyInsights.count = \(fridgyInsights.count)")
-                    }
-                } else {
-                    print("🔍 Fridgy: testo non valido (vuoto o troppo lungo: \(sanitized.count) caratteri)")
-                    await MainActor.run {
-                        fridgyInsights = []
-                        isLoadingFridgy = false
-                    }
+                await MainActor.run {
+                    improveTip = sanitized.isEmpty ? nil : String(sanitized.prefix(120))
+                    isLoadingImprove = false
                 }
             } catch {
-                print("🔍 Fridgy: errore durante generazione - \(error.localizedDescription)")
-                // Se Apple Intelligence non è disponibile o c'è un errore, Fridgy non mostra nulla
                 await MainActor.run {
-                    fridgyInsights = []
-                    isLoadingFridgy = false
+                    improveTip = nil
+                    isLoadingImprove = false
                 }
             }
         }
+    }
+}
+
+// MARK: - Dettaglio Cibo usato vs sprecato
+private struct UsedVsWastedDetailView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Cibo usato vs sprecato")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+                    Text("Confronto tra prodotti consumati e scaduti")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                    if let weeklyData = data.weeklyData {
+                        Text("Ultime 4 settimane")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                        Chart(weeklyData) { point in
+                            BarMark(x: .value("Data", point.dateLabel), y: .value("Consumati", point.consumed))
+                                .foregroundStyle(primaryColor)
+                            BarMark(x: .value("Data", point.dateLabel), y: .value("Scaduti", point.expired))
+                                .foregroundStyle(.red)
+                        }
+                        .chartXAxis { AxisMarks(values: .automatic) { _ in AxisValueLabel().font(.system(size: 11)) } }
+                        .chartYAxis { AxisMarks { _ in AxisValueLabel().font(.system(size: 11)) } }
+                        .frame(height: 220)
+                        HStack(spacing: 20) {
+                            HStack(spacing: 6) {
+                                RoundedRectangle(cornerRadius: 4).fill(primaryColor).frame(width: 12, height: 12)
+                                Text("Consumati").font(.system(size: 13)).foregroundColor(.secondary)
+                            }
+                            HStack(spacing: 6) {
+                                RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 12, height: 12)
+                                Text("Scaduti").font(.system(size: 13)).foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+            }
+            .padding(20)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Cibo usato vs sprecato")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Dettaglio Per categoria
+private struct CategoryDetailView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    
+    private var totalItems: Int {
+        data.categoryStats.reduce(0) { $0 + $1.total }
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Per categoria")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+                    Text("\(totalItems) prodotti nel periodo · Consumati vs totali per luogo")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    ForEach(data.categoryStats, id: \.category) { stat in
+                        HStack(spacing: 12) {
+                            Image(systemName: stat.category.iconFill)
+                                .font(.system(size: 22))
+                                .foregroundColor(AppTheme.color(for: stat.category))
+                                .frame(width: 32)
+                            Text(stat.category.rawValue)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.primary)
+                            if stat.total > 0 && stat.consumed == stat.total {
+                                Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                                Text("100% ok").font(.system(size: 14)).foregroundColor(.secondary)
+                            }
+                            Spacer(minLength: 8)
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 4).fill(Color(.systemGray5)).frame(height: 8)
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(AppTheme.color(for: stat.category))
+                                        .frame(width: stat.total > 0 ? geo.size.width * CGFloat(stat.consumed) / CGFloat(stat.total) : 0, height: 8)
+                                }
+                            }
+                            .frame(width: 60, height: 8)
+                            Text("\(stat.consumed)/\(stat.total)")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.secondary)
+                                .frame(width: 32, alignment: .trailing)
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .background(Color(.tertiarySystemGroupedBackground))
+                        .cornerRadius(12)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+            }
+            .padding(20)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Per categoria")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Dettaglio Quanto tieni i prodotti
+private struct AverageDaysDetailView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    
+    var body: some View {
+        Group {
+            if let avgDays = data.averageConsumptionDays {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Quanto tieni i prodotti")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    Circle()
+                                        .stroke(Color(red: 0.2, green: 0.6, blue: 0.7).opacity(0.4), lineWidth: 2)
+                                        .frame(width: 64, height: 64)
+                                    Image(systemName: "clock.badge.checkmark")
+                                        .font(.system(size: 28))
+                                        .foregroundColor(Color(red: 0.2, green: 0.6, blue: 0.7))
+                                }
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("In media li consumi dopo")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.primary)
+                                    HStack(spacing: 12) {
+                                        Text("\(avgDays)")
+                                            .font(.system(size: 32, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(width: 56, height: 56)
+                                            .background(Color(red: 0.2, green: 0.6, blue: 0.7))
+                                            .clipShape(Circle())
+                                        Text(avgDays == 1 ? "giorno" : "giorni")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.primary)
+                                    }
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            Text("Media calcolata sui prodotti che hai segnato come consumati.")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(24)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .cornerRadius(16)
+                    }
+                    .padding(20)
+                }
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Quanto tieni i prodotti")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Dettaglio Dettagli (prodotti più aggiunti)
+private struct DetailsDetailView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    
+    private var totalAdded: Int {
+        data.topAddedProducts.reduce(0) { $0 + $1.count }
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Prodotti più aggiunti")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+                    Text("\(data.topAddedProducts.count) prodotti · \(totalAdded) inserimenti totali")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    if data.topAddedProducts.isEmpty {
+                        Text("I dettagli compariranno man mano che usi l'app")
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(Array(data.topAddedProducts.prefix(10).enumerated()), id: \.element.name) { index, item in
+                            HStack(spacing: 12) {
+                                Text("\(index + 1)")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 28, height: 28)
+                                    .background(Color(red: 0.5, green: 0.4, blue: 0.8))
+                                    .clipShape(Circle())
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.name)
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                    Text("aggiunto \(item.count) \(item.count == 1 ? "volta" : "volte")")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                Text("\(item.count)")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+                
+                if !data.topWastedProducts.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Prodotti più sprecati")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                        Text("\(data.topWastedProducts.count) prodotti scaduti senza consumo")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                        ForEach(Array(data.topWastedProducts.prefix(5).enumerated()), id: \.element.name) { index, item in
+                            HStack(spacing: 12) {
+                                Text("\(index + 1)")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 28, height: 28)
+                                    .background(Color.red)
+                                    .clipShape(Circle())
+                                Text(item.name)
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text("\(item.count)")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                }
+            }
+            .padding(20)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Dettagli")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
