@@ -10,6 +10,14 @@ extension Date {
     var startOfDay: Date {
         Calendar.current.startOfDay(for: self)
     }
+    
+    /// Formato scadenza breve: "17 MAR 2026" (mesi 3 lettere maiuscole).
+    var expirationShortLabel: String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "it_IT")
+        f.dateFormat = "d MMM yyyy"
+        return f.string(from: self).uppercased()
+    }
 }
 
 // MARK: - Color Extensions

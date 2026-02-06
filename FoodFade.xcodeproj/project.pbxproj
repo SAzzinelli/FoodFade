@@ -11,6 +11,7 @@
 		F2A0A28FE18743FBB8C822DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC994EE62F029671006D9CF0 /* Assets.xcassets */; };
 		FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */; };
 		FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE82F029671006D9CF0 /* CategoryPicker.swift */; };
+		FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */; };
 		FC2128D52F029921001A2A52 /* EnhancedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */; };
 		FC2128D62F029921001A2A52 /* EnhancedSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */; };
 		FC2128D72F029921001A2A52 /* FoodItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EEB2F029671006D9CF0 /* FoodItemRow.swift */; };
@@ -29,6 +30,7 @@
 		FC2128E42F029921001A2A52 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F062F029671006D9CF0 /* CameraPreviewView.swift */; };
 		FC2128E52F029921001A2A52 /* FoodLookupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F072F029671006D9CF0 /* FoodLookupService.swift */; };
 		FC2128E62F029921001A2A52 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F082F029671006D9CF0 /* NotificationService.swift */; };
+		FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */; };
 		FC2128E72F029921001A2A52 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F0A2F029671006D9CF0 /* Extensions.swift */; };
 		FC2128E82F029921001A2A52 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F0B2F029671006D9CF0 /* LocalizedString.swift */; };
 		FC2128E92F029921001A2A52 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F0C2F029671006D9CF0 /* Theme.swift */; };
@@ -106,6 +108,7 @@
 		FC994EE62F029671006D9CF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedProgressRing.swift; sourceTree = "<group>"; };
 		FC994EE82F029671006D9CF0 /* CategoryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPicker.swift; sourceTree = "<group>"; };
+		FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationListeningOverlay.swift; sourceTree = "<group>"; };
 		FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProgressRing.swift; sourceTree = "<group>"; };
 		FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedSummaryCard.swift; sourceTree = "<group>"; };
 		FC994EEB2F029671006D9CF0 /* FoodItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodItemRow.swift; sourceTree = "<group>"; };
@@ -130,6 +133,7 @@
 		FC994F062F029671006D9CF0 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		FC994F072F029671006D9CF0 /* FoodLookupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLookupService.swift; sourceTree = "<group>"; };
 		FC994F082F029671006D9CF0 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationDictationService.swift; sourceTree = "<group>"; };
 		FC994F0A2F029671006D9CF0 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		FC994F0B2F029671006D9CF0 /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		FC994F0C2F029671006D9CF0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -210,6 +214,7 @@
 				FC21E0852F0301FE00996820 /* FridgyBadge.swift */,
 				FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */,
 				FC994EE82F029671006D9CF0 /* CategoryPicker.swift */,
+				FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */,
 				FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */,
 				FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */,
 				FC994EEB2F029671006D9CF0 /* FoodItemRow.swift */,
@@ -267,6 +272,7 @@
 				FC994F062F029671006D9CF0 /* CameraPreviewView.swift */,
 				FC994F072F029671006D9CF0 /* FoodLookupService.swift */,
 				FC994F082F029671006D9CF0 /* NotificationService.swift */,
+				FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -422,6 +428,7 @@
 				FC21E0982F03191E00996820 /* RecipesView.swift in Sources */,
 				FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */,
 				FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */,
+				FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */,
 				FC2128D52F029921001A2A52 /* EnhancedProgressRing.swift in Sources */,
 				FC21E0942F030A9300996820 /* FridgyCard.swift in Sources */,
 				FC2128D62F029921001A2A52 /* EnhancedSummaryCard.swift in Sources */,
@@ -445,6 +452,7 @@
 				FC21E0922F03099100996820 /* ItemDetailViewModel.swift in Sources */,
 				FC2128E52F029921001A2A52 /* FoodLookupService.swift in Sources */,
 				FC2128E62F029921001A2A52 /* NotificationService.swift in Sources */,
+				FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */,
 				FC2128E72F029921001A2A52 /* Extensions.swift in Sources */,
 				FC343FBF2F02A00100299160 /* GenderHelper.swift in Sources */,
 				FC2128E82F029921001A2A52 /* LocalizedString.swift in Sources */,
@@ -660,8 +668,10 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "FoodFade uses the camera to take photos of your food products.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "FoodFade can save product photos to your photo library for personal backup.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "FoodFade accesses your photo library to select images of food products.";
-				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "FoodFade usa l'app Promemoria per esportare la lista della spesa cosi puoi averla sempre a portata di mano.";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "FoodFade usa l’app Promemoria per esportare la lista della spesa così puoi averla sempre a portata di mano.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "FoodFade usa il riconoscimento vocale per inserire la data di scadenza a voce.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "FoodFade usa il microfono per ascoltare la data di scadenza che detti.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -701,8 +711,10 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "FoodFade uses the camera to take photos of your food products.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "FoodFade can save product photos to your photo library for personal backup.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "FoodFade accesses your photo library to select images of food products.";
-				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "FoodFade usa l'app Promemoria per esportare la lista della spesa cosi puoi averla sempre a portata di mano.";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "FoodFade usa l’app Promemoria per esportare la lista della spesa così puoi averla sempre a portata di mano.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "FoodFade usa il riconoscimento vocale per inserire la data di scadenza a voce.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "FoodFade usa il microfono per ascoltare la data di scadenza che detti.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

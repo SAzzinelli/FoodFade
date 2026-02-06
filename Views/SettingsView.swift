@@ -22,14 +22,16 @@ struct SettingsView: View {
                         Image(systemName: "gearshape.fill")
                             .font(.system(size: 40))
                             .foregroundStyle(
-                                LinearGradient(
+                                ThemeManager.shared.isNaturalStyle
+                                ? AnyShapeStyle(ThemeManager.shared.semanticIconColor(for: .settingsGear))
+                                : AnyShapeStyle(LinearGradient(
                                     colors: [
                                         ThemeManager.shared.primaryColor,
                                         ThemeManager.shared.primaryColorDark
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
-                                )
+                                ))
                             )
                         
                         VStack(spacing: 6) {
@@ -65,7 +67,12 @@ struct SettingsView: View {
                             .tag(mode)
                         }
                     } label: {
-                        Label("Modalità anello", systemImage: "chart.pie.fill")
+                        HStack(spacing: 8) {
+                            Image(systemName: "chart.pie.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
+                            Text("Modalità anello")
+                                .foregroundColor(.primary)
+                        }
                     }
                     .onChange(of: viewModel.progressRingMode) { oldValue, newValue in
                         viewModel.saveSettings()
@@ -79,7 +86,12 @@ struct SettingsView: View {
                 // 2. AVVISI
                 Section {
                     Toggle(isOn: $viewModel.notificationsEnabled) {
-                        Label("Avvisami prima della scadenza", systemImage: "bell.fill")
+                        HStack(spacing: 8) {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
+                            Text("Avvisami prima della scadenza")
+                                .foregroundColor(.primary)
+                        }
                     }
                     .onChange(of: viewModel.notificationsEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
@@ -92,7 +104,12 @@ struct SettingsView: View {
                             Text("2 giorni prima").tag(2)
                             Text("Personalizzato").tag(-1)
                         } label: {
-                            Label("Quanto prima", systemImage: "calendar")
+                            HStack(spacing: 8) {
+                                Image(systemName: "calendar")
+                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCalendar))
+                                Text("Quanto prima")
+                                    .foregroundColor(.primary)
+                            }
                         }
                         .onChange(of: viewModel.notificationDaysBefore) { oldValue, newValue in
                             if newValue == -1 {
@@ -108,7 +125,9 @@ struct SettingsView: View {
                                 showingCustomDaysPicker = true
                             } label: {
                                 HStack {
-                                    Label("Giorni personalizzati", systemImage: "calendar")
+                                    Image(systemName: "calendar")
+                                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCalendar))
+                                    Text("Giorni personalizzati")
                                         .foregroundColor(.primary)
                                     Spacer()
                                     Text("\(viewModel.customNotificationDays) \(viewModel.customNotificationDays == 1 ? "giorno" : "giorni")")
@@ -128,10 +147,48 @@ struct SettingsView: View {
                     }
                 }
                 
+                // 2b. INSERIMENTO SCADENZA
+                Section {
+                    HStack(spacing: 8) {
+                        Image(systemName: "calendar.badge.clock")
+                            .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsExpirationInput))
+                        Text("settings.expiration.input.short".localized)
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Menu {
+                            ForEach(ExpirationInputMethod.allCases, id: \.self) { method in
+                                Button {
+                                    viewModel.expirationInputMethod = method
+                                    viewModel.saveSettings()
+                                } label: {
+                                    Text(method.displayName)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(viewModel.expirationInputMethod.displayName)
+                                    .foregroundColor(.primary)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("settings.expiration.section".localized)
+                } footer: {
+                    Text("settings.expiration.footer".localized)
+                }
+                
                 // 3. FRIDGY (descrizioni sotto senza menzione Apple Intelligence)
                 Section {
                     Toggle(isOn: $viewModel.intelligenceEnabled) {
-                        Label("fridgy.toggle".localized, systemImage: "sparkles")
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsSuggestions))
+                            Text("fridgy.toggle".localized)
+                                .foregroundColor(.primary)
+                        }
                     }
                     .onChange(of: viewModel.intelligenceEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
@@ -140,8 +197,10 @@ struct SettingsView: View {
                     
                     if viewModel.isAppleIntelligenceAvailable {
                         HStack {
-                            Label("fridgy.title".localized, systemImage: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAvailable))
+                            Text("fridgy.title".localized)
+                                .foregroundColor(.primary)
                             Spacer()
                             Text("fridgy.available".localized)
                                 .font(.system(size: 13))
@@ -149,8 +208,10 @@ struct SettingsView: View {
                         }
                     } else {
                         HStack {
-                            Label("fridgy.title".localized, systemImage: "xmark.circle.fill")
+                            Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.secondary)
+                            Text("fridgy.title".localized)
+                                .foregroundColor(.primary)
                             Spacer()
                             Text("fridgy.unavailable".localized)
                                 .font(.system(size: 13))
@@ -176,7 +237,12 @@ struct SettingsView: View {
                     NavigationLink {
                         AppearanceSettingsView()
                     } label: {
-                        Label("Personalizza", systemImage: "paintbrush.fill")
+                        HStack(spacing: 8) {
+                            Image(systemName: "paintbrush.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAppearance))
+                            Text("Personalizza")
+                                .foregroundColor(.primary)
+                        }
                     }
                 } header: {
                     Text("Aspetto")
@@ -187,7 +253,10 @@ struct SettingsView: View {
                 // 5. SINCRONIZZAZIONE
                 Section {
                     HStack {
-                        Label("Sincronizzazione iCloud", systemImage: "icloud.fill")
+                        Image(systemName: "icloud.fill")
+                            .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
+                        Text("Sincronizzazione iCloud")
+                            .foregroundColor(.primary)
                         Spacer()
                         Text(viewModel.iCloudStatus)
                             .font(.system(size: 15))
@@ -200,14 +269,24 @@ struct SettingsView: View {
                             showingiCloudRestoreInfo = true
                             viewModel.restoreFromiCloud()
                         } label: {
-                            Label("Ripristina dati da iCloud", systemImage: "arrow.down.circle")
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.down.circle")
+                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
+                                Text("Ripristina dati da iCloud")
+                                    .foregroundColor(.primary)
+                            }
                         }
                         
                         // Verifica stato sincronizzazione
                         Button {
                             viewModel.checkCloudKitSyncStatus()
                         } label: {
-                            Label("Verifica stato sincronizzazione", systemImage: "checkmark.circle")
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle")
+                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
+                                Text("Verifica stato sincronizzazione")
+                                    .foregroundColor(.primary)
+                            }
                         }
                     }
                 } header: {
@@ -225,7 +304,12 @@ struct SettingsView: View {
                     NavigationLink {
                         BackupRestoreView()
                     } label: {
-                        Label("Backup e Ripristino", systemImage: "arrow.triangle.2.circlepath")
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsBackup))
+                            Text("Backup e Ripristino")
+                                .foregroundColor(.primary)
+                        }
                     }
                 } header: {
                     Text("Backup Manuale")
@@ -236,7 +320,10 @@ struct SettingsView: View {
                 // 7. INFORMAZIONI
                 Section {
                     HStack {
-                        Label("Versione", systemImage: "info.circle.fill")
+                        Image(systemName: "info.circle.fill")
+                            .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsInfo))
+                        Text("Versione")
+                            .foregroundColor(.primary)
                         Spacer()
                         Text("1.0")
                             .foregroundColor(.secondary)
@@ -265,8 +352,12 @@ struct SettingsView: View {
                     Button {
                         showingResetAlert = true
                     } label: {
-                        Label("Ripristina FoodFade", systemImage: "arrow.counterclockwise")
-                            .foregroundColor(.red)
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsReset))
+                            Text("Ripristina FoodFade")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsReset))
+                        }
                     }
                 }
             }
@@ -346,7 +437,7 @@ struct SettingsView: View {
         hasShownFirstAddPrompt = false
         
         // Resetta il ThemeManager ai valori di default
-        ThemeManager.shared.accentColor = .default
+        ThemeManager.shared.accentColor = .natural
         ThemeManager.shared.appearanceMode = .system
         ThemeManager.shared.animationsEnabled = true
         

@@ -24,7 +24,7 @@
 
 /* Navigation */
 "nav.home" = "Home";
-"nav.inventory" = "Inventario";
+"nav.inventory" = "In casa";
 "nav.statistics" = "Statistiche";
 "nav.settings" = "Impostazioni";
 
@@ -50,9 +50,12 @@
 /* Add Food */
 "addfood.title" = "Nuovo Prodotto";
 "addfood.name" = "Nome prodotto";
-"addfood.category" = "Categoria di conservazione";
+"addfood.name.placeholder" = "Es. Yogurt, Latte ...";
+"addfood.product.footer" = "Inserisci almeno il nome e una scadenza";
+"addfood.category" = "Dove lo conservi?";
 "addfood.foodtype" = "Tipo di alimento";
 "addfood.foodtype.optional" = "Categoria (opzionale)";
+"addfood.foodtype.footer" = "Ci aiuta a darti statistiche e suggerimenti più precisi";
 "addfood.foodtype.none" = "Nessuna categoria";
 "addfood.foodtype.add" = "Aggiungi categoria...";
 "addfood.foodtype.add.title" = "Aggiungi Categoria";
@@ -60,6 +63,7 @@
 "addfood.foodtype.add.name" = "Nome categoria";
 "addfood.barcode" = "Codice a barre";
 "addfood.photo" = "Foto prodotto";
+"addfood.photo.optional" = "Foto prodotto (facoltativo)";
 "addfood.photo.take" = "Scatta Foto";
 "addfood.photo.library" = "Libreria Foto";
 "addfood.photo.file" = "File";
@@ -72,7 +76,7 @@
 "tags.section" = "Tag";
 "tags.gluten_free" = "Senza glutine";
 "tags.bio" = "Bio";
-"tags.footer" = "Filtra inventario e ricette con questi tag.";
+"tags.footer" = "Useremo questi tag per filtrare il tuo inventario e fornirti suggerimenti.";
 "tags.filter_all" = "Tutti";
 "tags.filter_opened" = "Aperto";
 
@@ -283,11 +287,22 @@
 /* Add Food - Additional keys */
 "addfood.product" = "Prodotto";
 "addfood.additional_info" = "Informazioni Aggiuntive";
-"addfood.foodtype.footer" = "Scegli il tipo di alimento per statistiche migliori";
 "addfood.is_fresh" = "È un prodotto fresco";
 "addfood.expiration_section" = "Scadenza";
 "addfood.expiration.auto" = "La scadenza verrà calcolata automaticamente";
 "addfood.expiration.manual" = "Inserisci la data indicata sulla confezione";
-"addfood.notify_before" = "Avvisami prima della scadenza";
+"addfood.notify_before" = "Prima che scada";
 "addfood.notifications_section" = "Avvisi per questo prodotto";
-"addfood.notify.footer" = "Riceverai un avviso se sta per scadere";
+"addfood.notify.footer" = "Riceverai un avviso se il prodotto sta per scadere";
+"addfood.dictation.button" = "Detta la data di scadenza";
+"addfood.dictation.listening" = "Sto ascoltando... Parla per dettare la data di scadenza (es. 7 marzo 2026).";
+"addfood.dictation.error.title" = "Errore";
+"addfood.dictation.error.message" = "Non ho sentito niente..";
+
+/* Settings - Inserimento scadenza */
+"settings.expiration.section" = "Inserimento scadenza";
+"settings.expiration.input.title" = "Come inserire la scadenza";
+"settings.expiration.input.short" = "Come inserire";
+"settings.expiration.calendar" = "Calendario";
+"settings.expiration.dictation" = "Dettatura";
+"settings.expiration.footer" = "Scegli se usare il date picker o la dettatura vocale per la data di scadenza.";

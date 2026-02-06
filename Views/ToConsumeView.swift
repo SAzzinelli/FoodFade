@@ -90,7 +90,7 @@ private struct ToConsumeCard: View {
     var body: some View {
         HStack(spacing: 12) {
             // Icona categoria
-            Image(systemName: item.category.icon)
+            Image(systemName: item.category.iconFill)
                 .font(.system(size: 24))
                 .foregroundColor(categoryColor)
                 .frame(width: 40, height: 40)
@@ -103,7 +103,7 @@ private struct ToConsumeCard: View {
                     .foregroundColor(.primary)
                 
                 HStack(spacing: 8) {
-                    Label(item.effectiveExpirationDate.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                    Label(item.effectiveExpirationDate.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar.fill")
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
                     

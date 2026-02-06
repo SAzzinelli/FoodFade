@@ -5,7 +5,6 @@ import SwiftData
 struct ExpiringTodayView: View {
     @Query(sort: \FoodItem.expirationDate, order: .forward) private var allItems: [FoodItem]
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var themeManager = ThemeManager.shared
     
     private var expiringTodayItems: [FoodItem] {
         let calendar = Calendar.current
@@ -15,131 +14,106 @@ struct ExpiringTodayView: View {
         return allItems.filter { item in
             guard !item.isConsumed else { return false }
             let expiry = item.effectiveExpirationDate
-            // Scadono oggi: expiryDate <= endOfToday
             return expiry < endOfToday || calendar.isDate(expiry, inSameDayAs: now)
         }
     }
     
     var body: some View {
-        ScrollView {
+        Group {
             if expiringTodayItems.isEmpty {
-                emptyState
+                VStack(spacing: 16) {
+                    Spacer()
+                    
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.green)
+                    
+                    Text("Nessun prodotto in scadenza")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    Text("Ottimo! Non ci sono prodotti che scadono oggi")
+                        .font(.system(size: 15))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, 40)
+                .padding(.vertical, 20)
+                .background(Color(.systemGroupedBackground))
             } else {
-                LazyVStack(spacing: 16) {
+                List {
                     ForEach(expiringTodayItems) { item in
-                        ExpiringTodayItemCard(item: item)
+                        NavigationLink {
+                            ItemDetailView(item: item)
+                        } label: {
+                            ExpiringTodayCard(item: item)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button {
+                                item.isConsumed = true
+                                item.consumedDate = Date()
+                                item.lastUpdated = Date()
+                                try? modelContext.save()
+                            } label: {
+                                Label("Consumato", systemImage: "checkmark.circle.fill")
+                            }
+                            .tint(.green)
+                            
+                            Button(role: .destructive) {
+                                modelContext.delete(item)
+                                try? modelContext.save()
+                            } label: {
+                                Label("Elimina", systemImage: "trash.fill")
+                            }
+                        }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 20)
             }
         }
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle("Scadono Oggi")
+        .navigationTitle("Scadono oggi")
         .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private var emptyState: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.green)
-            
-            Text("Nessun prodotto in scadenza")
-                .font(.system(size: 22, weight: .semibold, design: .default))
-                .foregroundColor(.primary)
-            
-            Text("Ottimo! Non ci sono prodotti che scadono oggi")
-                .font(.system(size: 16, weight: .regular, design: .default))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 40)
-        .padding(.vertical, 20)
     }
 }
 
-// MARK: - Expiring Today Item Card
-private struct ExpiringTodayItemCard: View {
+// MARK: - Expiring Today Card (stile uniforme a ToConsumeCard)
+private struct ExpiringTodayCard: View {
     let item: FoodItem
-    @StateObject private var themeManager = ThemeManager.shared
     
     private var isExpired: Bool {
         item.expirationStatus == .expired
     }
     
     var body: some View {
-        HStack(spacing: 16) {
-            // Icona categoria con badge urgenza
-            ZStack {
-                Image(systemName: item.category.icon)
-                    .font(.system(size: 32))
-                    .foregroundColor(categoryColor)
-                    .frame(width: 60, height: 60)
-                    .background(categoryColor.opacity(0.15))
-                    .cornerRadius(12)
-                
-                if isExpired {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 16))
-                        .foregroundColor(.red)
-                        .offset(x: 22, y: -22)
-                }
-            }
+        HStack(spacing: 12) {
+            Image(systemName: item.category.iconFill)
+                .font(.system(size: 24))
+                .foregroundColor(categoryColor)
+                .frame(width: 40, height: 40)
+                .background(categoryColor.opacity(0.1))
+                .cornerRadius(8)
             
-            // Informazioni principali
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(item.name)
-                    .font(.system(size: 18, weight: .semibold, design: .default))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.primary)
                 
-                HStack(spacing: 16) {
-                    Label("\(item.quantity)", systemImage: "number")
-                    Text("•")
+                HStack(spacing: 8) {
+                    Label(item.effectiveExpirationDate.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar.fill")
+                        .font(.system(size: 13))
                         .foregroundColor(.secondary)
-                    Label(item.category.rawValue, systemImage: item.category.icon)
+                    
+                    Text(isExpired ? "Scaduto" : "Oggi")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(isExpired ? .red : .orange)
                 }
-                .font(.system(size: 15, weight: .regular, design: .default))
-                .foregroundColor(.secondary)
-                
-                HStack(spacing: 4) {
-                    Image(systemName: isExpired ? "exclamationmark.triangle.fill" : "clock.fill")
-                        .font(.system(size: 12))
-                    Text(isExpired ? "Scaduto" : "Scade oggi")
-                        .font(.system(size: 14, weight: .semibold, design: .default))
-                    Text("•")
-                        .foregroundColor(.secondary)
-                    Text(item.expirationDate.formatted(date: .abbreviated, time: .omitted))
-                        .font(.system(size: 14, weight: .regular, design: .default))
-                }
-                .foregroundColor(isExpired ? .red : .orange)
             }
             
             Spacer()
-            
-            // Badge urgenza
-            VStack {
-                Text(isExpired ? "Scaduto" : "Oggi")
-                    .font(.system(size: 12, weight: .bold, design: .default))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(isExpired ? Color.red : Color.orange)
-                    .cornerRadius(12)
-            }
         }
-        .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(isExpired ? Color.red.opacity(0.3) : Color.orange.opacity(0.3), lineWidth: 2)
-        )
+        .padding(.vertical, 4)
     }
     
     var categoryColor: Color {
@@ -157,4 +131,3 @@ private struct ExpiringTodayItemCard: View {
             .modelContainer(for: FoodItem.self, inMemory: true)
     }
 }
-

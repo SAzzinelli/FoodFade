@@ -59,7 +59,8 @@ class BackupService {
                     appearanceModeRaw: s.appearanceModeRaw,
                     animationsEnabled: s.animationsEnabled,
                     accentColorRaw: s.accentColorRaw,
-                    progressRingModeRaw: s.progressRingModeRaw
+                    progressRingModeRaw: s.progressRingModeRaw,
+                    expirationInputMethodRaw: s.expirationInputMethodRaw
                 )
             },
             profiles: profiles.map { p in
@@ -205,8 +206,9 @@ class BackupService {
                 smartSuggestionsEnabled: backupSettings.smartSuggestionsEnabled,
                 appearanceMode: AppearanceMode(rawValue: backupSettings.appearanceModeRaw) ?? .system,
                 animationsEnabled: backupSettings.animationsEnabled,
-                accentColor: AccentColor(rawValue: backupSettings.accentColorRaw) ?? .default,
-                progressRingMode: ProgressRingMode(rawValue: backupSettings.progressRingModeRaw) ?? .safeItems
+                accentColor: (backupSettings.accentColorRaw == "default" ? .orange : AccentColor(rawValue: backupSettings.accentColorRaw ?? "") ?? .natural),
+                progressRingMode: ProgressRingMode(rawValue: backupSettings.progressRingModeRaw) ?? .safeItems,
+                expirationInputMethod: ExpirationInputMethod(rawValue: backupSettings.expirationInputMethodRaw ?? ExpirationInputMethod.calendar.rawValue) ?? .calendar
             )
             modelContext.insert(settings)
         }
@@ -403,6 +405,7 @@ struct BackupSettings: Codable {
     let animationsEnabled: Bool
     let accentColorRaw: String
     let progressRingModeRaw: String
+    let expirationInputMethodRaw: String?
 }
 
 struct BackupProfile: Codable {

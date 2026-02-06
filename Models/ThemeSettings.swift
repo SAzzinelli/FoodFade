@@ -3,7 +3,7 @@ import SwiftData
 
 /// Enum per il colore principale d'accento
 enum AccentColor: String, Codable, CaseIterable {
-    case `default` = "default"
+    case natural = "natural"
     case green = "green"
     case blue = "blue"
     case purple = "purple"
@@ -13,7 +13,7 @@ enum AccentColor: String, Codable, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .default: return "Default"
+        case .natural: return "Naturale"
         case .green: return "Verde"
         case .blue: return "Blu"
         case .purple: return "Viola"
@@ -22,6 +22,26 @@ enum AccentColor: String, Codable, CaseIterable {
         case .teal: return "Azzurro"
         }
     }
+}
+
+/// Contesto per icone in stile Naturale (colori semantici)
+enum SemanticIconContext {
+    case tagGlutenFree
+    case tagBio
+    case category(FoodCategory)
+    case foodType(FoodType)
+    case settingsRing
+    case settingsAlerts
+    case settingsCalendar
+    case settingsExpirationInput
+    case settingsSuggestions
+    case settingsAvailable
+    case settingsGear
+    case settingsAppearance
+    case settingsCloud
+    case settingsBackup
+    case settingsInfo
+    case settingsReset
 }
 
 /// Enum per la modalità di aspetto
@@ -58,6 +78,19 @@ enum ProgressRingMode: String, Codable, CaseIterable {
         case .safeItems: return "Mostra la percentuale di prodotti che scadono dopo 3+ giorni"
         case .atRisk: return "Mostra la percentuale di prodotti che scadono presto o sono scaduti"
         case .healthScore: return "Mostra un punteggio basato su prodotti consumati vs scaduti"
+        }
+    }
+}
+
+/// Modalità di inserimento della data di scadenza
+enum ExpirationInputMethod: String, Codable, CaseIterable {
+    case calendar = "calendar"
+    case dictation = "dictation"
+    
+    var displayName: String {
+        switch self {
+        case .calendar: return "settings.expiration.calendar".localized
+        case .dictation: return "settings.expiration.dictation".localized
         }
     }
 }

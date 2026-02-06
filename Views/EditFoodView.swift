@@ -6,9 +6,15 @@ struct EditFoodView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @Query private var settings: [AppSettings]
+    @ObservedObject private var dictationService = ExpirationDictationService.shared
+    
     let item: FoodItem
     
     @State private var name: String
+    @State private var showingDictationOverlay = false
+    @State private var showingError = false
+    @State private var errorMessage = ""
     @State private var category: FoodCategory
     @State private var foodType: FoodType?
     @State private var expirationDate: Date
@@ -76,10 +82,20 @@ struct EditFoodView: View {
                 
                 Section {
                     Toggle(isOn: $isGlutenFree) {
-                        Label("tags.gluten_free".localized, systemImage: "leaf.fill")
+                        HStack(spacing: 8) {
+                            Image(systemName: "leaf.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagGlutenFree))
+                            Text("tags.gluten_free".localized)
+                                .foregroundColor(.primary)
+                        }
                     }
                     Toggle(isOn: $isBio) {
-                        Label("tags.bio".localized, systemImage: "leaf.circle.fill")
+                        HStack(spacing: 8) {
+                            Image(systemName: "leaf.circle.fill")
+                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagBio))
+                            Text("tags.bio".localized)
+                                .foregroundColor(.primary)
+                        }
                     }
                 } header: {
                     Text("tags.section".localized)
@@ -105,12 +121,55 @@ struct EditFoodView: View {
                                 .foregroundColor(.accentColor)
                         }
                     } else {
-                        // Prodotto con data di scadenza
-                        DatePicker(
-                            "Data di scadenza",
-                            selection: $expirationDate,
-                            displayedComponents: .date
-                        )
+                        // Prodotto con data di scadenza: Calendario o Dettatura
+                        let useDictation = (settings.first?.expirationInputMethod ?? .calendar) == .dictation
+                        if useDictation {
+                            HStack(spacing: 12) {
+                                Button {
+                                    showingDictationOverlay = true
+                                    Task {
+                                        await dictationService.startListening(
+                                            onDate: { date in
+                                                expirationDate = date
+                                                showingDictationOverlay = false
+                                            },
+                                            onError: { _ in
+                                                errorMessage = "addfood.dictation.error.message".localized
+                                                showingError = true
+                                                showingDictationOverlay = false
+                                            }
+                                        )
+                                    }
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "mic.fill")
+                                            .font(.system(size: 16))
+                                        Text("addfood.dictation.button".localized)
+                                            .font(.system(size: 15, weight: .medium))
+                                    }
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(ThemeManager.shared.primaryColor)
+                                    .cornerRadius(10)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(dictationService.isListening)
+                                
+                                Text(expirationDate.expirationShortLabel)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 10)
+                                    .cornerRadius(10)
+                            }
+                        } else {
+                            DatePicker(
+                                "Data di scadenza",
+                                selection: $expirationDate,
+                                displayedComponents: .date
+                            )
+                        }
                         
                         // Toggle prodotto aperto (solo se non fresco)
                         Toggle("Ho aperto questo prodotto", isOn: Binding(
@@ -162,6 +221,17 @@ struct EditFoodView: View {
                 } header: {
                     Text("Preferenze")
                 }
+            }
+            .fullScreenCover(isPresented: $showingDictationOverlay) {
+                DictationListeningOverlay(
+                    isPresented: $showingDictationOverlay,
+                    onDismiss: { dictationService.stopListening() }
+                )
+            }
+            .alert("addfood.dictation.error.title".localized, isPresented: $showingError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage)
             }
             .navigationTitle("Modifica Prodotto")
             .navigationBarTitleDisplayMode(.inline)

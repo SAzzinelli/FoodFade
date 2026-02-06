@@ -48,8 +48,7 @@ struct FoodFadeApp: App {
                 FoodItem.self,
                 AppSettings.self,
                 UserProfile.self,
-                CustomFoodType.self,
-                ShoppingItem.self
+                CustomFoodType.self
             ])
             
             // Leggi la scelta dell'utente da UserDefaults
@@ -115,8 +114,7 @@ struct FoodFadeApp: App {
                     FoodItem.self,
                     AppSettings.self,
                     UserProfile.self,
-                    CustomFoodType.self,
-                    ShoppingItem.self
+                    CustomFoodType.self
                 ])
                 let fallbackConfig = ModelConfiguration(
                     isStoredInMemoryOnly: false,
@@ -130,8 +128,7 @@ struct FoodFadeApp: App {
                         FoodItem.self,
                         AppSettings.self,
                         UserProfile.self,
-                        CustomFoodType.self,
-                        ShoppingItem.self
+                        CustomFoodType.self
                     ])
                     let inMemoryConfig = ModelConfiguration(isStoredInMemoryOnly: true)
                     return try ModelContainer(for: inMemorySchema, configurations: [inMemoryConfig])
@@ -159,11 +156,11 @@ struct ContentView: View {
             
             InventoryView(filterStatus: nil)
                 .tabItem {
-                    Label("Inventario", systemImage: "cabinet")
+                    Label(String(localized: "nav.inventory"), systemImage: "cabinet")
                 }
                 .tag(1)
             
-            ShoppingListView()
+            ShoppingListTabPlaceholder()
                 .tabItem {
                     Label("Lista spesa", systemImage: "cart.fill")
                 }
@@ -247,6 +244,32 @@ struct ContentView: View {
             return .light
         case .dark:
             return .dark
+        }
+    }
+}
+
+// Placeholder per tab Lista spesa (vista dedicata non nel target)
+private struct ShoppingListTabPlaceholder: View {
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                Spacer()
+                Image(systemName: "cart")
+                    .font(.system(size: 60))
+                    .foregroundColor(.secondary)
+                Text("Lista vuota")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.primary)
+                Text("Aggiungi cosa devi comprare.")
+                    .font(.system(size: 15))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Lista spesa")
+            .navigationBarTitleDisplayMode(.large)
         }
     }
 }

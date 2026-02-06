@@ -16,8 +16,9 @@ class SettingsViewModel: ObservableObject {
     // Aspetto
     @Published var appearanceMode: AppearanceMode = .system
     @Published var animationsEnabled: Bool = true
-    @Published var accentColor: AccentColor = .default
+    @Published var accentColor: AccentColor = .natural
     @Published var progressRingMode: ProgressRingMode = .safeItems
+    @Published var expirationInputMethod: ExpirationInputMethod = .calendar
     
     private var modelContext: ModelContext?
     private let notificationService = NotificationService.shared
@@ -51,6 +52,7 @@ class SettingsViewModel: ObservableObject {
             animationsEnabled = settings.animationsEnabled
             accentColor = settings.accentColor
             progressRingMode = settings.progressRingMode
+            expirationInputMethod = settings.expirationInputMethod
             
             // Aggiorna ThemeManager
             ThemeManager.shared.appearanceMode = appearanceMode
@@ -84,6 +86,7 @@ class SettingsViewModel: ObservableObject {
             settings.animationsEnabled = animationsEnabled
             settings.accentColor = accentColor
             settings.progressRingMode = progressRingMode
+            settings.expirationInputMethod = expirationInputMethod
             
             try? modelContext.save()
         } else {
@@ -95,7 +98,8 @@ class SettingsViewModel: ObservableObject {
                 appearanceMode: appearanceMode,
                 animationsEnabled: animationsEnabled,
                 accentColor: accentColor,
-                progressRingMode: progressRingMode
+                progressRingMode: progressRingMode,
+                expirationInputMethod: expirationInputMethod
             )
             modelContext.insert(newSettings)
             try? modelContext.save()

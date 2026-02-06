@@ -6,10 +6,13 @@ struct AddFoodView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    @Query private var settings: [AppSettings]
     @StateObject private var viewModel = AddFoodViewModel()
     @StateObject private var scannerService = BarcodeScannerService()
+    @ObservedObject private var dictationService = ExpirationDictationService.shared
     
     @State private var showingScanner = false
+    @State private var showingDictationOverlay = false
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var savedSuccessfully = false
@@ -34,6 +37,7 @@ struct AddFoodView: View {
             }
             .navigationTitle("addfood.title".localized)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Annulla") {
@@ -71,7 +75,13 @@ struct AddFoodView: View {
             .onChange(of: showingScanner) { oldValue, newValue in
                 print("🔄 AddFoodView - showingScanner cambiato: \(oldValue) -> \(newValue)")
             }
-            .alert("Errore", isPresented: $showingError) {
+            .fullScreenCover(isPresented: $showingDictationOverlay) {
+                DictationListeningOverlay(
+                    isPresented: $showingDictationOverlay,
+                    onDismiss: { dictationService.stopListening() }
+                )
+            }
+            .alert("addfood.dictation.error.title".localized, isPresented: $showingError) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage)
@@ -110,6 +120,8 @@ struct AddFoodView: View {
             barcodeField
         } header: {
             Text("addfood.product".localized)
+        } footer: {
+            Text("addfood.product.footer".localized)
         }
     }
     
@@ -118,7 +130,7 @@ struct AddFoodView: View {
             Text("Nome")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.secondary)
-            TextField("addfood.name".localized, text: $viewModel.name)
+            TextField("addfood.name.placeholder".localized, text: $viewModel.name)
                 .onChange(of: viewModel.name) { oldValue, newValue in
                     showingSuggestions = !newValue.isEmpty && !viewModel.filterSuggestions(for: newValue).isEmpty
                 }
@@ -237,7 +249,7 @@ struct AddFoodView: View {
                     Image(systemName: "photo.on.rectangle.angled")
                         .font(.system(size: 16))
                         .foregroundColor(.secondary)
-                    Text("Foto prodotto (facoltativo)")
+                    Text("addfood.photo.optional".localized)
                 }
             }
         }
@@ -264,10 +276,20 @@ struct AddFoodView: View {
     private var tagsSection: some View {
         Section {
             Toggle(isOn: $viewModel.isGlutenFree) {
-                Label("tags.gluten_free".localized, systemImage: "leaf.fill")
+                HStack(spacing: 8) {
+                    Image(systemName: "leaf.fill")
+                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagGlutenFree))
+                    Text("tags.gluten_free".localized)
+                        .foregroundColor(.primary)
+                }
             }
             Toggle(isOn: $viewModel.isBio) {
-                Label("tags.bio".localized, systemImage: "leaf.circle.fill")
+                HStack(spacing: 8) {
+                    Image(systemName: "leaf.circle.fill")
+                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagBio))
+                    Text("tags.bio".localized)
+                        .foregroundColor(.primary)
+                }
             }
         } header: {
             Text("tags.section".localized)
@@ -277,17 +299,62 @@ struct AddFoodView: View {
     }
     
     private var expirationSection: some View {
-        Section {
+        let useDictation = (settings.first?.expirationInputMethod ?? .calendar) == .dictation
+        
+        return Section {
             Toggle("addfood.is_fresh".localized, isOn: $viewModel.isFresh)
             
             if !viewModel.isFresh {
-                DatePicker(
-                    "addfood.expiration".localized,
-                    selection: $viewModel.expirationDate,
-                    displayedComponents: .date
-                )
-                .onChange(of: viewModel.expirationDate) { oldValue, newValue in
-                    viewModel.validateDate()
+                if useDictation {
+                    HStack(spacing: 12) {
+                        Button {
+                            showingDictationOverlay = true
+                            Task {
+                                await dictationService.startListening(
+                                    onDate: { date in
+                                        viewModel.expirationDate = date
+                                        viewModel.validateDate()
+                                        showingDictationOverlay = false
+                                    },
+                                    onError: { _ in
+                                        errorMessage = "addfood.dictation.error.message".localized
+                                        showingError = true
+                                        showingDictationOverlay = false
+                                    }
+                                )
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "mic.fill")
+                                    .font(.system(size: 16))
+                                Text("addfood.dictation.button".localized)
+                                    .font(.system(size: 15, weight: .medium))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(ThemeManager.shared.primaryColor)
+                            .cornerRadius(10)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(dictationService.isListening)
+                        
+                        Text(viewModel.expirationDate.expirationShortLabel)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .cornerRadius(10)
+                    }
+                } else {
+                    DatePicker(
+                        "addfood.expiration".localized,
+                        selection: $viewModel.expirationDate,
+                        displayedComponents: .date
+                    )
+                    .onChange(of: viewModel.expirationDate) { oldValue, newValue in
+                        viewModel.validateDate()
+                    }
                 }
                 
                 if let errorMessage = viewModel.dateValidationError {
@@ -320,7 +387,7 @@ struct AddFoodView: View {
                 Label("addfood.notify_before".localized, systemImage: "bell.fill")
             }
             
-            HStack(spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "note.text")
                     .font(.system(size: 16))
                     .foregroundColor(.secondary)

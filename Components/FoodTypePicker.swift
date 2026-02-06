@@ -114,6 +114,7 @@ private struct FoodTypeSheetView: View {
                             }
                         }
                     }
+                    .buttonStyle(.plain)
                 }
                 
                 Section {
@@ -125,7 +126,7 @@ private struct FoodTypeSheetView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: foodType.icon)
                                     .font(.system(size: 18))
-                                    .foregroundColor(ThemeManager.shared.primaryColor)
+                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .foodType(foodType)))
                                     .frame(width: 28, alignment: .center)
                                 Text(foodType.rawValue)
                                     .foregroundColor(.primary)

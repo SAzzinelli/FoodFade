@@ -24,7 +24,7 @@
 
 /* Navigation */
 "nav.home" = "Home";
-"nav.inventory" = "Inventory";
+"nav.inventory" = "In casa";
 "nav.statistics" = "Statistics";
 "nav.settings" = "Settings";
 
@@ -50,7 +50,9 @@
 /* Add Food */
 "addfood.title" = "New Product";
 "addfood.name" = "Product name";
-"addfood.category" = "Storage category";
+"addfood.name.placeholder" = "E.g. Yogurt, Milk ...";
+"addfood.product.footer" = "Enter at least the name and an expiration date";
+"addfood.category" = "Where do you store it?";
 "addfood.foodtype" = "Food type";
 "addfood.foodtype.optional" = "Category (optional)";
 "addfood.foodtype.none" = "No category";
@@ -60,6 +62,7 @@
 "addfood.foodtype.add.name" = "Category name";
 "addfood.barcode" = "Barcode";
 "addfood.photo" = "Product photo";
+"addfood.photo.optional" = "Product photo (optional)";
 "addfood.photo.take" = "Take Photo";
 "addfood.photo.library" = "Photo Library";
 "addfood.photo.file" = "File";
@@ -72,7 +75,7 @@
 "tags.section" = "Tags";
 "tags.gluten_free" = "Gluten-free";
 "tags.bio" = "Organic";
-"tags.footer" = "Filter inventory and recipes by these tags.";
+"tags.footer" = "We'll use these tags to filter your inventory and provide suggestions.";
 "tags.filter_all" = "All";
 "tags.filter_opened" = "Opened";
 
@@ -283,11 +286,23 @@
 /* Add Food - Additional keys */
 "addfood.product" = "Product";
 "addfood.additional_info" = "Additional Information";
-"addfood.foodtype.footer" = "Choose the food type for better statistics";
+"addfood.foodtype.footer" = "Helps us give you more accurate statistics and suggestions";
 "addfood.is_fresh" = "Is a fresh product";
 "addfood.expiration_section" = "Expiration";
 "addfood.expiration.auto" = "Expiration will be calculated automatically";
 "addfood.expiration.manual" = "Enter the date indicated on the package";
-"addfood.notify_before" = "Notify me before expiration";
+"addfood.notify_before" = "Before it expires";
 "addfood.notifications_section" = "Alerts for this product";
-"addfood.notify.footer" = "You will receive an alert if it is about to expire";
+"addfood.notify.footer" = "You will receive an alert if the product is about to expire";
+"addfood.dictation.button" = "Dictate expiration date";
+"addfood.dictation.listening" = "Listening... Speak the expiration date (e.g. March 7, 2026).";
+"addfood.dictation.error.title" = "Error";
+"addfood.dictation.error.message" = "I didn't hear anything..";
+
+/* Settings - Expiration input */
+"settings.expiration.section" = "Expiration input";
+"settings.expiration.input.title" = "How to enter expiration";
+"settings.expiration.input.short" = "How to enter";
+"settings.expiration.calendar" = "Calendar";
+"settings.expiration.dictation" = "Dictation";
+"settings.expiration.footer" = "Choose whether to use the date picker or voice dictation for the expiration date.";

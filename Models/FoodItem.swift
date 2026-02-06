@@ -15,6 +15,15 @@ enum FoodCategory: String, Codable, CaseIterable {
         }
     }
     
+    /// Icona in stile fill per uso in KPI e dettaglio prodotto
+    var iconFill: String {
+        switch self {
+        case .fridge: return "refrigerator.fill"
+        case .freezer: return "snowflake"
+        case .pantry: return "cabinet.fill"
+        }
+    }
+    
     var color: String {
         switch self {
         case .fridge: return "blue"
@@ -95,7 +104,7 @@ struct FoodType: Codable, Hashable, Identifiable {
 enum ExpirationStatus: String, Hashable {
     case expired = "Scaduto"
     case today = "Oggi"
-    case soon = "Prossimo"
+    case soon = "In scadenza"
     case safe = "Ancora buono"
     
     var color: String {
@@ -278,6 +287,18 @@ final class FoodItem {
         // Calcola il progresso (clamp tra 0 e 1)
         let progress = min(max(daysElapsed / totalDays, 0.0), 1.0)
         return progress
+    }
+    
+    /// Frazione di tempo ancora rimanente prima della scadenza (1.0 = appena aggiunto, 0.0 = scaduto). Usata per la barra che si svuota.
+    var expirationRemainingProgress: Double {
+        let totalDays: Double
+        let calendar = Calendar.current
+        let startOfCreation = calendar.startOfDay(for: createdAt)
+        let startOfExpiration = calendar.startOfDay(for: effectiveExpirationDate)
+        let totalComponents = calendar.dateComponents([.day], from: startOfCreation, to: startOfExpiration)
+        totalDays = Double(max(totalComponents.day ?? 1, 1))
+        let remaining = Double(daysRemaining)
+        return min(max(remaining / totalDays, 0.0), 1.0)
     }
 }
 

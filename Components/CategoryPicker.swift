@@ -55,11 +55,7 @@ private struct CategoryButton: View {
     }
     
     private var categoryColor: Color {
-        switch category {
-        case .fridge: return .blue
-        case .freezer: return .cyan
-        case .pantry: return .orange
-        }
+        ThemeManager.shared.semanticIconColor(for: .category(category))
     }
 }
 

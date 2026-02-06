@@ -15,8 +15,9 @@ final class AppSettings {
     // Aspetto
     var appearanceModeRaw: String = AppearanceMode.system.rawValue // AppearanceMode.rawValue
     var animationsEnabled: Bool = true
-    var accentColorRaw: String = AccentColor.default.rawValue // AccentColor.rawValue
+    var accentColorRaw: String = AccentColor.natural.rawValue
     var progressRingModeRaw: String = ProgressRingMode.safeItems.rawValue // ProgressRingMode.rawValue
+    var expirationInputMethodRaw: String = ExpirationInputMethod.calendar.rawValue
     
     var appearanceMode: AppearanceMode {
         get {
@@ -29,7 +30,8 @@ final class AppSettings {
     
     var accentColor: AccentColor {
         get {
-            AccentColor(rawValue: accentColorRaw) ?? .default
+            if accentColorRaw == "default" { return .orange }
+            return AccentColor(rawValue: accentColorRaw) ?? .natural
         }
         set {
             accentColorRaw = newValue.rawValue
@@ -45,17 +47,27 @@ final class AppSettings {
         }
     }
     
+    var expirationInputMethod: ExpirationInputMethod {
+        get {
+            ExpirationInputMethod(rawValue: expirationInputMethodRaw) ?? .calendar
+        }
+        set {
+            expirationInputMethodRaw = newValue.rawValue
+        }
+    }
+    
     init(
         id: UUID = UUID(),
         notificationsEnabled: Bool = true,
         notificationDaysBefore: Int = 1,
         customNotificationDays: Int = 3,
-        iCloudSyncEnabled: Bool = false, // Default false: l'utente deve scegliere esplicitamente
+        iCloudSyncEnabled: Bool = false,
         smartSuggestionsEnabled: Bool = true,
         appearanceMode: AppearanceMode = .system,
         animationsEnabled: Bool = true,
-        accentColor: AccentColor = .default,
+        accentColor: AccentColor = .natural,
         progressRingMode: ProgressRingMode = .safeItems,
+        expirationInputMethod: ExpirationInputMethod = .calendar,
         hasChosenCloudUsage: Bool = false
     ) {
         self.id = id
@@ -68,6 +80,7 @@ final class AppSettings {
         self.animationsEnabled = animationsEnabled
         self.accentColorRaw = accentColor.rawValue
         self.progressRingModeRaw = progressRingMode.rawValue
+        self.expirationInputMethodRaw = expirationInputMethod.rawValue
         self.hasChosenCloudUsage = hasChosenCloudUsage
     }
     

@@ -24,7 +24,7 @@ struct ItemDetailView: View {
                         
                         // Luogo di conservazione e quantità
                         HStack {
-                            Label(item.category.rawValue, systemImage: item.category.icon)
+                            Label(item.category.rawValue, systemImage: item.category.iconFill)
                                 .font(.system(size: 13, weight: .regular))
                                 .foregroundStyle(.secondary)
                             
@@ -64,8 +64,8 @@ struct ItemDetailView: View {
                                 .clipShape(Capsule())
                         }
                         
-                        // Progress bar
-                        ProgressView(value: item.expirationProgress)
+                        // Progress bar: si svuota man mano che diminuiscono i giorni alla scadenza (pieno = tanto tempo, vuoto = in scadenza)
+                        ProgressView(value: item.expirationRemainingProgress)
                             .tint(statusColor)
                             .frame(height: 6)
                     }
@@ -106,7 +106,7 @@ struct ItemDetailView: View {
                     
                     // Data di aggiunta
                     HStack {
-                        Label("Aggiunto il", systemImage: "plus.circle")
+                        Label("Aggiunto il", systemImage: "plus.circle.fill")
                             .font(.system(size: 15))
                             .foregroundStyle(.primary)
                         
@@ -143,6 +143,7 @@ struct ItemDetailView: View {
                         
                         TimelineBar(
                             currentDate: Date(),
+                            createdAt: item.createdAt,
                             expirationDate: item.effectiveExpirationDate,
                             status: item.expirationStatus
                         )
@@ -218,25 +219,31 @@ struct ItemDetailView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .navigationTitle("Dettaglio prodotto")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
+                    HStack(spacing: 12) {
                         Button {
                             isEditing = true
                         } label: {
-                            Label("Modifica", systemImage: "pencil")
+                            Image(systemName: "pencil")
                         }
-                        
-                        Divider()
-                        
-                        Button(role: .destructive) {
-                            showingDeleteConfirmation = true
+                        Menu {
+                            Button {
+                                isEditing = true
+                            } label: {
+                                Label("Modifica", systemImage: "pencil")
+                            }
+                            Divider()
+                            Button(role: .destructive) {
+                                showingDeleteConfirmation = true
+                            } label: {
+                                Label("Elimina", systemImage: "trash.fill")
+                            }
                         } label: {
-                            Label("Elimina", systemImage: "trash")
+                            Image(systemName: "ellipsis.circle")
                         }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
@@ -397,18 +404,19 @@ struct ItemDetailView: View {
 
 private struct TimelineBar: View {
     let currentDate: Date
+    let createdAt: Date
     let expirationDate: Date
     let status: ExpirationStatus
     
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                // Background
+                // Sfondo grigio (barra "piena")
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color(.systemGray5))
                     .frame(height: 6)
                 
-                // Progress
+                // Parte colorata: si svuota man mano che si avvicina la scadenza (pieno = tanto tempo, vuoto = scaduto)
                 RoundedRectangle(cornerRadius: 4)
                     .fill(progressColor)
                     .frame(width: progressWidth(in: geometry.size.width), height: 6)
@@ -419,28 +427,19 @@ private struct TimelineBar: View {
     
     private func progressWidth(in totalWidth: CGFloat) -> CGFloat {
         let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: currentDate)
-        let endDate = calendar.startOfDay(for: expirationDate)
+        let now = calendar.startOfDay(for: currentDate)
+        let expiry = calendar.startOfDay(for: expirationDate)
+        let created = calendar.startOfDay(for: createdAt)
         
-        guard let totalDays = calendar.dateComponents([.day], from: startDate, to: endDate).day else {
+        guard let daysRemaining = calendar.dateComponents([.day], from: now, to: expiry).day,
+              let totalDays = calendar.dateComponents([.day], from: created, to: expiry).day,
+              totalDays > 0 else {
             return 0
         }
         
-        // Calcola i giorni dalla creazione alla scadenza
-        let createdAt = calendar.startOfDay(for: currentDate)
-        let expirationAt = calendar.startOfDay(for: expirationDate)
-        guard let maxDays = calendar.dateComponents([.day], from: createdAt, to: expirationAt).day, maxDays > 0 else {
-            return totalWidth
-        }
-        
-        if totalDays < 0 {
-            return totalWidth // Scaduto = 100%
-        } else if totalDays >= maxDays {
-            return totalWidth * 0.95 // Quasi nuovo = 95%
-        } else {
-            let progress = Double(maxDays - totalDays) / Double(maxDays)
-            return totalWidth * max(0.05, min(0.95, progress))
-        }
+        // Frazione tempo rimanente: 1 = pieno, 0 = vuoto (scaduto)
+        let fraction = max(0, min(1, Double(daysRemaining) / Double(totalDays)))
+        return totalWidth * CGFloat(fraction)
     }
     
     private var progressColor: Color {

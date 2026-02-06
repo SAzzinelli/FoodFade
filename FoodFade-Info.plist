@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>FoodFade usa l’app Promemoria per esportare la lista della spesa così puoi averla sempre a portata di mano.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

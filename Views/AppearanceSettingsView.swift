@@ -74,7 +74,7 @@ struct AppearanceSettingsView: View {
                 } header: {
                     Text("Colore Principale")
                 } footer: {
-                    Text("Scegli il colore principale utilizzato nell'app. 'Default' mantiene lo schema multicolor originale.")
+                    Text("Naturale: icone a colori (mela rossa, bio verde…) e testi neri. Gli altri stili usano un unico colore accent.")
                 }
             }
             .navigationTitle("Aspetto")
@@ -86,8 +86,8 @@ struct AppearanceSettingsView: View {
     
     private func colorForAccent(_ accent: AccentColor) -> Color {
         switch accent {
-        case .default:
-            return AppTheme.primaryGreen
+        case .natural:
+            return Color(red: 0.5, green: 0.5, blue: 0.5)
         case .green:
             return Color(red: 0.2, green: 0.8, blue: 0.4)
         case .blue:
@@ -144,9 +144,15 @@ private struct AccentColorOption: View {
     var body: some View {
         Button(action: action) {
             HStack {
-                if color == .default {
+                if color == .natural {
                     Image(systemName: "paintpalette.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.red.opacity(0.8), .orange, .green],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .frame(width: 24, height: 24)
                 } else {
                     Circle()
@@ -170,8 +176,8 @@ private struct AccentColorOption: View {
     
     private func colorForAccent(_ accent: AccentColor) -> Color {
         switch accent {
-        case .default:
-            return AppTheme.primaryGreen
+        case .natural:
+            return Color(red: 0.5, green: 0.5, blue: 0.5)
         case .green:
             return Color(red: 0.2, green: 0.8, blue: 0.4)
         case .blue:

@@ -29,12 +29,6 @@ struct HomeView: View {
         userProfiles.first?.displayName ?? "Utente"
     }
     
-    private var expiringSoonItems: [FoodItem] {
-        allItems.filter { item in
-            !item.isConsumed && (item.expirationStatus == .today || item.expirationStatus == .soon || item.expirationStatus == .expired)
-        }
-    }
-    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -72,13 +66,17 @@ struct HomeView: View {
                     quickActionsSection
                         .padding(.bottom, 24)
                     
-                    // Scadenze a breve
-                    expiringSoonSection
-                        .padding(.bottom, 24)
-                    
                     // Recent Items
                     recentItemsSection
                         .padding(.bottom, 24)
+                    
+                    // Fridgy Card - Consiglio intelligente (sotto Prodotti Recenti, sopra Categorie)
+                    if let message = viewModel.fridgyMessage,
+                       let context = viewModel.fridgyContext {
+                        FridgyCard(context: context, message: message)
+                            .padding(.bottom, 24)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
                     
                     // Categorie rapide
                     categoriesQuickAccessSection
@@ -88,14 +86,6 @@ struct HomeView: View {
                     if showingSmartSuggestionsBanner && !hasShownSmartSuggestionsBanner {
                         smartSuggestionsInfoBanner
                             .padding(.bottom, 24)
-                    }
-                    
-                    // Fridgy Card - Consiglio intelligente (nuova architettura)
-                    if let message = viewModel.fridgyMessage,
-                       let context = viewModel.fridgyContext {
-                        FridgyCard(context: context, message: message)
-                            .padding(.bottom, 24)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 }
                 .padding(.horizontal, 20)
@@ -484,44 +474,6 @@ struct HomeView: View {
         }
     }
     
-    // MARK: - Expiring Soon Section
-    private var expiringSoonSection: some View {
-        if expiringSoonItems.isEmpty {
-            return AnyView(EmptyView())
-        }
-        
-        let itemsToShow = Array(expiringSoonItems.prefix(3))
-        
-        return AnyView(
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Scadenze Imminenti")
-                        .font(.system(size: 20, weight: .bold, design: .default))
-                    
-                    Spacer()
-                    
-                    NavigationLink(value: NavigationDestination.expiringSoon) {
-                        Text("Vedi tutti")
-                            .font(.system(size: 15, weight: .medium, design: .default))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
-                    }
-                }
-                .padding(.horizontal, 4)
-                
-                VStack(spacing: 8) {
-                    ForEach(itemsToShow) { item in
-                        NavigationLink {
-                            ItemDetailView(item: item)
-                        } label: {
-                            ExpiringItemRow(item: item)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-        )
-    }
-    
     // MARK: - Categories Quick Access Section
     private var categoriesQuickAccessSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -559,20 +511,9 @@ struct HomeView: View {
         
         return AnyView(
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Prodotti Recenti")
-                        .font(.system(size: 20, weight: .bold, design: .default))
-                    
-                    Spacer()
-                    
-                    NavigationLink(value: NavigationDestination.inventory) {
-                        Text("Vedi tutti")
-                            .font(.system(size: 15, weight: .medium, design: .default))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 4)
+                Text("Prodotti Recenti")
+                    .font(.system(size: 20, weight: .bold, design: .default))
+                    .padding(.horizontal, 4)
                 
                 VStack(spacing: 8) {
                     ForEach(recentItems) { item in
@@ -659,9 +600,11 @@ private struct SummaryCardContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Image(systemName: type.icon)
-                .font(.system(size: 24))
-                .foregroundColor(type.color)
-                .frame(width: 32, height: 32)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.white)
+                .frame(width: 40, height: 40)
+                .background(type.color)
+                .clipShape(Circle())
             
             Text(type.title)
                 .font(.system(size: 13, weight: .medium, design: .default))
@@ -803,78 +746,6 @@ private struct QuickActionButtonContent: View {
     }
 }
 
-// MARK: - Expiring Item Row
-private struct ExpiringItemRow: View {
-    let item: FoodItem
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: iconForCategory(item.category))
-                .font(.system(size: 20))
-                .foregroundColor(colorForCategory(item.category))
-                .frame(width: 40, height: 40)
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.name)
-                    .font(.system(size: 16, weight: .semibold, design: .default))
-                    .foregroundColor(.primary)
-                
-                Text(item.expirationStatus.displayName)
-                    .font(.system(size: 13, weight: .regular, design: .default))
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            Text(daysText)
-                .font(.system(size: 14, weight: .medium, design: .default))
-                .foregroundColor(statusColor)
-        }
-        .padding(12)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-    }
-    
-    private var daysText: String {
-        let days = item.daysRemaining
-        if days < 0 {
-            return "Scaduto"
-        } else if days == 0 {
-            return "Oggi"
-        } else if days == 1 {
-            return "1 giorno"
-        } else {
-            return "\(days) giorni"
-        }
-    }
-    
-    private var statusColor: Color {
-        switch item.expirationStatus {
-        case .expired, .today: return AppTheme.accentRed
-        case .soon: return AppTheme.accentOrange
-        case .safe: return AppTheme.primaryGreen
-        }
-    }
-    
-    private func iconForCategory(_ category: FoodCategory) -> String {
-        switch category {
-        case .fridge: return "refrigerator.fill"
-        case .freezer: return "snowflake"
-        case .pantry: return "cabinet.fill"
-        }
-    }
-    
-    private func colorForCategory(_ category: FoodCategory) -> Color {
-        switch category {
-        case .fridge: return .blue
-        case .freezer: return .cyan
-        case .pantry: return .orange
-        }
-    }
-}
-
 // MARK: - Category Quick Button
 private struct CategoryQuickButton: View {
     let category: FoodCategory
@@ -951,11 +822,11 @@ private struct RecentItemRow: View {
         if days < 0 {
             return "Scaduto"
         } else if days == 0 {
-            return "Oggi"
+            return "Scade oggi"
         } else if days == 1 {
-            return "1 giorno"
+            return "Scade tra 1 giorno"
         } else {
-            return "\(days) giorni"
+            return "Scade tra \(days) giorni"
         }
     }
     
@@ -1032,7 +903,7 @@ extension ExpirationStatus {
         switch self {
         case .expired: return "Scaduto"
         case .today: return "Scade oggi"
-        case .soon: return "Scade presto"
+        case .soon: return "In scadenza"
         case .safe: return "Sicuro"
         }
     }

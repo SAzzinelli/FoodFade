@@ -85,15 +85,7 @@ struct StatisticsView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Statistiche")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    NavigationLink {
-                        ConsumedHistoryView()
-                    } label: {
-                        Label("history.title".localized, systemImage: "clock.arrow.circlepath")
-                    }
-                }
-            }
+            // Storico consumi (ConsumedHistoryView) non nel target: pulsante toolbar rimosso
             .tint(themeManager.primaryColor)
             .onAppear {
                 calculateStatistics()
