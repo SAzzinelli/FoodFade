@@ -106,7 +106,7 @@ struct InventoryView: View {
                     title: "common.all".localized,
                     icon: "square.grid.2x2.fill",
                     isSelected: selectedCategory == nil,
-                    color: ThemeManager.shared.primaryColor
+                    color: ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
                 ) {
                     withAnimation {
                         selectedCategory = nil

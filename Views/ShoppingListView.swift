@@ -1,70 +1,53 @@
 import SwiftUI
 import SwiftData
 
-/// Lista della spesa: cosa comprare (manuale, da consumati, export Promemoria)
+/// Lista della spesa: gestione più liste, aggiungi voce, da consumati, swipe → comprato (Archiviati)
 struct ShoppingListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \ShoppingItem.addedAt, order: .reverse) private var allItems: [ShoppingItem]
+    @Query(sort: \ShoppingList.createdAt, order: .reverse) private var allLists: [ShoppingList]
     
-    @State private var newItemName = ""
-    @State private var showingAddFromConsumed = false
-    
-    private var pendingItems: [ShoppingItem] {
-        allItems.filter { !$0.isCompleted }
-    }
-    
-    private var completedItems: [ShoppingItem] {
-        allItems.filter { $0.isCompleted }
-    }
+    @State private var showingNewList = false
+    @State private var newListName = ""
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Campo aggiungi voce
-                HStack(spacing: 12) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
-                    TextField("shopping.add.placeholder".localized, text: $newItemName)
-                        .textFieldStyle(.plain)
-                        .onSubmit { addCurrentItem() }
-                    Button {
-                        addCurrentItem()
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(ThemeManager.shared.primaryColor)
-                            .clipShape(Circle())
-                    }
-                    .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-                .padding(16)
-                .background(Color(.secondarySystemGroupedBackground))
-                
-                if allItems.isEmpty {
-                    emptyState
+            Group {
+                if allLists.isEmpty {
+                    emptyListsState
                 } else {
                     List {
-                        if !pendingItems.isEmpty {
-                            Section {
-                                ForEach(pendingItems) { item in
-                                    ShoppingListRow(item: item, onToggle: { toggleItem(item) }, onDelete: { deleteItem(item) })
+                        ForEach(allLists) { list in
+                            NavigationLink {
+                                ShoppingListDetailView(list: list)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "list.bullet")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(ThemeManager.shared.primaryColor)
+                                        .frame(width: 32)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(list.name)
+                                            .font(.system(size: 17, weight: .semibold))
+                                            .foregroundColor(.primary)
+                                        Text(String(format: "shopping.list.count".localized, list.pendingItems.count))
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
                                 }
+                                .padding(.vertical, 6)
                             }
-                        }
-                        
-                        if !completedItems.isEmpty {
-                            Section("shopping.completed".localized) {
-                                ForEach(completedItems) { item in
-                                    ShoppingListRow(item: item, onToggle: { toggleItem(item) }, onDelete: { deleteItem(item) })
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteList(list)
+                                } label: {
+                                    Label("common.delete".localized, systemImage: "trash.fill")
                                 }
+                                .tint(.red)
                             }
                         }
                     }
                     .listStyle(.insetGrouped)
-                    .scrollContentBackground(.hidden)
                 }
             }
             .background(Color(.systemGroupedBackground))
@@ -72,33 +55,203 @@ struct ShoppingListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button {
-                            showingAddFromConsumed = true
-                        } label: {
-                            Label("shopping.add_from_consumed".localized, systemImage: "clock.arrow.circlepath")
-                        }
-                        Button {
-                            exportToReminders()
-                        } label: {
-                            Label("shopping.export_reminders".localized, systemImage: "calendar.badge.plus")
-                        }
+                    Button {
+                        newListName = ""
+                        showingNewList = true
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
                     }
                 }
             }
-            .sheet(isPresented: $showingAddFromConsumed) {
-                AddFromConsumedSheet(onSelect: { name in
-                    addItem(name: name)
-                    showingAddFromConsumed = false
-                }, onDismiss: { showingAddFromConsumed = false })
-                .presentationDetents([.medium, .large])
+            .sheet(isPresented: $showingNewList) {
+                newListSheet
+            }
+            .onAppear {
+                if allLists.isEmpty {
+                    createDefaultListIfNeeded()
+                }
             }
         }
     }
     
-    private var emptyState: some View {
+    private var emptyListsState: some View {
+        ContentUnavailableView(
+            "shopping.lists.empty.title".localized,
+            systemImage: "list.bullet.rectangle",
+            description: Text("shopping.lists.empty.subtitle".localized)
+        ) {
+            Button("shopping.lists.new".localized) {
+                newListName = ""
+                showingNewList = true
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(ThemeManager.shared.primaryColor)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var newListSheet: some View {
+        NavigationStack {
+            Form {
+                TextField("shopping.list.name.placeholder".localized, text: $newListName)
+                    .textInputAutocapitalization(.sentences)
+            }
+            .navigationTitle("shopping.lists.new".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("common.cancel".localized) { showingNewList = false }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("common.add".localized) {
+                        createList(name: newListName.trimmingCharacters(in: .whitespacesAndNewlines))
+                        showingNewList = false
+                    }
+                    .disabled(newListName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+    }
+    
+    private func createDefaultListIfNeeded() {
+        guard allLists.isEmpty else { return }
+        let defaultName = "shopping.list.default_name".localized
+        createList(name: defaultName)
+    }
+    
+    private func createList(name: String) {
+        guard !name.isEmpty else { return }
+        let list = ShoppingList(name: name)
+        modelContext.insert(list)
+        try? modelContext.save()
+    }
+    
+    private func deleteList(_ list: ShoppingList) {
+        modelContext.delete(list)
+        try? modelContext.save()
+    }
+}
+
+// MARK: - Dettaglio singola lista (voci, aggiungi, da consumati, archiviati)
+struct ShoppingListDetailView: View {
+    @Environment(\.modelContext) private var modelContext
+    var list: ShoppingList
+    
+    @State private var newItemName = ""
+    @State private var showingAddFromConsumed = false
+    @State private var showingRename = false
+    @State private var renameText = ""
+    
+    private var pendingItems: [ShoppingItem] {
+        list.pendingItems.sorted { $0.addedAt > $1.addedAt }
+    }
+    
+    private var archivedItems: [ShoppingItem] {
+        list.archivedItems.sorted { ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast) }
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Aggiungi voce
+            HStack(spacing: 12) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(ThemeManager.shared.primaryColor)
+                TextField("shopping.add.placeholder".localized, text: $newItemName)
+                    .textFieldStyle(.plain)
+                    .onSubmit { addCurrentItem() }
+                Button {
+                    addCurrentItem()
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(ThemeManager.shared.primaryColor)
+                        .clipShape(Circle())
+                }
+                .disabled(newItemName.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground))
+            
+            if list.items.isEmpty {
+                emptyListState
+            } else {
+                List {
+                    if !pendingItems.isEmpty {
+                        Section {
+                            ForEach(pendingItems) { item in
+                                ShoppingListRow(item: item, onToggle: { markAsBought(item) }, onDelete: { deleteItem(item) })
+                            }
+                            .onDelete(perform: deletePendingItems)
+                        }
+                    }
+                    
+                    if !archivedItems.isEmpty {
+                        Section("shopping.archived".localized) {
+                            ForEach(archivedItems) { item in
+                                ShoppingListRow(item: item, onToggle: { unmarkBought(item) }, onDelete: { deleteItem(item) })
+                            }
+                            .onDelete(perform: deleteArchivedItems)
+                        }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(list.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        renameText = list.name
+                        showingRename = true
+                    } label: {
+                        Label("common.edit".localized, systemImage: "pencil")
+                    }
+                    Button {
+                        showingAddFromConsumed = true
+                    } label: {
+                        Label("shopping.add_from_consumed".localized, systemImage: "clock.arrow.circlepath")
+                    }
+                    Button {
+                        exportListToReminders()
+                    } label: {
+                        Label("shopping.export_reminders".localized, systemImage: "calendar.badge.plus")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddFromConsumed) {
+            AddFromConsumedSheet(onSelect: { name in
+                addItem(name: name)
+                showingAddFromConsumed = false
+            }, onDismiss: { showingAddFromConsumed = false })
+            .presentationDetents([.medium, .large])
+        }
+        .alert("shopping.list.rename".localized, isPresented: $showingRename) {
+            TextField("shopping.list.name.placeholder".localized, text: $renameText)
+                .textInputAutocapitalization(.sentences)
+            Button("common.cancel".localized, role: .cancel) { }
+            Button("common.save".localized) {
+                list.name = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if list.name.isEmpty { list.name = "shopping.list.default_name".localized }
+                try? modelContext.save()
+            }
+        } message: {
+            Text("shopping.list.rename.hint".localized)
+        }
+    }
+    
+    private var emptyListState: some View {
         ContentUnavailableView(
             "shopping.empty.title".localized,
             systemImage: "cart",
@@ -115,14 +268,21 @@ struct ShoppingListView: View {
     }
     
     private func addItem(name: String) {
-        let item = ShoppingItem(name: name)
+        let item = ShoppingItem(name: name, list: list)
         modelContext.insert(item)
         try? modelContext.save()
     }
     
-    private func toggleItem(_ item: ShoppingItem) {
-        item.isCompleted.toggle()
-        item.completedAt = item.isCompleted ? Date() : nil
+    /// Swipe / segna come comprato → va in Archiviati
+    private func markAsBought(_ item: ShoppingItem) {
+        item.isCompleted = true
+        item.completedAt = Date()
+        try? modelContext.save()
+    }
+    
+    private func unmarkBought(_ item: ShoppingItem) {
+        item.isCompleted = false
+        item.completedAt = nil
         try? modelContext.save()
     }
     
@@ -131,11 +291,28 @@ struct ShoppingListView: View {
         try? modelContext.save()
     }
     
-    private func exportToReminders() {
-        guard !pendingItems.isEmpty else { return }
+    private func deletePendingItems(at offsets: IndexSet) {
+        for index in offsets {
+            let item = pendingItems[index]
+            modelContext.delete(item)
+        }
+        try? modelContext.save()
+    }
+    
+    private func deleteArchivedItems(at offsets: IndexSet) {
+        for index in offsets {
+            let item = archivedItems[index]
+            modelContext.delete(item)
+        }
+        try? modelContext.save()
+    }
+    
+    private func exportListToReminders() {
+        let toExport = pendingItems
+        guard !toExport.isEmpty else { return }
         EventKitHelper.shared.requestAccess { granted in
             if granted {
-                for item in pendingItems {
+                for item in toExport {
                     EventKitHelper.shared.addReminder(title: item.name)
                 }
             }
@@ -143,6 +320,7 @@ struct ShoppingListView: View {
     }
 }
 
+// MARK: - Riga voce (checkbox, nome, quantità; swipe elimina / segna comprato)
 private struct ShoppingListRow: View {
     let item: ShoppingItem
     let onToggle: () -> Void
@@ -175,6 +353,12 @@ private struct ShoppingListRow: View {
         }
         .padding(.vertical, 4)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button {
+                onToggle()
+            } label: {
+                Label("shopping.mark_bought".localized, systemImage: "checkmark.circle.fill")
+            }
+            .tint(.green)
             Button(role: .destructive, action: onDelete) {
                 Label("common.delete".localized, systemImage: "trash")
             }
@@ -183,7 +367,7 @@ private struct ShoppingListRow: View {
     }
 }
 
-/// Sheet: scegli da prodotti recentemente consumati da aggiungere alla lista
+// MARK: - Sheet: da consumati
 private struct AddFromConsumedSheet: View {
     @Query(sort: \FoodItem.consumedDate, order: .reverse) private var consumed: [FoodItem]
     let onSelect: (String) -> Void
@@ -220,7 +404,7 @@ private struct AddFromConsumedSheet: View {
     }
 }
 
-// MARK: - EventKit helper per Promemoria
+// MARK: - EventKit (Promemoria)
 import EventKit
 
 final class EventKitHelper {
@@ -246,5 +430,5 @@ final class EventKitHelper {
 
 #Preview {
     ShoppingListView()
-        .modelContainer(for: ShoppingItem.self)
+        .modelContainer(for: [ShoppingList.self, ShoppingItem.self])
 }

@@ -110,6 +110,7 @@ struct ConsumedQuantitySheet: View {
         if item.quantity <= 0 {
             item.quantity = 0
             item.isConsumed = true
+            item.consumedDate = Date()
         }
         item.lastUpdated = Date()
         

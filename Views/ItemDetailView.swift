@@ -10,7 +10,7 @@ struct ItemDetailView: View {
     @StateObject private var viewModel = ItemDetailViewModel()
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
-    
+    @State private var showingConsumedQuantitySheet = false
     
     var body: some View {
         List {
@@ -231,6 +231,14 @@ struct ItemDetailView: View {
             .sheet(isPresented: $isEditing) {
                 EditFoodView(item: item)
             }
+            .sheet(isPresented: $showingConsumedQuantitySheet) {
+                ConsumedQuantitySheet(item: item)
+            }
+            .onChange(of: showingConsumedQuantitySheet) { oldValue, newValue in
+                if oldValue == true && newValue == false && item.isConsumed {
+                    dismiss()
+                }
+            }
             .alert("Elimina Prodotto", isPresented: $showingDeleteConfirmation) {
                 Button("Annulla", role: .cancel) {}
                 Button("Elimina", role: .destructive) {
@@ -299,9 +307,13 @@ struct ItemDetailView: View {
                 .buttonStyle(.bordered)
             }
             
-            // Pulsante Consumato - stile primario verde
+            // Pulsante Consumato - se quantità > 1 apre sheet scelta quantità, altrimenti segna consumato
             Button {
-                markAsConsumed()
+                if item.quantity > 1 {
+                    showingConsumedQuantitySheet = true
+                } else {
+                    markAsConsumed()
+                }
             } label: {
                 Text("Consumato")
                     .font(.system(size: 16, weight: .semibold))

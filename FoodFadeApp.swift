@@ -48,7 +48,9 @@ struct FoodFadeApp: App {
                 FoodItem.self,
                 AppSettings.self,
                 UserProfile.self,
-                CustomFoodType.self
+                CustomFoodType.self,
+                ShoppingList.self,
+                ShoppingItem.self
             ])
             
             // Leggi la scelta dell'utente da UserDefaults
@@ -114,7 +116,9 @@ struct FoodFadeApp: App {
                     FoodItem.self,
                     AppSettings.self,
                     UserProfile.self,
-                    CustomFoodType.self
+                    CustomFoodType.self,
+                    ShoppingList.self,
+                    ShoppingItem.self
                 ])
                 let fallbackConfig = ModelConfiguration(
                     isStoredInMemoryOnly: false,
@@ -128,7 +132,9 @@ struct FoodFadeApp: App {
                         FoodItem.self,
                         AppSettings.self,
                         UserProfile.self,
-                        CustomFoodType.self
+                        CustomFoodType.self,
+                        ShoppingList.self,
+                        ShoppingItem.self
                     ])
                     let inMemoryConfig = ModelConfiguration(isStoredInMemoryOnly: true)
                     return try ModelContainer(for: inMemorySchema, configurations: [inMemoryConfig])
@@ -160,7 +166,7 @@ struct ContentView: View {
                 }
                 .tag(1)
             
-            ShoppingListTabPlaceholder()
+            ShoppingListView()
                 .tabItem {
                     Label("Lista spesa", systemImage: "cart.fill")
                 }
@@ -215,20 +221,20 @@ struct ContentView: View {
     
     private func updateTabBarColor() {
         DispatchQueue.main.async {
-            let primaryUIColor = UIColor(themeManager.primaryColor)
+            // In modalità Naturale: elementi attivi (tab, navbar) arancione; altrimenti primary
+            let activeColor = themeManager.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : themeManager.primaryColor
+            let activeUIColor = UIColor(activeColor)
             
-            // Tab bar
-            UITabBar.appearance().tintColor = primaryUIColor
+            // Tab bar (tab selezionata e elementi attivi)
+            UITabBar.appearance().tintColor = activeUIColor
             
-            // Navigation bar - tint per i pulsanti
-            UINavigationBar.appearance().tintColor = primaryUIColor
-            
-            // Navigation bar - titoli (sia large che inline)
+            // Navigation bar - tint per i pulsanti e titoli
+            UINavigationBar.appearance().tintColor = activeUIColor
             UINavigationBar.appearance().largeTitleTextAttributes = [
-                .foregroundColor: primaryUIColor
+                .foregroundColor: activeUIColor
             ]
             UINavigationBar.appearance().titleTextAttributes = [
-                .foregroundColor: primaryUIColor
+                .foregroundColor: activeUIColor
             ]
             
             // Forza il refresh di tutte le navigation bar esistenti
@@ -244,32 +250,6 @@ struct ContentView: View {
             return .light
         case .dark:
             return .dark
-        }
-    }
-}
-
-// Placeholder per tab Lista spesa (vista dedicata non nel target)
-private struct ShoppingListTabPlaceholder: View {
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                Spacer()
-                Image(systemName: "cart")
-                    .font(.system(size: 60))
-                    .foregroundColor(.secondary)
-                Text("Lista vuota")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.primary)
-                Text("Aggiungi cosa devi comprare.")
-                    .font(.system(size: 15))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Lista spesa")
-            .navigationBarTitleDisplayMode(.large)
         }
     }
 }

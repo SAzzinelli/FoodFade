@@ -12,6 +12,8 @@ final class ShoppingItem {
     var isCompleted: Bool = false
     var completedAt: Date?
     
+    var list: ShoppingList?
+    
     init(
         id: UUID = UUID(),
         name: String,
@@ -19,7 +21,8 @@ final class ShoppingItem {
         notes: String? = nil,
         addedAt: Date = Date(),
         isCompleted: Bool = false,
-        completedAt: Date? = nil
+        completedAt: Date? = nil,
+        list: ShoppingList? = nil
     ) {
         self.id = id
         self.name = name
@@ -28,5 +31,6 @@ final class ShoppingItem {
         self.addedAt = addedAt
         self.isCompleted = isCompleted
         self.completedAt = completedAt
+        self.list = list
     }
 }

@@ -98,6 +98,16 @@
 "shopping.add_from_consumed" = "Add from consumed";
 "shopping.export_reminders" = "Add to Reminders";
 "shopping.completed" = "Completed";
+"shopping.archived" = "Archived";
+"shopping.mark_bought" = "Mark bought";
+"shopping.list.count" = "%d items";
+"shopping.lists.empty.title" = "No lists";
+"shopping.lists.empty.subtitle" = "Create your first shopping list.";
+"shopping.lists.new" = "New list";
+"shopping.list.name.placeholder" = "List name";
+"shopping.list.default_name" = "Main list";
+"shopping.list.rename" = "Rename list";
+"shopping.list.rename.hint" = "Enter the new name for the list.";
 
 /* Categories */
 "category.fridge" = "Refrigerator";
@@ -258,6 +268,7 @@
 "settings.icloud.status.unavailable" = "Not available";
 "settings.icloud.footer.active" = "Your data is automatically synced across devices linked to the same Apple ID. Use 'Restore data from iCloud' to force synchronization.";
 "settings.icloud.footer.unavailable" = "iCloud is not available on this device.";
+"settings.reset.footer" = "Delete all data and restore the app to its initial state.";
 
 /* Fridgy (legacy, kept for other views) */
 "fridgy.title" = "Fridgy";

@@ -809,8 +809,12 @@ private struct RecentItemRow: View {
             Spacer()
             
             Text(daysText)
-                .font(.system(size: 14, weight: .medium, design: .default))
-                .foregroundColor(statusColor)
+                .font(.system(size: 13, weight: .semibold, design: .default))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(statusColor)
+                .clipShape(Capsule())
         }
         .padding(12)
         .background(Color(.secondarySystemGroupedBackground))

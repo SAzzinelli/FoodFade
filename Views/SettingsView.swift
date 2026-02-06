@@ -352,6 +352,8 @@ struct SettingsView: View {
                                 .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsReset))
                         }
                     }
+                } footer: {
+                    Text("settings.reset.footer".localized)
                 }
             }
             .tint(ThemeManager.shared.primaryColor)

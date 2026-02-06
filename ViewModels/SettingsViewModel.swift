@@ -4,6 +4,9 @@ import SwiftUI
 import Combine
 import CloudKit
 
+/// Deve coincidere con l'identificatore in FoodFade.entitlements e in Xcode (Capabilities → iCloud → Containers).
+private let kCloudKitContainerID = "iCloud.com.food.fade.FoodFade"
+
 @MainActor
 class SettingsViewModel: ObservableObject {
     @Published var notificationsEnabled: Bool = true
@@ -216,7 +219,7 @@ class SettingsViewModel: ObservableObject {
         
         Task {
             // Verifica lo stato di iCloud
-            let container = CKContainer(identifier: "iCloud.com.foodfade.FoodFade")
+            let container = CKContainer(identifier: kCloudKitContainerID)
             do {
                 let accountStatus = try await container.accountStatus()
                 print("📱 restoreFromiCloud: Account status: \(accountStatus.rawValue)")
@@ -315,7 +318,7 @@ class SettingsViewModel: ObservableObject {
         }
         
         Task {
-            let container = CKContainer(identifier: "iCloud.com.foodfade.FoodFade")
+            let container = CKContainer(identifier: kCloudKitContainerID)
             do {
                 let accountStatus = try await container.accountStatus()
                 print("☁️ checkCloudKitSyncStatus: Account iCloud status: \(accountStatus.rawValue)")

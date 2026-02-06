@@ -74,6 +74,7 @@
 		FC21E09C2F03195C00996820 /* RecipeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E09B2F03195C00996820 /* RecipeService.swift */; };
 		FC21E09E2F0319A500996820 /* MagicLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E09D2F0319A500996820 /* MagicLoadingView.swift */; };
 		FC21E0A02F03195D00996820 /* FoodFadeCulinaryLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0A12F03195D00996820 /* FoodFadeCulinaryLogic.swift */; };
+		FC21E0AE2F03195E00996820 /* ShoppingList.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0AD2F03195E00996820 /* ShoppingList.swift */; };
 		FC21E0B22F03195E00996820 /* ShoppingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0B12F03195E00996820 /* ShoppingItem.swift */; };
 		FC21E0B42F03195F00996820 /* ShoppingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0B32F03195F00996820 /* ShoppingListView.swift */; };
 		FC21E0B62F03196000996820 /* ConsumedHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */; };
@@ -99,6 +100,7 @@
 		FC21E09B2F03195C00996820 /* RecipeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeService.swift; sourceTree = "<group>"; };
 		FC21E09D2F0319A500996820 /* MagicLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagicLoadingView.swift; sourceTree = "<group>"; };
 		FC21E0A12F03195D00996820 /* FoodFadeCulinaryLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFadeCulinaryLogic.swift; sourceTree = "<group>"; };
+		FC21E0AD2F03195E00996820 /* ShoppingList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingList.swift; sourceTree = "<group>"; };
 		FC21E0B12F03195E00996820 /* ShoppingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingItem.swift; sourceTree = "<group>"; };
 		FC21E0B32F03195F00996820 /* ShoppingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListView.swift; sourceTree = "<group>"; };
 		FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumedHistoryView.swift; sourceTree = "<group>"; };
@@ -250,6 +252,7 @@
 				FC994EFD2F029671006D9CF0 /* AppSettings.swift */,
 				FC994EFE2F029671006D9CF0 /* CustomFoodType.swift */,
 				FC994EFF2F029671006D9CF0 /* FoodItem.swift */,
+				FC21E0AD2F03195E00996820 /* ShoppingList.swift */,
 				FC21E0B12F03195E00996820 /* ShoppingItem.swift */,
 				FC994F002F029671006D9CF0 /* ThemeSettings.swift */,
 				FC994F012F029671006D9CF0 /* UserProfile.swift */,
@@ -487,6 +490,7 @@
 				FC2129002F029921001A2A52 /* StatisticsView.swift in Sources */,
 				FC2129012F029921001A2A52 /* ToConsumeView.swift in Sources */,
 				FC2129022F029921001A2A52 /* WelcomeView.swift in Sources */,
+				FC21E0AE2F03195E00996820 /* ShoppingList.swift in Sources */,
 				FC21E0B22F03195E00996820 /* ShoppingItem.swift in Sources */,
 				FC21E0B42F03195F00996820 /* ShoppingListView.swift in Sources */,
 				FC21E0B62F03196000996820 /* ConsumedHistoryView.swift in Sources */,
