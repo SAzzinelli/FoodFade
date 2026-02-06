@@ -201,40 +201,8 @@ struct HomeView: View {
     }
     
     private var greetingText: String {
-        let gender = GenderHelper.getGender(from: userProfiles.first)
-        let hour = Calendar.current.component(.hour, from: Date())
-        let greetingKey: String
-        
-        switch hour {
-        case 5..<13:
-            greetingKey = "home.greeting.morning"
-        case 13..<18:
-            greetingKey = "home.greeting.afternoon"
-        default:
-            greetingKey = "home.greeting.evening"
-        }
-        
-        // Usa l'extension String.localized per ottenere la traduzione
-        // Questo dovrebbe funzionare meglio con il sistema di localizzazione
-        let baseGreeting = greetingKey.localized
-        
-        // Se la traduzione base funziona, usa GenderHelper per la variante di genere
-        if baseGreeting != greetingKey {
-            let greeting = GenderHelper.localizedString(greetingKey, gender: gender)
-            return "\(greeting), \(userName)"
-        } else {
-            // Fallback hardcoded se le traduzioni non vengono caricate
-            let fallbackGreeting: String
-            switch hour {
-            case 5..<13:
-                fallbackGreeting = "Buongiorno"
-            case 13..<18:
-                fallbackGreeting = "Buon pomeriggio"
-            default:
-                fallbackGreeting = "Buonasera"
-            }
-            return "\(fallbackGreeting), \(userName)"
-        }
+        let greeting = "home.greeting.ciao".localized
+        return "\(greeting), \(userName)!"
     }
     
     // MARK: - Progress Section

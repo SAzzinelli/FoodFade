@@ -190,9 +190,9 @@ struct ContentView: View {
                 }
                 .tag(4)
         }
-        .tint(themeManager.primaryColor)
+        .tint(themeManager.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : themeManager.primaryColor)
         .preferredColorScheme(preferredColorScheme)
-        .accentColor(themeManager.primaryColor)
+        .accentColor(themeManager.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : themeManager.primaryColor)
         .onAppear {
             loadThemeSettings()
             updateTabBarColor()

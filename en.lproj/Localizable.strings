@@ -16,6 +16,7 @@
 "home.greeting.morning" = "Good morning";
 "home.greeting.afternoon" = "Good afternoon";
 "home.greeting.evening" = "Good evening";
+"home.greeting.ciao" = "Hi";
 "home.subtitle.no_items" = "Start by adding your products";
 "home.subtitle.single" = "You have 1 product to manage";
 "home.subtitle.multiple" = "You have %d products to manage";

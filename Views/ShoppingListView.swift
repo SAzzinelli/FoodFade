@@ -78,19 +78,11 @@ struct ShoppingListView: View {
     }
     
     private var emptyListsState: some View {
-        VStack(spacing: 24) {
-            ContentUnavailableView(
-                "shopping.lists.empty.title".localized,
-                systemImage: "list.bullet.rectangle",
-                description: Text("shopping.lists.empty.subtitle".localized)
-            )
-            Button("shopping.lists.new".localized) {
-                newListName = ""
-                showingNewList = true
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(ThemeManager.shared.primaryColor)
-        }
+        ContentUnavailableView(
+            "shopping.lists.empty.title".localized,
+            systemImage: "list.bullet.rectangle",
+            description: Text("shopping.lists.empty.subtitle".localized)
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
@@ -143,9 +135,7 @@ struct ShoppingListDetailView: View {
     
     @State private var newItemName = ""
     @State private var showingAddFromConsumed = false
-    @State private var showingRename = false
-    @State private var renameText = ""
-    @State private var showingIconPicker = false
+    @State private var showingEditList = false
     @State private var itemToEdit: ShoppingItem?
     @State private var isAcquistatiExpanded = false
     
@@ -216,15 +206,9 @@ struct ShoppingListDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button {
-                        renameText = list.name
-                        showingRename = true
+                        showingEditList = true
                     } label: {
                         Label("common.edit".localized, systemImage: "pencil")
-                    }
-                    Button {
-                        showingIconPicker = true
-                    } label: {
-                        Label("shopping.list.change_icon".localized, systemImage: "square.grid.2x2")
                     }
                     Button {
                         showingAddFromConsumed = true
@@ -250,24 +234,8 @@ struct ShoppingListDetailView: View {
             }, onDismiss: { showingAddFromConsumed = false })
             .presentationDetents([.medium, .large])
         }
-        .sheet(isPresented: $showingIconPicker) {
-            ShoppingListIconPicker(currentIconName: list.iconName) { newName in
-                list.iconName = newName
-                try? modelContext.save()
-                showingIconPicker = false
-            }
-        }
-        .alert("shopping.list.rename".localized, isPresented: $showingRename) {
-            TextField("shopping.list.name.placeholder".localized, text: $renameText)
-                .textInputAutocapitalization(.sentences)
-            Button("common.cancel".localized, role: .cancel) { }
-            Button("common.save".localized) {
-                list.name = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
-                if list.name.isEmpty { list.name = "shopping.list.default_name".localized }
-                try? modelContext.save()
-            }
-        } message: {
-            Text("shopping.list.rename.hint".localized)
+        .sheet(isPresented: $showingEditList) {
+            EditShoppingListSheet(list: list) { showingEditList = false }
         }
         .sheet(item: $itemToEdit) { item in
             EditShoppingItemSheet(item: item, onDismiss: { itemToEdit = nil })
@@ -392,6 +360,66 @@ private struct ShoppingListRow: View {
                 Label("common.delete".localized, systemImage: "trash")
             }
             .tint(.red)
+        }
+    }
+}
+
+// MARK: - Sheet Modifica lista (nome + icona)
+private struct EditShoppingListSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    let list: ShoppingList
+    let onDismiss: () -> Void
+    
+    @State private var editName: String = ""
+    @State private var showingIconPicker = false
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("shopping.list.name.placeholder".localized, text: $editName)
+                        .textInputAutocapitalization(.sentences)
+                }
+                Section {
+                    Button {
+                        showingIconPicker = true
+                    } label: {
+                        HStack {
+                            Text("shopping.list.change_icon".localized)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: list.iconName)
+                                .font(.system(size: 20))
+                                .foregroundColor(ThemeManager.shared.primaryColor)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("common.edit".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear { editName = list.name }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("common.cancel".localized) { onDismiss(); dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("common.save".localized) {
+                        list.name = editName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if list.name.isEmpty { list.name = "shopping.list.default_name".localized }
+                        try? modelContext.save()
+                        onDismiss(); dismiss()
+                    }
+                    .disabled(editName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .sheet(isPresented: $showingIconPicker) {
+                ShoppingListIconPicker(currentIconName: list.iconName) { newName in
+                    list.iconName = newName
+                    try? modelContext.save()
+                    showingIconPicker = false
+                }
+            }
         }
     }
 }
