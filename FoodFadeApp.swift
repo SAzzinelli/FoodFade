@@ -185,7 +185,7 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "house.fill")
+                    Label("Home", systemImage: "leaf.fill")
                 }
                 .tag(0)
             
@@ -205,13 +205,13 @@ struct ContentView: View {
             
             StatisticsView()
                 .tabItem {
-                    Label("Statistiche", systemImage: "chart.bar.fill")
+                    Label("Statistiche", systemImage: "chart.pie.fill")
                 }
                 .tag(shoppingListTabEnabled ? 3 : 2)
             
             SettingsView()
                 .tabItem {
-                    Label("Impostazioni", systemImage: "gearshape.fill")
+                    Label("Impostazioni", systemImage: "slider.horizontal.3")
                 }
                 .tag(shoppingListTabEnabled ? 4 : 3)
         }

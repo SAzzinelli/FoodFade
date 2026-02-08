@@ -98,7 +98,7 @@ struct FoodItemRow: View {
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange
-        case .soon: return .yellow
+        case .soon: return .orange
         case .safe: return .green
         }
     }

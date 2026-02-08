@@ -24,6 +24,8 @@ struct HomeView: View {
     @State private var showingSmartSuggestionsBanner = false
     @State private var categoriesAccordionExpanded = true
     @State private var recentItemsAccordionExpanded = true
+    @State private var categoryToOpen: FoodCategory?
+    @State private var showExpiringSoonView = false
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
@@ -83,14 +85,14 @@ struct HomeView: View {
             .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    HStack(spacing: 6) {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    ZStack {
+                        Circle()
+                            .fill(ThemeManager.naturalHomeLogoColor)
+                            .frame(width: 32, height: 32)
                         Image(systemName: "leaf.fill")
-                            .foregroundColor(homeLogoColor)
-                            .font(.system(size: 18))
-                        Text("FoodFade")
-                            .font(.system(size: 20, weight: .bold, design: .default))
-                            .foregroundColor(homeLogoColor)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
                     }
                 }
                 
@@ -173,6 +175,12 @@ struct HomeView: View {
                         AllOkView()
                     }
                 }
+            }
+            .navigationDestination(item: $categoryToOpen) { category in
+                CategoryInventoryView(category: category)
+            }
+            .navigationDestination(isPresented: $showExpiringSoonView) {
+                ExpiringSoonView()
             }
         }
         .tint(ThemeManager.shared.primaryColor)
@@ -407,7 +415,9 @@ struct HomeView: View {
                         Text("home.expiring.section.title".localized)
                             .font(.system(size: 20, weight: .bold, design: .default))
                         Spacer()
-                        NavigationLink(value: NavigationDestination.expiringSoon) {
+                        Button {
+                            showExpiringSoonView = true
+                        } label: {
                             Text("home.see.all".localized)
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(ThemeManager.shared.primaryColor)
@@ -448,7 +458,9 @@ struct HomeView: View {
         DisclosureGroup(isExpanded: $categoriesAccordionExpanded) {
             VStack(spacing: 10) {
                 ForEach(FoodCategory.allCases, id: \.self) { category in
-                    NavigationLink(value: NavigationDestination.category(category)) {
+                    Button {
+                        categoryToOpen = category
+                    } label: {
                         HomeCategoryCard(
                             category: category,
                             productCount: allItems.filter { $0.category == category && !$0.isConsumed }.count,
@@ -663,7 +675,7 @@ private struct ExpiringProductCard: View {
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange
-        case .soon: return .yellow
+        case .soon: return .orange
         case .safe: return .green
         }
     }

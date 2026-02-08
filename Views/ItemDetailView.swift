@@ -266,8 +266,14 @@ struct ItemDetailView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 actionButtons
-                    .padding()
-                    .background(.ultraThinMaterial)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .fill(.regularMaterial)
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
             }
     }
     
@@ -378,7 +384,7 @@ struct ItemDetailView: View {
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange
-        case .soon: return .yellow
+        case .soon: return .orange
         case .safe: return .green
         }
     }

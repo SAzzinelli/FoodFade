@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// Vista dell'inventario con filtri e ricerca
+/// Vista inventario "In casa" – ridisegnata da zero
 struct InventoryView: View {
     @Query(sort: \FoodItem.expirationDate, order: .forward) private var allItems: [FoodItem]
     @StateObject private var viewModel = InventoryViewModel()
@@ -30,22 +30,45 @@ struct InventoryView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Barra ricerca
-                searchSection
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(Color(.systemGroupedBackground))
-                
-                // Filtri categoria
-                filterSection
-                
-                // Lista items
-                if filteredItems.isEmpty {
-                    emptyState
-                } else {
-                    listSection
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Ricerca
+                    searchBar
+                    
+                    // Filtri categoria (pill orizzontali)
+                    categoryPills
+                    
+                    if filteredItems.isEmpty {
+                        emptyContent
+                    } else {
+                        // Conteggio risultati solo quando il filtro non è "Tutti"
+                        if selectedCategory != nil {
+                            HStack {
+                                Text(String(format: "inventory.results.count".localized, filteredItems.count))
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                        
+                        // Lista card
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredItems) { item in
+                                InventoryCard(
+                                    item: item,
+                                    onTap: { selectedItem = item },
+                                    onConsume: { viewModel.markAsConsumed(item) },
+                                    onEdit: { selectedItem = item },
+                                    onDelete: { viewModel.deleteItem(item) }
+                                )
+                            }
+                        }
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 32)
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("nav.inventory".localized)
@@ -57,7 +80,7 @@ struct InventoryView: View {
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .foregroundStyle(.primary)
                     }
                     .accessibilityLabel("common.add".localized)
                 }
@@ -82,7 +105,6 @@ struct InventoryView: View {
                 viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
-            .tint(ThemeManager.shared.primaryColor)
             .onChange(of: selectedCategory) { _, newValue in
                 viewModel.selectedCategory = newValue
                 viewModel.filterStatus = filterStatus
@@ -97,169 +119,109 @@ struct InventoryView: View {
                 viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
+            .tint(ThemeManager.shared.primaryColor)
         }
     }
     
     // MARK: - Search
-    private var searchSection: some View {
-        HStack(spacing: 8) {
+    private var searchBar: some View {
+        HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-                .font(.system(size: 16))
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.secondary)
             TextField("inventory.search.prompt".localized, text: $searchText)
                 .textFieldStyle(.plain)
                 .font(.system(size: 16))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color(.tertiarySystemFill))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     
-    // MARK: - Filtri categoria (chip scorrevoli)
-    private var filterSection: some View {
+    // MARK: - Filtri categoria
+    private var categoryPills: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                CategoryFilterButton(
+            HStack(spacing: 8) {
+                InventoryFilterPill(
                     title: "common.all".localized,
                     icon: "square.grid.2x2.fill",
                     isSelected: selectedCategory == nil,
                     color: accentColor
                 ) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedCategory = nil
-                    }
+                    withAnimation(.easeInOut(duration: 0.2)) { selectedCategory = nil }
                 }
                 ForEach(FoodCategory.allCases, id: \.self) { category in
-                    CategoryFilterButton(
+                    InventoryFilterPill(
                         title: category.rawValue,
                         icon: category.iconFill,
                         isSelected: selectedCategory == category,
                         color: AppTheme.color(for: category)
                     ) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedCategory = category
-                        }
+                        withAnimation(.easeInOut(duration: 0.2)) { selectedCategory = category }
                     }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 2)
         }
-        .padding(.vertical, 12)
-        .background(Color(.systemGroupedBackground))
-    }
-    
-    // MARK: - Lista
-    private var listSection: some View {
-        List {
-            ForEach(filteredItems) { item in
-                FoodItemRow(
-                    item: item,
-                    onConsume: { viewModel.markAsConsumed(item) },
-                    onEdit: { selectedItem = item },
-                    onDelete: { viewModel.deleteItem(item) }
-                )
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button {
-                        viewModel.markAsConsumed(item)
-                    } label: {
-                        Label("inventory.consumed".localized, systemImage: "checkmark.circle.fill")
-                    }
-                    .tint(.green)
-                    Button(role: .destructive) {
-                        viewModel.deleteItem(item)
-                    } label: {
-                        Label("common.delete".localized, systemImage: "trash.fill")
-                    }
-                    .tint(.red)
-                }
-                .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                    Button {
-                        selectedItem = item
-                    } label: {
-                        Label("common.edit".localized, systemImage: "pencil")
-                    }
-                    .tint(.blue)
-                }
-                .onTapGesture {
-                    selectedItem = item
-                }
-            }
-        }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(Color(.systemGroupedBackground))
     }
     
     // MARK: - Empty state
-    private var emptyStateButtonColor: Color {
-        if let category = selectedCategory {
-            return AppTheme.color(for: category)
-        }
-        return ThemeManager.shared.onboardingButtonColor
-    }
-    
-    private var emptyState: some View {
+    private var emptyContent: some View {
         let isCategoryFilter = categoryFilter != nil
-        return VStack(spacing: 20) {
-            Spacer()
-            Image(systemName: searchText.isEmpty ? "tray" : "magnifyingglass")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
+        return VStack(spacing: 24) {
+            Spacer(minLength: 40)
+            Image(systemName: searchText.isEmpty ? "tray.fill" : "magnifyingglass")
+                .font(.system(size: 56))
+                .foregroundStyle(.secondary.opacity(0.8))
             if searchText.isEmpty {
                 if isCategoryFilter {
                     Text("inventory.category.empty".localized)
-                        .font(.system(size: 18, weight: .semibold, design: .default))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 24)
                 } else {
                     Text("inventory.empty.title".localized)
-                        .font(.system(size: 22, weight: .semibold, design: .default))
+                        .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.primary)
                     Text("inventory.empty.subtitle".localized)
-                        .font(.system(size: 16, weight: .regular, design: .default))
+                        .font(.system(size: 16))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                        .lineSpacing(4)
+                        .padding(.horizontal, 24)
                     Button {
                         showingAddFood = true
                     } label: {
                         Text("inventory.empty.button".localized)
-                            .font(.system(size: 17, weight: .semibold, design: .default))
+                            .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(.white)
-                            .frame(maxWidth: 200)
-                            .frame(height: 50)
-                            .background(emptyStateButtonColor)
-                            .cornerRadius(12)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(selectedCategory.map { AppTheme.color(for: $0) } ?? accentColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .buttonStyle(.plain)
-                    .tint(.white)
+                    .padding(.horizontal, 32)
                 }
             } else {
                 Text("inventory.search.empty.title".localized)
-                    .font(.system(size: 22, weight: .semibold, design: .default))
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(.primary)
-                Text("inventory.search.empty.subtitle".localized(searchText))
-                    .font(.system(size: 16, weight: .regular, design: .default))
+                Text(String(format: "inventory.search.empty.subtitle".localized, searchText))
+                    .font(.system(size: 15))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                    .lineSpacing(4)
+                    .padding(.horizontal, 24)
             }
-            Spacer()
+            Spacer(minLength: 60)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 40)
-        .padding(.vertical, 20)
-        .background(Color(.systemGroupedBackground))
+        .frame(maxWidth: .infinity)
     }
 }
 
-// MARK: - Pulsante filtro categoria (chip)
-private struct CategoryFilterButton: View {
+// MARK: - Pill filtro categoria
+private struct InventoryFilterPill: View {
     let title: String
     let icon: String
     let isSelected: Bool
@@ -270,18 +232,111 @@ private struct CategoryFilterButton: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                 Text(title)
-                    .font(.system(size: 15, weight: isSelected ? .semibold : .regular, design: .default))
+                    .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
             }
-            .foregroundColor(isSelected ? .white : .primary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(isSelected ? color : Color(.secondarySystemGroupedBackground))
-            .cornerRadius(20)
+            .foregroundStyle(isSelected ? .white : .primary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(isSelected ? color : Color(.tertiarySystemFill))
+            .clipShape(Capsule())
         }
-        .accessibilityLabel(title)
-        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Card singolo item (nuovo design)
+private struct InventoryCard: View {
+    let item: FoodItem
+    let onTap: () -> Void
+    let onConsume: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    
+    private var categoryColor: Color {
+        AppTheme.color(for: item.category)
+    }
+    
+    private var statusColor: Color {
+        switch item.expirationStatus {
+        case .expired: return .red
+        case .today: return .orange
+        case .soon: return .orange
+        case .safe: return .green
+        }
+    }
+    
+    private var daysText: String {
+        item.daysRemaining == 1 ? "item.day".localized : String(format: "item.days".localized, item.daysRemaining)
+    }
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 14) {
+                // Thumbnail: foto o icona categoria
+                ZStack {
+                    if let data = item.photoData, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        Image(systemName: item.category.iconFill)
+                            .font(.system(size: 22))
+                            .foregroundStyle(categoryColor)
+                    }
+                }
+                .frame(width: 52, height: 52)
+                .background(categoryColor.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                
+                // Nome + sottotitolo
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.name)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Image(systemName: "calendar")
+                            .font(.system(size: 11))
+                        Text(daysText)
+                            .font(.system(size: 13))
+                        Text("·")
+                        Text("Qtà \(item.quantity)")
+                            .font(.system(size: 13))
+                    }
+                    .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Badge stato
+                Text(item.expirationStatus.rawValue)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(statusColor)
+                    .clipShape(Capsule())
+            }
+            .padding(14)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button(action: onConsume) {
+                Label("inventory.mark.consumed".localized, systemImage: "checkmark.circle")
+            }
+            Button(action: onEdit) {
+                Label("common.edit".localized, systemImage: "pencil")
+            }
+            Divider()
+            Button(role: .destructive, action: onDelete) {
+                Label("common.delete".localized, systemImage: "trash")
+            }
+        }
+        .accessibilityLabel("\(item.name), \(daysText), \(item.expirationStatus.rawValue)")
+        .accessibilityHint("item.accessibility.hint".localized)
     }
 }
 

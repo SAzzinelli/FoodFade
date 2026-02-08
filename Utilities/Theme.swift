@@ -82,7 +82,7 @@ struct AppTheme {
             )
         case .soon:
             return LinearGradient(
-                colors: [accentYellow, Color.yellow.opacity(0.7)],
+                colors: [accentOrange, Color.orange.opacity(0.7)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

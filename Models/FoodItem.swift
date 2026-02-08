@@ -2,7 +2,8 @@ import Foundation
 import SwiftData
 
 /// Categoria di conservazione del cibo
-enum FoodCategory: String, Codable, CaseIterable {
+enum FoodCategory: String, Codable, CaseIterable, Identifiable {
+    var id: String { rawValue }
     case fridge = "Frigorifero"
     case freezer = "Congelatore"
     case pantry = "Dispensa"
@@ -111,7 +112,7 @@ enum ExpirationStatus: String, Hashable {
         switch self {
         case .expired: return "red"
         case .today: return "orange"
-        case .soon: return "yellow"
+        case .soon: return "orange"
         case .safe: return "green"
         }
     }

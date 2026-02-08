@@ -11,12 +11,11 @@ struct FridgyCard: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Icona con background colorato
-            Image(systemName: icon)
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(width: 36, height: 36)
-                .background(color)
+            // Fridgy (mascotte) al posto delle stelle con fondo verde
+            Image("FridgySettingsHeader")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 40, height: 40)
                 .clipShape(Circle())
             
             // Contenuto
