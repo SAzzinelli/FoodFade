@@ -99,86 +99,22 @@ struct EditFoodView: View {
                 }
                 
                 Section {
-                    Toggle(isOn: $isGlutenFree) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "heart.text.square.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagGlutenFree))
-                            Text("tags.gluten_free".localized)
-                                .foregroundColor(.primary)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            EditLabelPill(title: "tags.gluten_free".localized, icon: "heart.text.square.fill", color: ThemeManager.shared.semanticIconColor(for: .tagGlutenFree), isOn: $isGlutenFree)
+                            EditLabelPill(title: "tags.bio".localized, icon: "leaf.fill", color: ThemeManager.shared.semanticIconColor(for: .tagBio), isOn: $isBio)
+                            EditLabelPill(title: "tags.vegan".localized, icon: "carrot.fill", color: .green, isOn: $isVegan)
+                            EditLabelPill(title: "tags.lactose_free".localized, icon: "drop.fill", color: .blue, isOn: $isLactoseFree)
+                            EditLabelPill(title: "tags.vegetarian".localized, icon: "leaf.circle.fill", color: .green, isOn: $isVegetarian)
+                            EditLabelPill(title: "tags.ready".localized, icon: "checkmark.circle.fill", color: .green, isOn: $isReady)
+                            EditLabelPill(title: "tags.to_cook".localized, icon: "flame.fill", color: .orange, isOn: $needsCooking)
+                            EditLabelPill(title: "tags.artisan".localized, icon: "hammer.fill", color: .brown, isOn: $isArtisan)
+                            EditLabelPill(title: "tags.single_portion".localized, icon: "person.fill", color: .purple, isOn: $isSinglePortion)
+                            EditLabelPill(title: "tags.multi_portion".localized, icon: "person.3.fill", color: .purple, isOn: $isMultiPortion)
                         }
+                        .padding(.vertical, 4)
                     }
-                    Toggle(isOn: $isBio) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "leaf.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagBio))
-                            Text("tags.bio".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isVegan) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "carrot.fill")
-                                .foregroundColor(.green)
-                            Text("tags.vegan".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isLactoseFree) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "drop.fill")
-                                .foregroundColor(.blue)
-                            Text("tags.lactose_free".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isVegetarian) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "leaf.circle.fill")
-                                .foregroundColor(.green)
-                            Text("tags.vegetarian".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isReady) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text("tags.ready".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $needsCooking) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "flame.fill")
-                                .foregroundColor(.orange)
-                            Text("tags.to_cook".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isArtisan) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "hammer.fill")
-                                .foregroundColor(.brown)
-                            Text("tags.artisan".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isSinglePortion) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.purple)
-                            Text("tags.single_portion".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    Toggle(isOn: $isMultiPortion) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "person.3.fill")
-                                .foregroundColor(.purple)
-                            Text("tags.multi_portion".localized)
-                                .foregroundColor(.primary)
-                        }
-                    }
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                 } header: {
                     Text("addfood.labels".localized)
                 }
@@ -404,6 +340,38 @@ struct EditFoodView: View {
         } catch {
             print("Errore nel salvataggio: \(error)")
         }
+    }
+}
+
+private struct EditLabelPill: View {
+    let title: String
+    let icon: String
+    let color: Color
+    @Binding var isOn: Bool
+    
+    var body: some View {
+        Button {
+            isOn.toggle()
+        } label: {
+            HStack(spacing: 6) {
+                if isOn {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+            }
+            .foregroundColor(isOn ? .white : color)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                Capsule()
+                    .fill(isOn ? color : color.opacity(0.15))
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

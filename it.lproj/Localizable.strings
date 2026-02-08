@@ -64,6 +64,7 @@
 "inventory.sort.ascending" = "Crescente";
 "inventory.sort.descending" = "Decrescente";
 "inventory.results.count" = "%d prodotti";
+"inventory.total_items" = "Totale elementi: %d";
 
 /* Recipes */
 "recipe.title" = "Ricette";
@@ -204,6 +205,13 @@
 /* Settings */
 "settings.title" = "Impostazioni";
 "settings.appearance" = "Aspetto";
+"settings.app_icon.primary" = "FoodFade (predefinita)";
+"settings.app_icon.opt1" = "FoodFade 1";
+"settings.app_icon.opt2" = "FoodFade 2";
+"settings.app_icon.section" = "Icona app";
+"settings.app_icon.footer" = "Scegli l'icona da mostrare sulla home.";
+"settings.app_icon.error" = "Impossibile cambiare icona. Riprova.";
+"settings.app_icon.error.title" = "Icona non cambiata";
 "settings.notifications" = "Notifiche";
 "settings.notifications.enable" = "Notifiche";
 "settings.notifications.message" = "Ricevi notifiche quando i tuoi prodotti stanno per scadere";
@@ -378,6 +386,8 @@
 "addfood.add_notes" = "Aggiungi note";
 "addfood.add_notes.optional" = "Opzionale";
 "addfood.notify_days" = "3 giorni prima";
+"addfood.notify_days.one" = "1 giorno prima";
+"addfood.notify_days.many" = "%d giorni prima";
 "addfood.barcode.placeholder" = "Scansiona o inserisci";
 
 /* Settings - Inserimento scadenza */

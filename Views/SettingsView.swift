@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 /// Vista delle impostazioni - VERSIONE FINALE LOCKATA
 struct SettingsView: View {

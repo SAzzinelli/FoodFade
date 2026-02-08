@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "display-p3:0.99299,0.85764,0.44427,1.00000",
-      "display-p3:0.87861,0.42875,0.06055,1.00000"
+      "display-p3:0.59420,1.00000,0.94235,1.00000",
+      "display-p3:0.03564,0.49366,0.99299,1.00000"
     ],
     "orientation" : {
       "start" : {
@@ -18,7 +18,19 @@
   "groups" : [
     {
       "layers" : [
-
+        {
+          "glass" : false,
+          "hidden" : false,
+          "image-name" : "59FC042B-8C37-4A0E-B071-E6BF925BC0DF.png",
+          "name" : "59FC042B-8C37-4A0E-B071-E6BF925BC0DF",
+          "position" : {
+            "scale" : 1.07,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
       ],
       "shadow" : {
         "kind" : "neutral",
@@ -32,40 +44,6 @@
     {
       "layers" : [
         {
-          "fill-specializations" : [
-            {
-              "appearance" : "dark",
-              "value" : {
-                "linear-gradient" : [
-                  "display-p3:1.00000,0.77565,0.06490,1.00000",
-                  "display-p3:0.96783,0.40566,0.02043,1.00000"
-                ],
-                "orientation" : {
-                  "start" : {
-                    "x" : 0.5,
-                    "y" : 0
-                  },
-                  "stop" : {
-                    "x" : 0.5,
-                    "y" : 0.8256360619469026
-                  }
-                }
-              }
-            }
-          ],
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "PNG image 2.png",
-          "name" : "PNG image 2",
-          "position" : {
-            "scale" : 1.5,
-            "translation-in-points" : [
-              0,
-              0
-            ]
-          }
-        },
-        {
           "hidden" : true,
           "image-name" : "Risorsa 1@5x.png",
           "name" : "Risorsa 1@5x",
@@ -74,6 +52,18 @@
             "translation-in-points" : [
               0,
               0
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "BB40D1E9-EAB2-4859-BD27-D50EE38D042B.png",
+          "name" : "BB40D1E9-EAB2-4859-BD27-D50EE38D042B",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              55.546875
             ]
           }
         }

@@ -1,0 +1,87 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:1.00000,0.91979,0.62813,1.00000",
+      "display-p3:0.99299,0.57238,0.18976,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "glass" : false,
+          "hidden" : true,
+          "image-name" : "59FC042B-8C37-4A0E-B071-E6BF925BC0DF.png",
+          "name" : "59FC042B-8C37-4A0E-B071-E6BF925BC0DF",
+          "position" : {
+            "scale" : 1.07,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "hidden" : false,
+          "image-name" : "Risorsa 1@5x.png",
+          "name" : "Risorsa 1@5x",
+          "position" : {
+            "scale" : 0.29,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "BB40D1E9-EAB2-4859-BD27-D50EE38D042B.png",
+          "name" : "BB40D1E9-EAB2-4859-BD27-D50EE38D042B",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              55.546875
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

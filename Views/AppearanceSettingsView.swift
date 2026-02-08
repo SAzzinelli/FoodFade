@@ -6,9 +6,16 @@ import UIKit
 struct AppearanceSettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @StateObject private var themeManager = ThemeManager.shared
+    @AppStorage(AppIconManager.userDefaultsKey) private var appIconName: String = ""
+    @State private var showIconError = false
+    @State private var iconErrorMessage = ""
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    
+    private var selectedIconRaw: String {
+        appIconName.isEmpty ? AppIconManager.Option.primary.rawValue : appIconName
+    }
     
     var body: some View {
         List {
@@ -77,8 +84,45 @@ struct AppearanceSettingsView: View {
                 } footer: {
                     Text("Naturale: icone a colori (mela rossa, bio verde…) e testi neri. Gli altri stili usano un unico colore accent.")
                 }
+                
+                // Icona app – sezione dedicata
+                if UIApplication.shared.supportsAlternateIcons {
+                    Section {
+                        ForEach(AppIconManager.Option.allCases, id: \.rawValue) { option in
+                            Button {
+                                AppIconManager.setIcon(option) { success, error in
+                                    if !success {
+                                        iconErrorMessage = error?.localizedDescription ?? "settings.app_icon.error".localized
+                                        showIconError = true
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "app.badge.fill")
+                                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAppearance))
+                                    Text(option.displayName)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if selectedIconRaw == option.rawValue {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(ThemeManager.shared.primaryColor)
+                                    }
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("settings.app_icon.section".localized)
+                    } footer: {
+                        Text("settings.app_icon.footer".localized)
+                    }
+                }
             }
             .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+            .alert("settings.app_icon.error.title".localized, isPresented: $showIconError) {
+                Button("common.ok".localized, role: .cancel) {}
+            } message: {
+                Text(iconErrorMessage)
+            }
             .navigationTitle("Aspetto")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

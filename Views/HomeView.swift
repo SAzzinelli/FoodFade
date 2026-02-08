@@ -85,24 +85,14 @@ struct HomeView: View {
             .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    ZStack {
-                        Circle()
-                            .fill(ThemeManager.naturalHomeLogoColor)
-                            .frame(width: 32, height: 32)
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
                         Image(systemName: "leaf.fill")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddFood = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                        Text("FoodFade")
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
                     }
                 }
             }

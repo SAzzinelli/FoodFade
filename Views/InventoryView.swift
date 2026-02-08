@@ -30,31 +30,28 @@ struct InventoryView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Ricerca
-                    searchBar
-                    
-                    // Filtri categoria (pill orizzontali)
-                    categoryPills
-                    
-                    if filteredItems.isEmpty {
-                        emptyContent
-                    } else {
-                        // Conteggio risultati solo quando il filtro non è "Tutti"
-                        if selectedCategory != nil {
-                            HStack {
-                                Text(String(format: "inventory.results.count".localized, filteredItems.count))
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 4)
+            Group {
+                if filteredItems.isEmpty {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            categoryPills
+                            emptyContent
                         }
-                        
-                        // Lista card
-                        LazyVStack(spacing: 12) {
-                            ForEach(filteredItems) { item in
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
+                        .padding(.bottom, 32)
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 12) {
+                        categoryPills
+                        if selectedCategory != nil {
+                            Text(String(format: "inventory.results.count".localized, filteredItems.count))
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                        List {
+                            Section {
+                                ForEach(filteredItems) { item in
                                 InventoryCard(
                                     item: item,
                                     onTap: { selectedItem = item },
@@ -62,17 +59,39 @@ struct InventoryView: View {
                                     onEdit: { selectedItem = item },
                                     onDelete: { viewModel.deleteItem(item) }
                                 )
+                                .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color(.systemGroupedBackground))
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        viewModel.deleteItem(item)
+                                    } label: { Label("common.delete".localized, systemImage: "trash") }
+                                    Button {
+                                        selectedItem = item
+                                    } label: { Label("common.edit".localized, systemImage: "pencil") }
+                                    .tint(ThemeManager.shared.primaryColor)
+                                }
                             }
                         }
+                        }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
+                        .background(Color(.systemGroupedBackground))
                     }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 32)
             }
+            .searchable(text: $searchText, prompt: Text("inventory.search.prompt".localized))
             .background(Color(.systemGroupedBackground))
             .navigationTitle("nav.inventory".localized)
             .navigationBarTitleDisplayMode(.large)
+            .safeAreaInset(edge: .bottom) {
+                Text(String(format: "inventory.total_items".localized, filteredItems.count))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -121,22 +140,6 @@ struct InventoryView: View {
             }
             .tint(ThemeManager.shared.primaryColor)
         }
-    }
-    
-    // MARK: - Search
-    private var searchBar: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.secondary)
-            TextField("inventory.search.prompt".localized, text: $searchText)
-                .textFieldStyle(.plain)
-                .font(.system(size: 16))
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     
     // MARK: - Filtri categoria

@@ -266,12 +266,6 @@ struct ItemDetailView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 actionButtons
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 14)
-                    .background(
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
-                            .fill(.regularMaterial)
-                    )
                     .padding(.horizontal, 16)
                     .padding(.bottom, 8)
             }
@@ -314,23 +308,23 @@ struct ItemDetailView: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            // Pulsante per cambiare stato aperto/chiuso (solo per prodotti non freschi)
+            // Pulsante L'hai aperto? – sfondo arancione, testo bianco
             if !item.isFresh {
                 Button {
                     toggleOpenedStatus()
                 } label: {
                     Text("itemdetail.opened.button".localized)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(colorScheme == .dark ? .black : .primary)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                 }
                 .buttonStyle(.plain)
-                .background(colorScheme == .dark ? Color(white: 0.92) : Color(.secondarySystemGroupedBackground))
+                .background(ThemeManager.naturalHomeLogoColor)
                 .clipShape(Capsule())
             }
             
-            // Pulsante Consumato - se quantità > 1 apre sheet scelta quantità, altrimenti segna consumato
+            // Pulsante Consumato – sfondo verde, testo bianco
             Button {
                 if item.quantity > 1 {
                     showingConsumedQuantitySheet = true
@@ -340,11 +334,13 @@ struct ItemDetailView: View {
             } label: {
                 Text("Consumato")
                     .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.green)
+            .buttonStyle(.plain)
+            .background(Color.green)
+            .clipShape(Capsule())
             .disabled(item.isConsumed)
         }
     }

@@ -7,6 +7,11 @@ struct AddFoodView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     
+    /// Grigio scuro come l’icona (i) in Impostazioni → Versione (toggle, icone, pulsanti)
+    private var addFormControlColor: Color {
+        Color(red: 0.4, green: 0.5, blue: 0.6)
+    }
+    
     @Query private var settings: [AppSettings]
     @StateObject private var viewModel = AddFoodViewModel()
     @StateObject private var scannerService = BarcodeScannerService()
@@ -24,7 +29,6 @@ struct AddFoodView: View {
     @State private var showNotesField = false
     @State private var showingPhotoSourceDialog = false
     @State private var showingCamera = false
-    @State private var showingLabelsSheet = false
     @State private var showingPhotoLibrary = false
     @State private var showingDocumentPicker = false
     
@@ -41,7 +45,7 @@ struct AddFoodView: View {
                     notificationsAndNotesSection
                 }
                 .listStyle(.insetGrouped)
-                .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+                .tint(addFormControlColor)
                 
                 suggestionsOverlay
             }
@@ -63,6 +67,7 @@ struct AddFoodView: View {
                     .disabled(!viewModel.canSave)
                 }
             }
+            .tint(addFormControlColor)
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerView(scannerService: scannerService) { barcode in
                     print("📥 AddFoodView - Callback barcode ricevuto: \(barcode)")
@@ -89,9 +94,6 @@ struct AddFoodView: View {
             }
             .sheet(isPresented: $showingDocumentPicker) {
                 DocumentPicker(selectedImage: $viewModel.selectedPhoto)
-            }
-            .sheet(isPresented: $showingLabelsSheet) {
-                moreLabelsSheet
             }
             .onAppear {
                 showNotesField = !viewModel.notes.isEmpty
@@ -224,7 +226,7 @@ struct AddFoodView: View {
                 } label: {
                     Image(systemName: "barcode.viewfinder")
                         .font(.system(size: 20))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
+                        .foregroundColor(addFormControlColor)
                         .frame(width: 44, height: 44)
                         .background(Color(.tertiarySystemFill))
                         .clipShape(Circle())
@@ -249,7 +251,7 @@ struct AddFoodView: View {
                 HStack {
                     Text(viewModel.expirationDate.expirationShortLabel)
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(addFormControlColor)
                     Spacer()
                     Image(systemName: "calendar")
                         .font(.system(size: 18))
@@ -288,11 +290,11 @@ struct AddFoodView: View {
                             Text("addfood.dictation.button".localized)
                                 .font(.system(size: 16, weight: .medium))
                         }
-                        .foregroundColor(colorScheme == .dark ? .black : .white)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .background(addFormControlColor)
+                        .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
                     .disabled(dictationService.isListening)
@@ -333,7 +335,7 @@ struct AddFoodView: View {
                     } label: {
                         Image(systemName: "minus.circle.fill")
                             .font(.system(size: 32))
-                            .foregroundColor(viewModel.quantity > 1 ? ThemeManager.shared.primaryColor : Color(.tertiaryLabel))
+                            .foregroundColor(viewModel.quantity > 1 ? addFormControlColor : Color(.tertiaryLabel))
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.quantity <= 1)
@@ -348,7 +350,7 @@ struct AddFoodView: View {
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 32))
-                            .foregroundColor(viewModel.quantity < 99 ? ThemeManager.shared.primaryColor : Color(.tertiaryLabel))
+                            .foregroundColor(viewModel.quantity < 99 ? addFormControlColor : Color(.tertiaryLabel))
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.quantity >= 99)
@@ -365,17 +367,22 @@ struct AddFoodView: View {
     }
     
     private var labelsSection: some View {
-        let primaryLabels: [(title: String, icon: String, color: Color, isSelected: Bool, action: () -> Void)] = [
+        let allLabels: [(title: String, icon: String, color: Color, isSelected: Bool, action: () -> Void)] = [
             ("tags.vegan".localized, "carrot.fill", .green, viewModel.isVegan, { viewModel.isVegan.toggle() }),
             ("tags.vegetarian".localized, "leaf.circle.fill", .green, viewModel.isVegetarian, { viewModel.isVegetarian.toggle() }),
             ("tags.gluten_free".localized, "heart.text.square.fill", ThemeManager.shared.semanticIconColor(for: .tagGlutenFree), viewModel.isGlutenFree, { viewModel.isGlutenFree.toggle() }),
-            ("tags.lactose_free".localized, "drop.fill", .blue, viewModel.isLactoseFree, { viewModel.isLactoseFree.toggle() })
+            ("tags.lactose_free".localized, "drop.fill", .blue, viewModel.isLactoseFree, { viewModel.isLactoseFree.toggle() }),
+            ("tags.bio".localized, "leaf.fill", .green, viewModel.isBio, { viewModel.isBio.toggle() }),
+            ("tags.ready".localized, "checkmark.circle.fill", .green, viewModel.isReady, { viewModel.isReady.toggle() }),
+            ("tags.to_cook".localized, "flame.fill", .orange, viewModel.needsCooking, { viewModel.needsCooking.toggle() }),
+            ("tags.artisan".localized, "hammer.fill", .brown, viewModel.isArtisan, { viewModel.isArtisan.toggle() }),
+            ("tags.single_portion".localized, "person.fill", .purple, viewModel.isSinglePortion, { viewModel.isSinglePortion.toggle() }),
+            ("tags.multi_portion".localized, "person.3.fill", .purple, viewModel.isMultiPortion, { viewModel.isMultiPortion.toggle() })
         ]
-        let moreCount = 6 // Bio, Pronto, Da cucinare, Artigianale, Monoporzione, Multiporzione
         return Section {
-            VStack(alignment: .leading, spacing: 12) {
+            ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    ForEach(Array(primaryLabels.enumerated()), id: \.offset) { _, label in
+                    ForEach(Array(allLabels.enumerated()), id: \.offset) { _, label in
                         AddFoodCharacteristicPill(
                             title: label.title,
                             icon: label.icon,
@@ -383,21 +390,9 @@ struct AddFoodView: View {
                             color: label.color
                         ) { label.action() }
                     }
-                    Button {
-                        showingLabelsSheet = true
-                    } label: {
-                        Text(String(format: "addfood.labels.more".localized, moreCount))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .background(Color(.tertiarySystemFill))
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
                 }
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 8)
             .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
         } header: {
             Text("addfood.labels".localized)
@@ -406,26 +401,13 @@ struct AddFoodView: View {
         }
     }
     
-    private var moreLabelsSheet: some View {
-        NavigationStack {
-            List {
-                AddFoodLabelRow(title: "tags.bio".localized, icon: "leaf.fill", color: .green, isOn: $viewModel.isBio)
-                AddFoodLabelRow(title: "tags.ready".localized, icon: "checkmark.circle.fill", color: .green, isOn: $viewModel.isReady)
-                AddFoodLabelRow(title: "tags.to_cook".localized, icon: "flame.fill", color: .orange, isOn: $viewModel.needsCooking)
-                AddFoodLabelRow(title: "tags.artisan".localized, icon: "hammer.fill", color: .brown, isOn: $viewModel.isArtisan)
-                AddFoodLabelRow(title: "tags.single_portion".localized, icon: "person.fill", color: .purple, isOn: $viewModel.isSinglePortion)
-                AddFoodLabelRow(title: "tags.multi_portion".localized, icon: "person.3.fill", color: .purple, isOn: $viewModel.isMultiPortion)
-            }
-            .navigationTitle("addfood.labels".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Fatto") {
-                        showingLabelsSheet = false
-                    }
-                }
-            }
+    /// Sottotitolo giorni notifica: rispetta Impostazioni (es. "1 giorno prima" se impostato 1)
+    private var notifyDaysSubtitle: String {
+        let days = settings.first?.effectiveNotificationDays ?? 1
+        if days == 1 {
+            return "addfood.notify_days.one".localized
         }
+        return String(format: "addfood.notify_days.many".localized, days)
     }
     
     private var notificationsAndNotesSection: some View {
@@ -434,13 +416,13 @@ struct AddFoodView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "bell.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(ThemeManager.shared.primaryColor)
+                        .foregroundColor(.primary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("addfood.notify_before".localized)
                             .foregroundColor(.primary)
-                        Text("addfood.notify_days".localized)
+                        Text(notifyDaysSubtitle)
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.primary)
                     }
                 }
             }
@@ -449,13 +431,13 @@ struct AddFoodView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "note.text")
                         .font(.system(size: 16))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.primary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("addfood.add_notes".localized)
                             .foregroundColor(.primary)
                         Text("addfood.add_notes.optional".localized)
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.primary)
                     }
                 }
             }
@@ -546,7 +528,7 @@ private struct AddFoodStorageButton: View {
                 
                 Text(category.rawValue)
                     .font(.caption)
-                    .foregroundColor(isSelected ? categoryColor : .primary)
+                    .foregroundColor(isSelected ? categoryColor : Color(red: 0.4, green: 0.5, blue: 0.6))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)

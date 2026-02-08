@@ -10,28 +10,28 @@ struct FridgyCard: View {
     @State private var glowIntensity: Double = 0.6
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Fridgy (mascotte) al posto delle stelle con fondo verde
-            Image("FridgySettingsHeader")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
-            
-            // Contenuto
-            VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
+            // Riga titolo: icona Fridgy + titolo Consiglia (poca distanza dal testo sotto)
+            HStack(alignment: .center, spacing: 12) {
+                Image("FridgySettingsHeader")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 52, height: 52)
+                    .clipShape(Circle())
+                
                 Text("FRIDGY CONSIGLIA:")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
                 
-                Text(message)
-                    .font(.system(size: 15, weight: .regular, design: .default))
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
+                Spacer()
             }
             
-            Spacer()
+            // Testo del consiglio sotto, a tutta larghezza (senza indent/tabulazione)
+            Text(message)
+                .font(.system(size: 15, weight: .regular, design: .default))
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)
         .background(
@@ -95,7 +95,7 @@ struct FridgyCard: View {
     private var color: Color {
         switch context {
         case .tip:
-            return .green
+            return .blue
         case .warning:
             return .orange
         case .reminder:
@@ -121,10 +121,10 @@ struct FridgyCard: View {
         switch context {
         case .tip:
             baseColors = [
-                .green.opacity(0.8),
-                .cyan.opacity(0.6),
-                .blue.opacity(0.7),
-                .green.opacity(0.8)
+                .blue.opacity(0.8),
+                .cyan.opacity(0.7),
+                Color(red: 0.4, green: 0.7, blue: 1.0).opacity(0.8),
+                .blue.opacity(0.8)
             ]
         case .warning:
             baseColors = [
@@ -151,10 +151,10 @@ struct FridgyCard: View {
         switch context {
         case .tip:
             baseColors = [
-                .green.opacity(0.3),
-                .cyan.opacity(0.2),
-                .blue.opacity(0.25),
-                .green.opacity(0.3)
+                .blue.opacity(0.3),
+                .cyan.opacity(0.25),
+                Color(red: 0.4, green: 0.7, blue: 1.0).opacity(0.25),
+                .blue.opacity(0.3)
             ]
         case .warning:
             baseColors = [

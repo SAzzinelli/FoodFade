@@ -63,6 +63,7 @@
 "inventory.sort" = "Sort";
 "inventory.sort.ascending" = "Ascending";
 "inventory.sort.descending" = "Descending";
+"inventory.total_items" = "Total items: %d";
 "inventory.results.count" = "%d products";
 
 /* Recipes */
@@ -203,6 +204,13 @@
 /* Settings */
 "settings.title" = "Settings";
 "settings.appearance" = "Appearance";
+"settings.app_icon.primary" = "FoodFade (default)";
+"settings.app_icon.opt1" = "FoodFade 1";
+"settings.app_icon.opt2" = "FoodFade 2";
+"settings.app_icon.section" = "App icon";
+"settings.app_icon.footer" = "Choose the icon to show on the home screen.";
+"settings.app_icon.error" = "Could not change icon. Try again.";
+"settings.app_icon.error.title" = "Icon not changed";
 "settings.notifications" = "Notifications";
 "settings.notifications.enable" = "Notifications";
 "settings.notifications.message" = "Receive notifications when your products are about to expire";
@@ -378,6 +386,8 @@
 "addfood.add_notes" = "Add notes";
 "addfood.add_notes.optional" = "Optional";
 "addfood.notify_days" = "3 days before";
+"addfood.notify_days.one" = "1 day before";
+"addfood.notify_days.many" = "%d days before";
 "addfood.barcode.placeholder" = "Scan or enter";
 
 /* Settings - Expiration input */

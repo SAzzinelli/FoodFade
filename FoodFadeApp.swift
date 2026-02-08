@@ -19,6 +19,9 @@ struct FoodFadeApp: App {
         WindowGroup {
             WelcomeView()
                 .modelContainer(modelContainer)
+                .onAppear {
+                    AppIconManager.applySavedIconIfNeeded()
+                }
         }
     }
     
