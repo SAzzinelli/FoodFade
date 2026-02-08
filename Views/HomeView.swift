@@ -31,6 +31,11 @@ struct HomeView: View {
         colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : (ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
     }
     
+    /// Colore anello e CTA in Home: arancione in stile Naturale, altrimenti primary
+    private var homeAccentColor: Color {
+        ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
+    }
+    
     private var userName: String {
         userProfiles.first?.displayName ?? "Utente"
     }
@@ -59,13 +64,18 @@ struct HomeView: View {
                             } label: {
                                 Image(systemName: "slider.horizontal.3")
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(ThemeManager.shared.primaryColor)
+                                    .foregroundColor(.primary)
+                                    .frame(width: 36, height: 36)
+                                    .background(Circle().fill(Color(.systemGray5)))
                             }
                         }
                         .padding(.horizontal, 4)
                         
                         summaryCardsSection
                     }
+                    .padding(16)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
                     .padding(.bottom, 24)
                     
                     // Quick Actions
@@ -217,52 +227,54 @@ struct HomeView: View {
     }
     
     private var progressSectionWithRing: some View {
-        let counts = viewModel.activityRingCounts
+        let percentage = viewModel.progressRingPercentage
         let urgentCount = viewModel.expiringToday.count + viewModel.toConsume.count
         return VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("home.rings.title".localized)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.primary)
-                ActivityRingsView(
-                    okCount: counts.ok,
-                    inScadenzaCount: counts.inScadenza,
-                    expiredCount: counts.expired,
-                    size: 120,
-                    lineWidth: 10,
+            VStack(spacing: 24) {
+                AnimatedProgressRing(
+                    progress: percentage,
+                    size: 140,
+                    lineWidth: 20,
+                    ringColor: homeAccentColor,
+                    unfilledOpacity: 0.15,
                     animationsEnabled: ThemeManager.shared.animationsEnabled
-                )
+                ) {
+                    VStack(spacing: 4) {
+                        Text("\(Int(round(percentage * 100)))%")
+                            .font(.system(size: 36, weight: .bold))
+                            .foregroundColor(.primary)
+                        Text(progressRingLabel)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                if urgentCount > 0 {
+                    NavigationLink(value: viewModel.expiringToday.count > 0 ? NavigationDestination.kpiCard(.expiringToday) : NavigationDestination.kpiCard(.toConsume)) {
+                        HStack(spacing: 6) {
+                            Text("👀")
+                            Text(urgentCount == 1 ? "Vai al prodotto" : "Vai ai prodotti")
+                                .font(.system(size: 15, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(homeAccentColor.opacity(0.5))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Text(progressRingSubtitle)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
             .padding(.horizontal, 16)
             .background(Color(.secondarySystemGroupedBackground))
             .cornerRadius(16)
-            Text(progressRingLegend)
-                .font(.system(size: 12, weight: .regular, design: .default))
-                .foregroundColor(.secondary.opacity(0.9))
-                .multilineTextAlignment(.center)
-            if urgentCount > 0 {
-                NavigationLink(value: viewModel.expiringToday.count > 0 ? NavigationDestination.kpiCard(.expiringToday) : NavigationDestination.kpiCard(.toConsume)) {
-                    HStack(spacing: 6) {
-                        Text("👀")
-                        Text(urgentCount == 1 ? "Vai al prodotto" : "Vai ai prodotti")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(ThemeManager.shared.primaryColor)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(ThemeManager.shared.primaryColor.opacity(0.24))
-                    .foregroundStyle(ThemeManager.shared.primaryColor)
-                    .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-            } else {
-                Text(progressRingSubtitle)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
         }
     }
     
@@ -672,22 +684,13 @@ private struct CompactSummaryRow: View {
     }
 }
 
-// MARK: - Summary Card Content (KPI – icona + titolo + numero + micro-label emotiva)
+// MARK: - Summary Card Content (KPI – icona + titolo + numero)
 private struct SummaryCardContent: View {
     let type: KPICardType
     let count: Int
     
     @State private var animatedCount: Int = 0
     @State private var glowIntensity: Double = 0.5
-    
-    private var microLabel: String {
-        switch type {
-        case .expiringToday: return count == 0 ? "Ottimo!" : "Da gestire"
-        case .toConsume: return count == 0 ? "Tranquillo" : "Da gestire"
-        case .incoming: return count == 0 ? "Tranquillo" : "Presto"
-        case .allOk: return count == 0 ? "—" : "Tutto ok"
-        }
-    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -706,10 +709,6 @@ private struct SummaryCardContent: View {
                 .font(.system(size: 32, weight: .bold, design: .default))
                 .foregroundColor(type.color)
                 .opacity(type == .allOk && animatedCount == 0 ? 0.4 : 1)
-            
-            Text(microLabel)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
@@ -916,15 +915,36 @@ struct KPISettingsView: View {
         NavigationStack {
             List {
                 Section {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Image("FridgyBravo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 160, maxHeight: 160)
+                            .frame(maxWidth: .infinity)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Riordina le card del Riepilogo")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.primary)
+                            Text("Decidi in che ordine mostrare le quattro sezioni nella schermata Home.")
+                                .font(.system(size: 15))
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                }
+                .listRowInsets(EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20))
+                .listRowBackground(Color(.secondarySystemGroupedBackground))
+                
+                Section {
                     ForEach(Array(viewModel.kpiCardOrder.enumerated()), id: \.element) { index, kpiType in
                         Text(kpiType.title)
                     }
                     .onMove { source, destination in
                         viewModel.moveKPI(from: source, to: destination)
                     }
-                } footer: {
-                    Text("Trascina le sezioni per riordinarle. L'ordine che imposti verrà visualizzato nella schermata Home.")
-                        .font(.system(size: 13))
                 }
             }
             .navigationTitle("Riordina sezioni veloci")

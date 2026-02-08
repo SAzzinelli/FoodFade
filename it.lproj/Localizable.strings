@@ -46,6 +46,12 @@
 "inventory.empty.title" = "Nessun prodotto";
 "inventory.empty.subtitle" = "Aggiungi il tuo primo prodotto per iniziare";
 "inventory.empty.button" = "Aggiungi Prodotto";
+"inventory.search.empty.title" = "Nessun risultato";
+"inventory.search.empty.subtitle" = "Nessun risultato per \"%@\". Prova con altri termini.";
+"inventory.sort" = "Ordina";
+"inventory.sort.ascending" = "Crescente";
+"inventory.sort.descending" = "Decrescente";
+"inventory.results.count" = "%d prodotti";
 
 /* Recipes */
 "recipe.title" = "Ricette";

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		F2A0A28FE18743FBB8C822DD /* FoodFadeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EF82F029671006D9CF0 /* FoodFadeApp.swift */; };
 		F2A0A28FE18743FBB8C822DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC994EE62F029671006D9CF0 /* Assets.xcassets */; };
-		FC2128D22F029921001A2A51 /* ActivityRingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE02F029671006D9CF1 /* ActivityRingsView.swift */; };
 		FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */; };
 		FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE82F029671006D9CF0 /* CategoryPicker.swift */; };
 		FC2128D52F029921001A2A52 /* EnhancedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */; };
@@ -115,7 +114,6 @@
 		FC6DB9812F02A68900FA5652 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = InfoPlist.strings; sourceTree = "<group>"; };
 		FC6DB9842F02A6AB00FA5652 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
 		FC994EE62F029671006D9CF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		FC994EE02F029671006D9CF1 /* ActivityRingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityRingsView.swift; sourceTree = "<group>"; };
 		FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedProgressRing.swift; sourceTree = "<group>"; };
 		FC994EE82F029671006D9CF0 /* CategoryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPicker.swift; sourceTree = "<group>"; };
 		FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProgressRing.swift; sourceTree = "<group>"; };
@@ -222,7 +220,6 @@
 				FC21E0952F03164800996820 /* FridgySkeletonLoader.swift */,
 				FC21E0932F030A9300996820 /* FridgyCard.swift */,
 				FC21E0852F0301FE00996820 /* FridgyBadge.swift */,
-				FC994EE02F029671006D9CF1 /* ActivityRingsView.swift */,
 				FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */,
 				FC994EE82F029671006D9CF0 /* CategoryPicker.swift */,
 				FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */,
@@ -438,7 +435,6 @@
 				FC21E08E2F03094200996820 /* FridgyModels.swift in Sources */,
 				F2A0A28FE18743FBB8C822DD /* FoodFadeApp.swift in Sources */,
 				FC21E0982F03191E00996820 /* RecipesView.swift in Sources */,
-				FC2128D22F029921001A2A51 /* ActivityRingsView.swift in Sources */,
 				FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */,
 				FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */,
 				FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */,

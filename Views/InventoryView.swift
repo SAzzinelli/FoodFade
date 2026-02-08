@@ -20,29 +20,34 @@ struct InventoryView: View {
     
     @Environment(\.modelContext) private var modelContext
     
+    private var filteredItems: [FoodItem] {
+        viewModel.items.filter { !$0.isConsumed }
+    }
+    
+    private var accentColor: Color {
+        ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Barra ricerca (in contenuto così il titolo large non si nasconde al tap)
-                searchBar
+                // Barra ricerca
+                searchSection
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
                     .background(Color(.systemGroupedBackground))
                 
                 // Filtri categoria
-                categoryFilterView
-                    .padding(.vertical, 12)
-                    .background(Color(.systemGroupedBackground))
-                
-                Divider()
+                filterSection
                 
                 // Lista items
-                if viewModel.items.filter({ !$0.isConsumed }).isEmpty {
+                if filteredItems.isEmpty {
                     emptyState
                 } else {
-                    listView
+                    listSection
                 }
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("nav.inventory".localized)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -71,37 +76,32 @@ struct InventoryView: View {
                     selectedCategory = category
                     viewModel.selectedCategory = category
                 } else {
-                    // Reset categoria se non c'è un filtro iniziale
                     selectedCategory = nil
                     viewModel.selectedCategory = nil
                 }
-                // Imposta il filtro status prima di caricare i dati
                 viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
             .tint(ThemeManager.shared.primaryColor)
-            .onChange(of: selectedCategory) { oldValue, newValue in
+            .onChange(of: selectedCategory) { _, newValue in
                 viewModel.selectedCategory = newValue
                 viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
-            .onChange(of: searchText) { oldValue, newValue in
+            .onChange(of: searchText) { _, newValue in
                 viewModel.searchText = newValue
-                viewModel.filterStatus = filterStatus // Mantieni il filtro status
-                viewModel.loadData()
-            }
-            .onChange(of: allItems.count) { oldValue, newValue in
-                // Mantieni il filtro quando i dati vengono ricaricati
                 viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
-            .onChange(of: viewModel.sortAscending) { oldValue, newValue in
+            .onChange(of: allItems.count) { _, _ in
+                viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
         }
     }
     
-    private var searchBar: some View {
+    // MARK: - Search
+    private var searchSection: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
@@ -116,20 +116,20 @@ struct InventoryView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
     
-    private var categoryFilterView: some View {
+    // MARK: - Filtri categoria (chip scorrevoli)
+    private var filterSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 CategoryFilterButton(
                     title: "common.all".localized,
                     icon: "square.grid.2x2.fill",
                     isSelected: selectedCategory == nil,
-                    color: ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
+                    color: accentColor
                 ) {
-                    withAnimation {
+                    withAnimation(.easeInOut(duration: 0.2)) {
                         selectedCategory = nil
                     }
                 }
-                
                 ForEach(FoodCategory.allCases, id: \.self) { category in
                     CategoryFilterButton(
                         title: category.rawValue,
@@ -137,7 +137,7 @@ struct InventoryView: View {
                         isSelected: selectedCategory == category,
                         color: AppTheme.color(for: category)
                     ) {
-                        withAnimation {
+                        withAnimation(.easeInOut(duration: 0.2)) {
                             selectedCategory = category
                         }
                     }
@@ -145,36 +145,30 @@ struct InventoryView: View {
             }
             .padding(.horizontal, 20)
         }
+        .padding(.vertical, 12)
+        .background(Color(.systemGroupedBackground))
     }
     
-    private var listView: some View {
+    // MARK: - Lista
+    private var listSection: some View {
         List {
-            ForEach(viewModel.items.filter { !$0.isConsumed }) { item in
+            ForEach(filteredItems) { item in
                 FoodItemRow(
                     item: item,
-                    onConsume: {
-                        viewModel.markAsConsumed(item)
-                    },
-                    onEdit: {
-                        selectedItem = item
-                    },
-                    onDelete: {
-                        viewModel.deleteItem(item)
-                    }
+                    onConsume: { viewModel.markAsConsumed(item) },
+                    onEdit: { selectedItem = item },
+                    onDelete: { viewModel.deleteItem(item) }
                 )
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    // Azione principale: Consuma (swipe completo)
                     Button {
                         viewModel.markAsConsumed(item)
                     } label: {
                         Label("inventory.consumed".localized, systemImage: "checkmark.circle.fill")
                     }
                     .tint(.green)
-                    
-                    // Azione secondaria: Elimina (sempre sfondo rosso)
                     Button(role: .destructive) {
                         viewModel.deleteItem(item)
                     } label: {
@@ -183,7 +177,6 @@ struct InventoryView: View {
                     .tint(.red)
                 }
                 .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                    // Azione sinistra: Modifica
                     Button {
                         selectedItem = item
                     } label: {
@@ -201,7 +194,7 @@ struct InventoryView: View {
         .background(Color(.systemGroupedBackground))
     }
     
-    /// Colore per il pulsante empty state: se c’è un filtro categoria usa il colore della sezione, altrimenti primary.
+    // MARK: - Empty state
     private var emptyStateButtonColor: Color {
         if let category = selectedCategory {
             return AppTheme.color(for: category)
@@ -212,23 +205,18 @@ struct InventoryView: View {
     private var emptyState: some View {
         VStack(spacing: 20) {
             Spacer()
-            
-            Image(systemName: "tray")
+            Image(systemName: searchText.isEmpty ? "tray" : "magnifyingglass")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
-            
-            Text("inventory.empty.title".localized)
-                .font(.system(size: 22, weight: .semibold, design: .default))
-                .foregroundColor(.primary)
-            
-            Text("inventory.empty.subtitle".localized)
-                .font(.system(size: 16, weight: .regular, design: .default))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-            
-            // Mostra "Aggiungi Prodotto" solo se l’empty state non è dovuto alla ricerca (ricerca senza risultati = solo messaggio)
             if searchText.isEmpty {
+                Text("inventory.empty.title".localized)
+                    .font(.system(size: 22, weight: .semibold, design: .default))
+                    .foregroundColor(.primary)
+                Text("inventory.empty.subtitle".localized)
+                    .font(.system(size: 16, weight: .regular, design: .default))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
                 Button {
                     showingAddFood = true
                 } label: {
@@ -242,8 +230,16 @@ struct InventoryView: View {
                 }
                 .buttonStyle(.plain)
                 .tint(.white)
+            } else {
+                Text("inventory.search.empty.title".localized)
+                    .font(.system(size: 22, weight: .semibold, design: .default))
+                    .foregroundColor(.primary)
+                Text("inventory.search.empty.subtitle".localized(searchText))
+                    .font(.system(size: 16, weight: .regular, design: .default))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
             }
-            
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -251,13 +247,9 @@ struct InventoryView: View {
         .padding(.vertical, 20)
         .background(Color(.systemGroupedBackground))
     }
-    
-    private func filterByStatus(_ status: ExpirationStatus) {
-        // Il filtro viene applicato nel ViewModel
-    }
 }
 
-// MARK: - Category Filter Button
+// MARK: - Pulsante filtro categoria (chip)
 private struct CategoryFilterButton: View {
     let title: String
     let icon: String
@@ -270,7 +262,6 @@ private struct CategoryFilterButton: View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 13, weight: .semibold))
-                
                 Text(title)
                     .font(.system(size: 15, weight: isSelected ? .semibold : .regular, design: .default))
             }

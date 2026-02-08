@@ -1,54 +1,46 @@
 import SwiftUI
 
-/// Anello di progresso animato (senza glow)
-struct AnimatedProgressRing: View {
-    let progress: Double // 0.0 - 1.0
+/// Anello di progresso: colore unico, parte non riempita stesso colore a opacità bassa, centro per numero + stato.
+struct AnimatedProgressRing<CenterContent: View>: View {
+    let progress: Double
     let size: CGFloat
     let lineWidth: CGFloat
-    let primaryColor: Color
-    let primaryColorDark: Color
+    let ringColor: Color
+    let unfilledOpacity: Double
     let animationsEnabled: Bool
+    let centerContent: CenterContent
     
     @State private var animatedProgress: Double = 0
+    
     init(
         progress: Double,
         size: CGFloat = 140,
-        lineWidth: CGFloat = 14,
-        primaryColor: Color = AppTheme.primaryGreen,
-        primaryColorDark: Color = AppTheme.primaryGreenDark,
-        animationsEnabled: Bool = true
+        lineWidth: CGFloat = 20,
+        ringColor: Color = AppTheme.primaryGreen,
+        unfilledOpacity: Double = 0.15,
+        animationsEnabled: Bool = true,
+        @ViewBuilder centerContent: () -> CenterContent
     ) {
         self.progress = progress
         self.size = size
         self.lineWidth = lineWidth
-        self.primaryColor = primaryColor
-        self.primaryColorDark = primaryColorDark
+        self.ringColor = ringColor
+        self.unfilledOpacity = unfilledOpacity
         self.animationsEnabled = animationsEnabled
+        self.centerContent = centerContent()
     }
     
     var body: some View {
         ZStack {
-            // Background ring
             Circle()
-                .stroke(
-                    Color(.systemGray5),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                )
+                .stroke(ringColor.opacity(unfilledOpacity), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .frame(width: size, height: size)
-            
-            // Progress ring con gradiente (senza glow/shadow)
             Circle()
                 .trim(from: 0, to: animatedProgress)
-                .stroke(
-                    LinearGradient(
-                        colors: [primaryColor, primaryColorDark, primaryColor],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
-                )
+                .stroke(ringColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
                 .rotationEffect(.degrees(-90))
                 .frame(width: size, height: size)
+            centerContent
         }
         .onAppear {
             if animationsEnabled {
@@ -72,10 +64,11 @@ struct AnimatedProgressRing: View {
 }
 
 #Preview {
-    VStack(spacing: 30) {
-        AnimatedProgressRing(progress: 0.75, animationsEnabled: true)
-        AnimatedProgressRing(progress: 0.45, animationsEnabled: false)
+    AnimatedProgressRing(progress: 0.5, ringColor: .orange) {
+        VStack(spacing: 4) {
+            Text("50%").font(.system(size: 36, weight: .bold)).foregroundColor(.primary)
+            Text("Quasi tutto ok").font(.system(size: 14, weight: .medium)).foregroundColor(.secondary)
+        }
     }
     .padding()
 }
-
