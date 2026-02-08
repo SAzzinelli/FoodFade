@@ -3,6 +3,9 @@ import SwiftData
 
 /// Vista delle impostazioni - VERSIONE FINALE LOCKATA
 struct SettingsView: View {
+    /// Blu Fridgy (tonalità più scura per toggle e icone)
+    private static let fridgyBlue = Color(red: 100/255, green: 175/255, blue: 230/255)
+    
     @Query private var settings: [AppSettings]
     @StateObject private var viewModel = SettingsViewModel()
     @State private var showingCustomDaysPicker = false
@@ -21,54 +24,78 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                // 0. INTRODUZIONE (header compatto)
+                // 0. INTRODUZIONE (Fridgy + titolo e descrizione centrati)
                 Section {
-                    HStack(spacing: 12) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(
-                                AnyShapeStyle(Color(red: 1.0, green: 0.6, blue: 0.2))
-                            )
-                        VStack(alignment: .leading, spacing: 4) {
+                    VStack(spacing: 12) {
+                        Image("FridgySettingsHeader")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 160, maxHeight: 160)
+                        VStack(spacing: 4) {
                             Text("Personalizza la tua esperienza")
                                 .font(.system(size: 16, weight: .semibold, design: .default))
                                 .foregroundColor(.primary)
                             Text("Configura aspetto, notifiche e sincronizzazione.")
                                 .font(.system(size: 13, weight: .regular, design: .default))
                                 .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
                                 .lineLimit(2)
                         }
-                        Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 12)
                 }
                 .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
                 .listRowBackground(Color(.secondarySystemGroupedBackground))
                 
-                // 1. ANELLO DI PROGRESSO
+                // 1. RIEPILOGO IN HOME
                 Section {
-                    Picker(selection: $viewModel.progressRingMode) {
-                        ForEach(ProgressRingMode.allCases, id: \.self) { mode in
+                    Picker(selection: $viewModel.homeSummaryStyle) {
+                        ForEach(HomeSummaryStyle.allCases, id: \.self) { style in
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(mode.displayName)
+                                Text(style.displayName)
                                     .font(.system(size: 16, weight: .medium))
-                                Text(mode.description)
+                                Text(style.description)
                                     .font(.system(size: 13))
                                     .foregroundColor(.secondary)
                             }
-                            .tag(mode)
+                            .tag(style)
                         }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "chart.pie.fill")
                                 .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
-                            Text("Modalità anello")
+                            Text("Riepilogo in Home")
                                 .foregroundColor(.primary)
                         }
                     }
-                    .onChange(of: viewModel.progressRingMode) { oldValue, newValue in
+                    .onChange(of: viewModel.homeSummaryStyle) { oldValue, newValue in
                         viewModel.saveSettings()
+                    }
+                    
+                    if viewModel.homeSummaryStyle == .ring {
+                        Picker(selection: $viewModel.progressRingMode) {
+                            ForEach(ProgressRingMode.allCases, id: \.self) { mode in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(mode.displayName)
+                                        .font(.system(size: 16, weight: .medium))
+                                    Text(mode.description)
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.secondary)
+                                }
+                                .tag(mode)
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "circle.lefthalf.filled")
+                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
+                                Text("Modalità anello")
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .onChange(of: viewModel.progressRingMode) { oldValue, newValue in
+                            viewModel.saveSettings()
+                        }
                     }
                     
                     Toggle(isOn: $viewModel.shoppingListTabEnabled) {
@@ -86,7 +113,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Funzionalità")
                 } footer: {
-                    Text("Scegli come visualizzare l'anello nella schermata Home e quali funzionalità mostrare nella barra in basso.")
+                    Text("Scegli se mostrare l'anello con percentuale oppure solo il riepilogo numerico in Home. Le opzioni della barra in basso sono separate.")
                 }
                 
                 // 2. AVVISI
@@ -193,12 +220,12 @@ struct SettingsView: View {
                     Toggle(isOn: $viewModel.intelligenceEnabled) {
                         HStack(spacing: 8) {
                             Image(systemName: "sparkles")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsSuggestions))
+                                .foregroundColor(Self.fridgyBlue)
                             Text("fridgy.toggle".localized)
                                 .foregroundColor(.primary)
                         }
                     }
-                    .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsSuggestions))
+                    .tint(Self.fridgyBlue)
                     .onChange(of: viewModel.intelligenceEnabled) { oldValue, newValue in
                         viewModel.saveSettings()
                         IntelligenceManager.shared.isEnabled = newValue
@@ -207,7 +234,7 @@ struct SettingsView: View {
                     if viewModel.isAppleIntelligenceAvailable {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAvailable))
+                                .foregroundColor(Self.fridgyBlue)
                             Text("fridgy.title".localized)
                                 .foregroundColor(.primary)
                             Spacer()

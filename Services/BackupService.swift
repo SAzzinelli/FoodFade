@@ -60,6 +60,7 @@ class BackupService {
                     animationsEnabled: s.animationsEnabled,
                     accentColorRaw: s.accentColorRaw,
                     progressRingModeRaw: s.progressRingModeRaw,
+                    homeSummaryStyleRaw: s.homeSummaryStyleRaw,
                     expirationInputMethodRaw: s.expirationInputMethodRaw
                 )
             },
@@ -208,6 +209,7 @@ class BackupService {
                 animationsEnabled: backupSettings.animationsEnabled,
                 accentColor: (backupSettings.accentColorRaw == "default" ? .orange : AccentColor(rawValue: backupSettings.accentColorRaw) ?? .natural),
                 progressRingMode: ProgressRingMode(rawValue: backupSettings.progressRingModeRaw) ?? .safeItems,
+                homeSummaryStyle: HomeSummaryStyle(rawValue: backupSettings.homeSummaryStyleRaw ?? HomeSummaryStyle.ring.rawValue) ?? .ring,
                 expirationInputMethod: ExpirationInputMethod(rawValue: backupSettings.expirationInputMethodRaw ?? ExpirationInputMethod.calendar.rawValue) ?? .calendar
             )
             modelContext.insert(settings)
@@ -433,6 +435,7 @@ struct BackupSettings: Codable {
     let animationsEnabled: Bool
     let accentColorRaw: String
     let progressRingModeRaw: String
+    let homeSummaryStyleRaw: String?
     let expirationInputMethodRaw: String?
 }
 

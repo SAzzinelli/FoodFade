@@ -123,11 +123,7 @@ private struct FoodTypeSheetView: View {
                             selectedFoodType = foodType
                             dismiss()
                         } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: foodType.icon)
-                                    .font(.system(size: 18))
-                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .foodType(foodType)))
-                                    .frame(width: 28, alignment: .center)
+                            HStack {
                                 Text(foodType.rawValue)
                                     .foregroundColor(.primary)
                                 Spacer()

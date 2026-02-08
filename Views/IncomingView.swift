@@ -5,10 +5,7 @@ import SwiftData
 struct IncomingView: View {
     @Query(sort: \FoodItem.expirationDate, order: .forward) private var allItems: [FoodItem]
     @Environment(\.modelContext) private var modelContext
-    @State private var fridgyMessage: String?
-    @State private var fridgyContext: FridgyContext?
-    @State private var isLoadingFridgy = false
-    private let fridgyService = FridgyServiceImpl.shared
+    @State private var showFridgyBravo = false
     
     private var incomingItems: [FoodItem] {
         let calendar = Calendar.current
@@ -63,6 +60,7 @@ struct IncomingView: View {
                                 item.consumedDate = Date()
                                 item.lastUpdated = Date()
                                 try? modelContext.save()
+                                showFridgyBravo = true
                             } label: {
                                 Label("Consumato", systemImage: "checkmark.circle.fill")
                             }
@@ -77,53 +75,16 @@ struct IncomingView: View {
                             .tint(.red)
                         }
                     }
-                    if IntelligenceManager.shared.isFridgyAvailable {
-                        Section {
-                            if isLoadingFridgy {
-                                FridgySkeletonLoader()
-                            } else if let message = fridgyMessage, let context = fridgyContext {
-                                FridgyCard(context: context, message: message)
-                            }
-                        } header: {
-                            Text("Suggerimenti di Fridgy")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.secondary)
-                        }
-                    }
                 }
+            }
+        }
+        .overlay {
+            if showFridgyBravo {
+                FridgyBravoOverlay { showFridgyBravo = false }
             }
         }
         .navigationTitle("Nei prossimi giorni")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            if !incomingItems.isEmpty { loadFridgy() }
-        }
-        .onChange(of: incomingItems.count) { _, _ in
-            if !incomingItems.isEmpty { loadFridgy() }
-        }
-    }
-    
-    private func loadFridgy() {
-        guard IntelligenceManager.shared.isFridgyAvailable,
-              let payload = FridgyPayload.forIncomingSection(items: incomingItems) else { return }
-        isLoadingFridgy = true
-        Task {
-            do {
-                let text = try await fridgyService.generateMessage(from: payload.promptContext)
-                let sanitized = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                await MainActor.run {
-                    fridgyMessage = sanitized.isEmpty ? nil : String(sanitized.prefix(100))
-                    fridgyContext = payload.context
-                    isLoadingFridgy = false
-                }
-            } catch {
-                await MainActor.run {
-                    fridgyMessage = nil
-                    fridgyContext = nil
-                    isLoadingFridgy = false
-                }
-            }
-        }
     }
 }
 

@@ -19,53 +19,49 @@ class NotificationService: ObservableObject {
         }
     }
     
-    /// Programma le notifiche per un FoodItem
+    /// Programma la notifica per un FoodItem: viene fissata per (scadenza - daysBefore) alle 9:00, se quella data è nel futuro.
     func scheduleNotifications(for item: FoodItem, daysBefore: Int) async {
         guard item.notify, !item.isConsumed else { return }
         
-        let days = item.daysRemaining
-        let shouldNotify = (days >= 0 && days <= daysBefore)
+        let calendar = Calendar.current
+        let expirationDate = item.effectiveExpirationDate
+        let now = Date()
         
-        guard shouldNotify else { return }
+        // Data/ora in cui far partire la notifica: giorno di scadenza alle 9:00, meno N giorni
+        var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: expirationDate)
+        dateComponents.hour = 9
+        dateComponents.minute = 0
+        guard let expirationAtNine = calendar.date(from: dateComponents) else { return }
+        let triggerDate = calendar.date(byAdding: .day, value: -daysBefore, to: expirationAtNine) ?? expirationAtNine
         
-        // Rimuovi notifiche esistenti per questo item
+        // Non programmare se la data è già passata (evita notifiche inutili)
+        if triggerDate <= now { return }
+        
         await cancelNotifications(for: item.id)
         
         let content = UNMutableNotificationContent()
         content.title = "⏰ FoodFade"
-        content.body = notificationBody(for: item, daysRemaining: days)
+        // Messaggio in base a quanti giorni mancano al momento della notifica (daysBefore)
+        content.body = notificationBody(for: item, daysRemaining: daysBefore)
         content.sound = .default
         content.userInfo = ["foodItemId": item.id.uuidString]
         content.categoryIdentifier = "FOOD_EXPIRATION"
         
-        let calendar = Calendar.current
-        let expirationDate = item.effectiveExpirationDate
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
+            repeats: false
+        )
         
-        // Programma la notifica per il giorno di scadenza o giorni prima
-        var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: expirationDate)
-        dateComponents.hour = 9 // Ore 9 del mattino
-        dateComponents.minute = 0
+        let request = UNNotificationRequest(
+            identifier: item.id.uuidString,
+            content: content,
+            trigger: trigger
+        )
         
-        if let triggerDate = calendar.date(from: dateComponents) {
-            let clampedDaysBefore = min(daysBefore, max(days, 0))
-            let adjustedDate = calendar.date(byAdding: .day, value: -clampedDaysBefore, to: triggerDate) ?? triggerDate
-            
-            let trigger = UNCalendarNotificationTrigger(
-                dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: adjustedDate),
-                repeats: false
-            )
-            
-            let request = UNNotificationRequest(
-                identifier: item.id.uuidString,
-                content: content,
-                trigger: trigger
-            )
-            
-            do {
-                try await UNUserNotificationCenter.current().add(request)
-            } catch {
-                print("Errore nella programmazione della notifica: \(error)")
-            }
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            print("Errore nella programmazione della notifica: \(error)")
         }
         
         // Aggiungi azioni alla notifica

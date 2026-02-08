@@ -207,37 +207,107 @@ struct HomeView: View {
     private var progressSection: some View {
         VStack(spacing: 16) {
             if viewModel.totalActiveItems == 0 {
-                // Stato vuoto: nessun prodotto in inventario
                 progressEmptyState
+            } else if currentHomeSummaryStyle == .compact {
+                compactSummaryView
             } else {
-                ZStack {
-                    AnimatedProgressRing(
-                        progress: viewModel.progressRingPercentage,
-                        size: 140,
-                        lineWidth: 14,
-                        primaryColor: ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor,
-                        primaryColorDark: ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColorDark,
-                        animationsEnabled: ThemeManager.shared.animationsEnabled
-                    )
-                    
-                    VStack(spacing: 4) {
-                        Text("\(Int(viewModel.progressRingPercentage * 100))%")
-                            .font(.system(size: 36, weight: .bold, design: .default))
-                            .foregroundColor(.primary)
-                        
-                        Text(progressRingLabel)
-                            .font(.system(size: 14, weight: .medium, design: .default))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+                progressSectionWithRing
+            }
+        }
+    }
+    
+    private var progressSectionWithRing: some View {
+        let counts = viewModel.activityRingCounts
+        let urgentCount = viewModel.expiringToday.count + viewModel.toConsume.count
+        return VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("home.rings.title".localized)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.primary)
+                ActivityRingsView(
+                    okCount: counts.ok,
+                    inScadenzaCount: counts.inScadenza,
+                    expiredCount: counts.expired,
+                    size: 120,
+                    lineWidth: 10,
+                    animationsEnabled: ThemeManager.shared.animationsEnabled
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 20)
+            .padding(.horizontal, 16)
+            .background(Color(.secondarySystemGroupedBackground))
+            .cornerRadius(16)
+            Text(progressRingLegend)
+                .font(.system(size: 12, weight: .regular, design: .default))
+                .foregroundColor(.secondary.opacity(0.9))
+                .multilineTextAlignment(.center)
+            if urgentCount > 0 {
+                NavigationLink(value: viewModel.expiringToday.count > 0 ? NavigationDestination.kpiCard(.expiringToday) : NavigationDestination.kpiCard(.toConsume)) {
+                    HStack(spacing: 6) {
+                        Text("👀")
+                        Text(urgentCount == 1 ? "Vai al prodotto" : "Vai ai prodotti")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(ThemeManager.shared.primaryColor.opacity(0.24))
+                    .foregroundStyle(ThemeManager.shared.primaryColor)
+                    .clipShape(Capsule())
                 }
-                
+                .buttonStyle(.plain)
+            } else {
                 Text(progressRingSubtitle)
-                    .font(.system(size: 15, weight: .medium, design: .default))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
         }
+    }
+    
+    /// Vista compatta al posto dell'anello: barre solo dove serve + CTA (senza Fridgy)
+    private var compactSummaryView: some View {
+        let total = max(1, viewModel.totalActiveItems)
+        let a = viewModel.expiringToday.count
+        let b = viewModel.toConsume.count
+        let c = viewModel.incoming.count
+        let d = viewModel.allOk.count
+        let urgentCount = a + b
+        return VStack(spacing: 14) {
+            VStack(spacing: 10) {
+                CompactSummaryRow(label: "Scadono oggi", count: a, total: total, color: .red, microIcon: a > 0 ? "exclamationmark.triangle.fill" : nil)
+                CompactSummaryRow(label: "Da consumare", count: b, total: total, color: .orange, microIcon: b > 0 ? "fork.knife" : nil)
+                CompactSummaryRow(label: "Nei prossimi giorni", count: c, total: total, color: Color(red: 0.85, green: 0.75, blue: 0.2), microIcon: nil)
+                CompactSummaryRow(label: "Tutto ok", count: d, total: total, color: .green, microIcon: nil)
+            }
+            if urgentCount > 0 {
+                NavigationLink(value: a > 0 ? NavigationDestination.kpiCard(.expiringToday) : NavigationDestination.kpiCard(.toConsume)) {
+                    HStack(spacing: 6) {
+                        Text("👀")
+                        Text(urgentCount == 1 ? "Vai al prodotto" : "Vai ai prodotti")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(ThemeManager.shared.primaryColor)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(ThemeManager.shared.primaryColor.opacity(0.24))
+                    .foregroundStyle(ThemeManager.shared.primaryColor)
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text(progressRingSubtitle)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(16)
     }
     
     /// Placeholder al posto dell'anello quando non ci sono prodotti
@@ -264,6 +334,22 @@ struct HomeView: View {
     
     private var currentProgressRingMode: ProgressRingMode {
         settings.first?.progressRingMode ?? .safeItems
+    }
+    
+    private var currentHomeSummaryStyle: HomeSummaryStyle {
+        settings.first?.homeSummaryStyle ?? .ring
+    }
+    
+    /// Didascalia sotto l'anello (user friendly)
+    private var progressRingLegend: String {
+        switch currentProgressRingMode {
+        case .safeItems:
+            return "Quanto sei in tempo con le scadenze"
+        case .atRisk:
+            return "Quanto è sotto controllo"
+        case .healthScore:
+            return "Il tuo andamento"
+        }
     }
     
     /// Testo dentro l'anello (senza emoji; le emoji restano solo sotto nel subtitle)
@@ -313,51 +399,49 @@ struct HomeView: View {
         switch currentProgressRingMode {
         case .safeItems:
             if percentage == 1.0 {
-                return "😌 Nessuna scadenza imminente"
+                return "😌 Tutto tranquillo!"
             } else if urgentCount > 0 {
                 if urgentCount == 1 {
-                    return "👀 1 prodotto richiede attenzione"
+                    return "👀 C’è un prodotto da tenere d’occhio"
                 } else {
-                    return "👀 \(urgentCount) prodotti richiedono attenzione"
+                    return "👀 Qualche prodotto da tenere d’occhio"
                 }
             } else if viewModel.incoming.count > 0 {
-                return "📅 Alcuni prodotti scadono presto"
+                return "📅 Qualche scadenza in vista"
             } else {
-                return "🔍 Controlla le scadenze"
+                return "🔍 Dai un’occhiata alle scadenze"
             }
             
         case .atRisk:
             let atRiskCount = viewModel.expiringToday.count + viewModel.toConsume.count + viewModel.incoming.count
             if percentage == 0.0 {
-                return "😊 Nessun prodotto a rischio"
+                return "😊 Tutto sotto controllo"
             } else if atRiskCount == 1 {
-                return "⚠️ 1 prodotto a rischio"
+                return "⚠️ Un prodotto da non dimenticare"
             } else {
-                return "⚠️ \(atRiskCount) prodotti a rischio"
+                return "⚠️ \(atRiskCount) prodotti da tenere d’occhio"
             }
             
         case .healthScore:
-            // Per health score, mostra info sui prodotti consumati vs scaduti
             let descriptor = FetchDescriptor<FoodItem>()
-            guard let allItems = try? modelContext.fetch(descriptor) else { return "⏳ Calcolo in corso..." }
+            guard let allItems = try? modelContext.fetch(descriptor) else { return "⏳ Un attimo…" }
             
             let consumed = allItems.filter { $0.isConsumed }.count
             let expired = allItems.filter { !$0.isConsumed && $0.expirationStatus == .expired }.count
             
             if consumed == 0 && expired == 0 {
-                return "📊 Aggiungi prodotti per vedere lo score"
+                return "📊 Aggiungi prodotti per vedere il tuo andamento"
             } else if expired == 0 {
-                return "🎉 Ottimo! Nessun prodotto scaduto"
+                return "🎉 Ottimo, niente sprechi!"
             } else {
                 return "📈 \(consumed) consumati, \(expired) scaduti"
             }
         }
     }
     
-    // MARK: - Summary Cards Section
+    // MARK: - Summary Cards Section (KPI – layout semplice)
     private var summaryCardsSection: some View {
         VStack(spacing: 12) {
-            // Prime due card in una riga
             if viewModel.kpiCardOrder.count >= 2 {
                 HStack(spacing: 12) {
                     NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[0])) {
@@ -367,7 +451,6 @@ struct HomeView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    
                     NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[1])) {
                         SummaryCardContent(
                             type: viewModel.kpiCardOrder[1],
@@ -377,8 +460,6 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                 }
             }
-            
-            // Terza e quarta card in una riga (se presenti)
             if viewModel.kpiCardOrder.count >= 3 {
                 HStack(spacing: 12) {
                     NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[2])) {
@@ -388,7 +469,6 @@ struct HomeView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    
                     if viewModel.kpiCardOrder.count >= 4 {
                         NavigationLink(value: NavigationDestination.kpiCard(viewModel.kpiCardOrder[3])) {
                             SummaryCardContent(
@@ -546,13 +626,68 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Summary Card Content (senza Button, per NavigationLink)
+// MARK: - Riga con barra per il riepilogo compatto (evidenzia solo non-zero)
+private struct CompactSummaryRow: View {
+    let label: String
+    let count: Int
+    let total: Int
+    let color: Color
+    var microIcon: String? = nil
+    
+    private var fillRatio: CGFloat {
+        min(1, CGFloat(count) / CGFloat(max(1, total)))
+    }
+    
+    private var isZero: Bool { count == 0 }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                if let icon = microIcon, count > 0 {
+                    Image(systemName: icon)
+                        .font(.system(size: 11))
+                        .foregroundColor(color)
+                }
+                Text(label)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(isZero ? .secondary : .primary)
+                Spacer()
+                Text("\(count)")
+                    .font(.system(size: 14, weight: isZero ? .regular : .semibold, design: .rounded))
+                    .foregroundColor(isZero ? Color(.tertiaryLabel) : color)
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.primary.opacity(isZero ? 0.06 : 0.08))
+                    if count > 0 {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(color.opacity(0.9))
+                            .frame(width: max(0, geo.size.width * fillRatio))
+                    }
+                }
+            }
+            .frame(height: isZero ? 4 : 6)
+        }
+    }
+}
+
+// MARK: - Summary Card Content (KPI – icona + titolo + numero + micro-label emotiva)
 private struct SummaryCardContent: View {
     let type: KPICardType
     let count: Int
     
     @State private var animatedCount: Int = 0
     @State private var glowIntensity: Double = 0.5
+    
+    private var microLabel: String {
+        switch type {
+        case .expiringToday: return count == 0 ? "Ottimo!" : "Da gestire"
+        case .toConsume: return count == 0 ? "Tranquillo" : "Da gestire"
+        case .incoming: return count == 0 ? "Tranquillo" : "Presto"
+        case .allOk: return count == 0 ? "—" : "Tutto ok"
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -571,84 +706,35 @@ private struct SummaryCardContent: View {
                 .font(.system(size: 32, weight: .bold, design: .default))
                 .foregroundColor(type.color)
                 .opacity(type == .allOk && animatedCount == 0 ? 0.4 : 1)
+            
+            Text(microLabel)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(cardBackgroundColor)
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(
-            color: cardShadowColor,
-            radius: cardShadowRadius,
+            color: type == .toConsume && animatedCount > 0 ? type.color.opacity(0.2 * glowIntensity) : Color.clear,
+            radius: type == .toConsume && animatedCount > 0 ? 8 * glowIntensity : 0,
             x: 0,
-            y: cardShadowY
+            y: type == .toConsume && animatedCount > 0 ? 2 * glowIntensity : 0
         )
-        .scaleEffect(cardScale)
+        .scaleEffect(type == .toConsume && animatedCount > 0 ? 1.02 : 1.0)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
-                animatedCount = count
-            }
-            
-            // Animazione glow per "Da consumare" quando count > 0
+            withAnimation(.easeOut(duration: 0.5)) { animatedCount = count }
             if type == .toConsume && count > 0 {
-                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                    glowIntensity = 1.0
-                }
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) { glowIntensity = 1.0 }
             }
         }
         .onChange(of: count) { oldValue, newValue in
-            withAnimation(.easeOut(duration: 0.5)) {
-                animatedCount = newValue
-            }
-            
-            // Reset glow se count diventa 0
-            if type == .toConsume && newValue == 0 {
-                glowIntensity = 0.5
-            } else if type == .toConsume && newValue > 0 && oldValue == 0 {
-                // Avvia glow quando passa da 0 a > 0
-                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                    glowIntensity = 1.0
-                }
+            withAnimation(.easeOut(duration: 0.5)) { animatedCount = newValue }
+            if type == .toConsume && newValue == 0 { glowIntensity = 0.5 }
+            else if type == .toConsume && newValue > 0 && oldValue == 0 {
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) { glowIntensity = 1.0 }
             }
         }
-    }
-    
-    // MARK: - Computed Properties per enfasi visiva
-    
-    /// Colore dello sfondo della card
-    private var cardBackgroundColor: Color {
-        Color(.secondarySystemGroupedBackground)
-    }
-    
-    /// Colore dell'ombra (glow per "Da consumare" quando count > 0)
-    private var cardShadowColor: Color {
-        if type == .toConsume && animatedCount > 0 {
-            return type.color.opacity(0.2 * glowIntensity)
-        }
-        return Color.clear
-    }
-    
-    /// Raggio dell'ombra
-    private var cardShadowRadius: CGFloat {
-        if type == .toConsume && animatedCount > 0 {
-            return 8 * glowIntensity
-        }
-        return 0
-    }
-    
-    /// Offset Y dell'ombra
-    private var cardShadowY: CGFloat {
-        if type == .toConsume && animatedCount > 0 {
-            return 2 * glowIntensity
-        }
-        return 0
-    }
-    
-    /// Scala della card (leggermente più grande per "Da consumare" quando count > 0)
-    private var cardScale: CGFloat {
-        if type == .toConsume && animatedCount > 0 {
-            return 1.02
-        }
-        return 1.0
     }
 }
 

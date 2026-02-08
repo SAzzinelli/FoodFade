@@ -24,17 +24,15 @@ struct StatisticsView: View {
             ScrollView {
                 if let data = statsData {
                     VStack(spacing: 20) {
-                        // Card di ingresso alle viste dettaglio
+                        // Card informativa introduttiva (Fridgy in base al Waste Score + testo)
+                        StatisticsIntroCard()
+                        
+                        // Card di ingresso alle viste dettaglio (solo titoli)
                         VStack(spacing: 12) {
                             NavigationLink {
                                 WasteScoreDetailView(data: data, primaryColor: primaryColor, primaryColorDark: themeManager.primaryColorDark)
                             } label: {
-                                StatEntryCard(
-                                    icon: "chart.pie.fill",
-                                    title: "Waste Score",
-                                    description: "Quanto hai usato in tempo rispetto a quanto è scaduto. 100% = nessuno spreco.",
-                                    iconColor: primaryColor
-                                )
+                                StatEntryCard(icon: "chart.pie.fill", title: "stats.waste_score".localized, iconColor: primaryColor)
                             }
                             .buttonStyle(.plain)
                             
@@ -42,12 +40,7 @@ struct StatisticsView: View {
                                 NavigationLink {
                                     UsedVsWastedDetailView(data: data, primaryColor: primaryColor)
                                 } label: {
-                                    StatEntryCard(
-                                        icon: "chart.bar.fill",
-                                        title: "Cibo usato vs sprecato",
-                                        description: "Confronto tra prodotti consumati e scaduti nel tempo.",
-                                        iconColor: .blue
-                                    )
+                                    StatEntryCard(icon: "chart.bar.fill", title: "stats.food_waste".localized, iconColor: .blue)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -56,12 +49,7 @@ struct StatisticsView: View {
                                 NavigationLink {
                                     CategoryDetailView(data: data, primaryColor: primaryColor)
                                 } label: {
-                                    StatEntryCard(
-                                        icon: "square.grid.2x2.fill",
-                                        title: "Per categoria",
-                                        description: "Andamento per Frigorifero, Congelatore e Dispensa.",
-                                        iconColor: .green
-                                    )
+                                    StatEntryCard(icon: "square.grid.2x2.fill", title: "stats.categories".localized, iconColor: .green)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -70,12 +58,7 @@ struct StatisticsView: View {
                                 NavigationLink {
                                     AverageDaysDetailView(data: data, primaryColor: primaryColor)
                                 } label: {
-                                    StatEntryCard(
-                                        icon: "clock.badge.checkmark",
-                                        title: "Quanto tieni i prodotti",
-                                        description: "In media dopo quanti giorni consumi i prodotti.",
-                                        iconColor: Color(red: 0.2, green: 0.6, blue: 0.7)
-                                    )
+                                    StatEntryCard(icon: "clock.badge.checkmark", title: "stats.how_long_products".localized, iconColor: Color(red: 0.2, green: 0.6, blue: 0.7))
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -83,12 +66,7 @@ struct StatisticsView: View {
                             NavigationLink {
                                 DetailsDetailView(data: data, primaryColor: primaryColor)
                             } label: {
-                                StatEntryCard(
-                                    icon: "list.bullet.rectangle",
-                                    title: "Dettagli",
-                                    description: "Prodotti più aggiunti e statistiche di utilizzo.",
-                                    iconColor: Color(red: 0.5, green: 0.4, blue: 0.8)
-                                )
+                                StatEntryCard(icon: "list.bullet.rectangle", title: "stats.in_detail".localized, iconColor: Color(red: 0.5, green: 0.4, blue: 0.8))
                             }
                             .buttonStyle(.plain)
                         }
@@ -119,11 +97,37 @@ struct StatisticsView: View {
         }
     }
     
-    // MARK: - Card di ingresso (icona colorata, descrizione, freccia)
+    // MARK: - Card informativa introduttiva (Fridgy fisso + testo)
+    private struct StatisticsIntroCard: View {
+        var body: some View {
+            VStack(spacing: 14) {
+                Image("FridgyStatisticsIntro")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 160, maxHeight: 160)
+                VStack(spacing: 6) {
+                    Text("Riepilogo di utilizzo e spreco.")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
+                    Text("Waste Score, grafici e approfondimenti per categoria e tempi. Per monitorare le tue abitudini.")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .padding(.horizontal, 16)
+            .background(Color(.secondarySystemGroupedBackground))
+            .cornerRadius(16)
+        }
+    }
+    
+    // MARK: - Card di ingresso (solo icona + titolo, senza descrizione)
     private struct StatEntryCard: View {
         let icon: String
         let title: String
-        let description: String
         let iconColor: Color
         
         var body: some View {
@@ -134,16 +138,10 @@ struct StatisticsView: View {
                     .frame(width: 48, height: 48)
                     .background(iconColor.opacity(0.15))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
-                    Text(description)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(title)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "chevron.right")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color(.tertiaryLabel))
@@ -404,37 +402,59 @@ private struct WasteScoreDetailView: View {
         return "\(wasted) \(wasted == 1 ? "prodotto scaduto" : "prodotti scaduti") questo mese"
     }
     
+    private func ctaLabel(percentage: Double) -> String {
+        if percentage >= 1.0 { return "Continua così" }
+        if percentage >= 0.8 { return "Continua così" }
+        return "Puoi migliorare"
+    }
+    
+    private func ctaEmoji(percentage: Double) -> String {
+        if percentage >= 0.8 { return "💪" }
+        return "📈"
+    }
+    
+    private var wasteScoreSentiment: (pillColor: Color, glowColor: Color) {
+        if data.wasteScore >= 0.8 { return (.green, .green) }
+        if data.wasteScore >= 0.5 { return (Color(red: 0.95, green: 0.7, blue: 0.2), Color.orange) }
+        return (.red.opacity(0.9), .red)
+    }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Contenuto: score e periodo
+                // Contenuto: Fridgy + percentuale in pill con glow
                 VStack(alignment: .leading, spacing: 8) {
                     Text("stats.section.content".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(spacing: 16) {
-                        Text("Waste Score")
+                        Text("stats.waste_score".localized)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
-                        ZStack {
-                            Circle()
-                                .stroke(Color(.systemGray5), lineWidth: 18)
-                                .frame(width: 160, height: 160)
-                            Circle()
-                                .trim(from: 0, to: animatedWasteScore)
-                                .stroke(primaryColor, style: StrokeStyle(lineWidth: 18, lineCap: .round))
-                                .rotationEffect(.degrees(-90))
-                                .frame(width: 160, height: 160)
-                                .animation(.spring(response: 1.5, dampingFraction: 0.8), value: animatedWasteScore)
-                            VStack(spacing: 6) {
-                                Text(emoji(percentage: data.wasteScore)).font(.system(size: 40))
-                                Text("\(Int(animatedWasteScore * 100))%").font(.system(size: 36, weight: .bold)).foregroundColor(.primary)
-                            }
-                        }
+                        Image(FridgyEmotion.forWasteScore(data.wasteScore).imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 140, maxHeight: 140)
+                        Text("\(Int(animatedWasteScore * 100))%")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 12)
+                            .background(wasteScoreSentiment.pillColor)
+                            .clipShape(Capsule())
+                            .shadow(color: wasteScoreSentiment.glowColor.opacity(0.5), radius: 10, x: 0, y: 0)
+                            .shadow(color: wasteScoreSentiment.glowColor.opacity(0.3), radius: 16, x: 0, y: 0)
                         Text(title(percentage: data.wasteScore)).font(.system(size: 18, weight: .bold)).foregroundColor(.primary)
-                        Text("\(Int(data.wasteScore * 100))% di spreco evitato").font(.system(size: 15)).foregroundColor(.secondary)
                         Text(subtitle(wasted: data.monthlyStats.expired)).font(.system(size: 14)).foregroundColor(.secondary).multilineTextAlignment(.center)
-                        Button("Continua così") { }.font(.system(size: 16, weight: .medium)).foregroundColor(primaryColor).buttonStyle(.plain)
+                        Button { } label: {
+                            HStack(spacing: 6) {
+                                Text(ctaLabel(percentage: data.wasteScore))
+                                Text(ctaEmoji(percentage: data.wasteScore))
+                            }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(primaryColor)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(24)
                     .frame(maxWidth: .infinity)
@@ -460,11 +480,8 @@ private struct WasteScoreDetailView: View {
                     .cornerRadius(16)
                 }
                 
-                // Cos'è? e come migliorare
+                // Cos'è? e come migliorare (solo titolo dentro la card, come "Come migliorare")
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 10) {
                         Label("stats.what_is".localized, systemImage: "book.closed.fill")
                             .font(.system(size: 16, weight: .semibold))
@@ -503,7 +520,7 @@ private struct WasteScoreDetailView: View {
             .padding(20)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Waste Score")
+        .navigationTitle("stats.waste_score".localized)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             withAnimation(.spring(response: 1.5, dampingFraction: 0.8)) { animatedWasteScore = data.wasteScore }
@@ -562,7 +579,7 @@ private struct UsedVsWastedDetailView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Cibo usato vs sprecato")
+                        Text("stats.food_waste".localized)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
                         Text("Confronto tra prodotti consumati e scaduti")
@@ -602,12 +619,12 @@ private struct UsedVsWastedDetailView: View {
             .padding(20)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Cibo usato vs sprecato")
+        .navigationTitle("stats.food_waste".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-// MARK: - Dettaglio Per categoria
+// MARK: - Dettaglio Categorie
 private struct CategoryDetailView: View {
     let data: StatisticsData
     let primaryColor: Color
@@ -640,7 +657,7 @@ private struct CategoryDetailView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Per categoria")
+                        Text("stats.categories".localized)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
                         Text("\(totalItems) prodotti nel periodo · Consumati vs totali per luogo")
@@ -682,7 +699,7 @@ private struct CategoryDetailView: View {
             .padding(20)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Per categoria")
+        .navigationTitle("stats.categories".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -692,62 +709,53 @@ private struct AverageDaysDetailView: View {
     let data: StatisticsData
     let primaryColor: Color
     
+    private static let teal = Color(red: 0.2, green: 0.6, blue: 0.7)
+    
     var body: some View {
         Group {
             if let avgDays = data.averageConsumptionDays {
                 ScrollView {
-                    VStack(spacing: 16) {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Quanto tieni i prodotti")
-                                .font(.system(size: 14))
+                    VStack(spacing: 24) {
+                        // Card hero: numero grande centrato
+                        VStack(spacing: 20) {
+                            Text("stats.how_long.avg_title".localized)
+                                .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(.secondary)
-                            HStack(spacing: 16) {
-                                ZStack {
-                                    Circle()
-                                        .stroke(Color(red: 0.2, green: 0.6, blue: 0.7).opacity(0.4), lineWidth: 2)
-                                        .frame(width: 64, height: 64)
-                                    Image(systemName: "clock.badge.checkmark")
-                                        .font(.system(size: 28))
-                                        .foregroundColor(Color(red: 0.2, green: 0.6, blue: 0.7))
-                                }
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("In media li consumi dopo")
-                                        .font(.system(size: 18, weight: .medium))
-                                        .foregroundColor(.primary)
-                                    HStack(spacing: 12) {
-                                        Text("\(avgDays)")
-                                            .font(.system(size: 32, weight: .bold))
-                                            .foregroundColor(.white)
-                                            .frame(width: 56, height: 56)
-                                            .background(Color(red: 0.2, green: 0.6, blue: 0.7))
-                                            .clipShape(Circle())
-                                        Text(avgDays == 1 ? "giorno" : "giorni")
-                                            .font(.system(size: 18))
-                                            .foregroundColor(.primary)
-                                    }
-                                }
-                                Spacer(minLength: 0)
+                                .multilineTextAlignment(.center)
+                            Image(systemName: "clock.badge.checkmark")
+                                .font(.system(size: 40))
+                                .foregroundStyle(Self.teal.opacity(0.4))
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text("\(avgDays)")
+                                    .font(.system(size: 72, weight: .bold))
+                                    .foregroundColor(Self.teal)
+                                Text(avgDays == 1 ? "stats.how_long.day".localized : "stats.how_long.days".localized)
+                                    .font(.system(size: 22, weight: .medium))
+                                    .foregroundColor(.primary)
                             }
-                            Text("Media calcolata sui prodotti che hai segnato come consumati.")
+                            Text("stats.how_long.footer".localized)
                                 .font(.system(size: 13))
                                 .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 8)
                         }
-                        .padding(24)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
+                        .padding(.horizontal, 24)
                         .background(Color(.secondarySystemGroupedBackground))
-                        .cornerRadius(16)
+                        .cornerRadius(20)
                     }
                     .padding(20)
                 }
             }
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Quanto tieni i prodotti")
+        .navigationTitle("stats.how_long_products".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-// MARK: - Dettaglio Dettagli (prodotti più aggiunti)
+// MARK: - Dettaglio Nel dettaglio (prodotti più aggiunti)
 private struct DetailsDetailView: View {
     let data: StatisticsData
     let primaryColor: Color
@@ -858,7 +866,7 @@ private struct DetailsDetailView: View {
             .padding(20)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Dettagli")
+        .navigationTitle("stats.in_detail".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

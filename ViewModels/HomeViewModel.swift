@@ -44,6 +44,7 @@ class HomeViewModel: ObservableObject {
     @Published var toConsume: [FoodItem] = []
     @Published var incoming: [FoodItem] = []
     @Published var allOk: [FoodItem] = []
+    @Published var expiredCount: Int = 0
     @Published var smartSuggestion: String? // Retrocompatibilità
     @Published var fridgySuggestion: String? // Retrocompatibilità
     @Published var fridgyMessage: String?
@@ -121,6 +122,8 @@ class HomeViewModel: ObservableObject {
             
             // 4. Tutto ok: tutto il resto
             allOk = remainingItems
+            
+            expiredCount = allItems.filter { !$0.isConsumed && $0.expirationStatus == .expired }.count
             
             // Fridgy non è più mostrato in Home; suggerimenti solo nelle viste singole (Scadono oggi, Da consumare, ecc.)
             fridgyMessage = nil
@@ -208,6 +211,16 @@ class HomeViewModel: ObservableObject {
     /// Totale items attivi
     var totalActiveItems: Int {
         expiringToday.count + toConsume.count + incoming.count + allOk.count
+    }
+    
+    /// Prodotti "in scadenza" (scadono oggi + da consumare + nei prossimi giorni), esclusi gli scaduti
+    var inScadenzaCount: Int {
+        totalActiveItems - allOk.count - expiredCount
+    }
+    
+    /// Conteggi per i 3 anelli: OK, in scadenza, scaduti
+    var activityRingCounts: (ok: Int, inScadenza: Int, expired: Int) {
+        (allOk.count, inScadenzaCount, expiredCount)
     }
     
     /// Carica il suggerimento Fridgy per la home usando la nuova architettura

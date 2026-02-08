@@ -11,6 +11,7 @@ struct ConsumedQuantitySheet: View {
     var onConfirm: ((Int) -> Void)?
     
     @State private var quantityToConsume: Int = 1
+    @State private var showFridgyBravo = false
     private var maxQuantity: Int { item.quantity }
     
     var body: some View {
@@ -100,6 +101,14 @@ struct ConsumedQuantitySheet: View {
             .onAppear {
                 quantityToConsume = 1
             }
+            .overlay {
+                if showFridgyBravo {
+                    FridgyBravoOverlay {
+                        showFridgyBravo = false
+                        dismiss()
+                    }
+                }
+            }
         }
     }
     
@@ -107,10 +116,11 @@ struct ConsumedQuantitySheet: View {
         let amount = quantityToConsume
         if let onConfirm = onConfirm {
             onConfirm(amount)
+            dismiss()
         } else {
             applyConsumption(amount: amount)
+            showFridgyBravo = true
         }
-        dismiss()
     }
     
     private func applyConsumption(amount: Int) {
@@ -125,8 +135,6 @@ struct ConsumedQuantitySheet: View {
         
         do {
             try modelContext.save()
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
         } catch {
             print("ConsumedQuantitySheet save error: \(error)")
         }

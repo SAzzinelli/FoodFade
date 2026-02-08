@@ -306,11 +306,7 @@ private struct WelcomeStep1View: View {
     let currentStep: Int
     let totalSteps: Int
     let onNext: () -> Void
-    @Environment(\.colorScheme) private var colorScheme
     @Query private var userProfiles: [UserProfile]
-    
-    private var leafColor: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor }
-    private var leafColorDark: Color { colorScheme == .dark ? ThemeManager.naturalHomeLogoColor.opacity(0.8) : ThemeManager.shared.primaryColorDark }
     
     private var welcomeTitle: String {
         let gender = GenderHelper.getGender(from: userProfiles.first)
@@ -324,19 +320,11 @@ private struct WelcomeStep1View: View {
             
             ScrollView {
                 VStack(spacing: 40) {
-                    // Icona arancione (tinta fissa per non diventare bianca col tema)
-                    Image("AppIconLogo")
-                        .renderingMode(.template)
+                    // Fridgy – mascotte di benvenuto
+                    Image("FridgyIntro")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 100, height: 100)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [ThemeManager.naturalHomeLogoColor, ThemeManager.naturalHomeLogoColor.opacity(0.85)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .frame(maxWidth: 200, maxHeight: 200)
                         .padding(.top, 20)
                     
                     // Titolo e sottotitolo

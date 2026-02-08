@@ -17,6 +17,7 @@ final class AppSettings {
     var animationsEnabled: Bool = true
     var accentColorRaw: String = AccentColor.natural.rawValue
     var progressRingModeRaw: String = ProgressRingMode.safeItems.rawValue // ProgressRingMode.rawValue
+    var homeSummaryStyleRaw: String = HomeSummaryStyle.ring.rawValue     // ring = anello, compact = solo riepilogo
     var expirationInputMethodRaw: String = ExpirationInputMethod.calendar.rawValue
     var shoppingListTabEnabled: Bool = false // Voce "Lista della spesa" in tab bar (off di default)
     
@@ -48,6 +49,15 @@ final class AppSettings {
         }
     }
     
+    var homeSummaryStyle: HomeSummaryStyle {
+        get {
+            HomeSummaryStyle(rawValue: homeSummaryStyleRaw) ?? .ring
+        }
+        set {
+            homeSummaryStyleRaw = newValue.rawValue
+        }
+    }
+    
     var expirationInputMethod: ExpirationInputMethod {
         get {
             ExpirationInputMethod(rawValue: expirationInputMethodRaw) ?? .calendar
@@ -68,6 +78,7 @@ final class AppSettings {
         animationsEnabled: Bool = true,
         accentColor: AccentColor = .natural,
         progressRingMode: ProgressRingMode = .safeItems,
+        homeSummaryStyle: HomeSummaryStyle = .ring,
         expirationInputMethod: ExpirationInputMethod = .calendar,
         hasChosenCloudUsage: Bool = false,
         shoppingListTabEnabled: Bool = false
@@ -82,6 +93,7 @@ final class AppSettings {
         self.animationsEnabled = animationsEnabled
         self.accentColorRaw = accentColor.rawValue
         self.progressRingModeRaw = progressRingMode.rawValue
+        self.homeSummaryStyleRaw = homeSummaryStyle.rawValue
         self.expirationInputMethodRaw = expirationInputMethod.rawValue
         self.hasChosenCloudUsage = hasChosenCloudUsage
         self.shoppingListTabEnabled = shoppingListTabEnabled

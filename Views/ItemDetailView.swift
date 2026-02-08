@@ -12,6 +12,7 @@ struct ItemDetailView: View {
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
     @State private var showingConsumedQuantitySheet = false
+    @State private var showFridgyBravo = false
     
     var body: some View {
         List {
@@ -70,7 +71,7 @@ struct ItemDetailView: View {
                             .tint(statusColor)
                             .frame(height: 6)
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 4)
                 }
                 
                 // Fridgy Card (se disponibile o in caricamento)
@@ -202,6 +203,7 @@ struct ItemDetailView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .contentMargins(.top, 4, for: .scrollContent)
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("")
             .toolbar {
@@ -237,6 +239,14 @@ struct ItemDetailView: View {
             }
             .sheet(isPresented: $showingConsumedQuantitySheet) {
                 ConsumedQuantitySheet(item: item)
+            }
+            .overlay {
+                if showFridgyBravo {
+                    FridgyBravoOverlay {
+                        showFridgyBravo = false
+                        dismiss()
+                    }
+                }
             }
             .onChange(of: showingConsumedQuantitySheet) { oldValue, newValue in
                 if oldValue == true && newValue == false && item.isConsumed {
@@ -311,7 +321,7 @@ struct ItemDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .background(colorScheme == .dark ? Color(white: 0.92) : Color(.secondarySystemGroupedBackground))
-                .cornerRadius(10)
+                .clipShape(Capsule())
             }
             
             // Pulsante Consumato - se quantità > 1 apre sheet scelta quantità, altrimenti segna consumato
@@ -380,11 +390,7 @@ struct ItemDetailView: View {
         
         do {
             try modelContext.save()
-            
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-            
-            dismiss()
+            showFridgyBravo = true
         } catch {
             print("Errore nel salvataggio: \(error)")
         }

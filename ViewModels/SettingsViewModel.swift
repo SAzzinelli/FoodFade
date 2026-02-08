@@ -21,6 +21,7 @@ class SettingsViewModel: ObservableObject {
     @Published var animationsEnabled: Bool = true
     @Published var accentColor: AccentColor = .natural
     @Published var progressRingMode: ProgressRingMode = .safeItems
+    @Published var homeSummaryStyle: HomeSummaryStyle = .ring
     @Published var expirationInputMethod: ExpirationInputMethod = .calendar
     @Published var shoppingListTabEnabled: Bool = false
     
@@ -56,6 +57,7 @@ class SettingsViewModel: ObservableObject {
             animationsEnabled = settings.animationsEnabled
             accentColor = settings.accentColor
             progressRingMode = settings.progressRingMode
+            homeSummaryStyle = settings.homeSummaryStyle
             expirationInputMethod = settings.expirationInputMethod
             shoppingListTabEnabled = settings.shoppingListTabEnabled
             
@@ -91,6 +93,7 @@ class SettingsViewModel: ObservableObject {
             settings.animationsEnabled = animationsEnabled
             settings.accentColor = accentColor
             settings.progressRingMode = progressRingMode
+            settings.homeSummaryStyle = homeSummaryStyle
             settings.expirationInputMethod = expirationInputMethod
             settings.shoppingListTabEnabled = shoppingListTabEnabled
             
@@ -105,6 +108,7 @@ class SettingsViewModel: ObservableObject {
                 animationsEnabled: animationsEnabled,
                 accentColor: accentColor,
                 progressRingMode: progressRingMode,
+                homeSummaryStyle: homeSummaryStyle,
                 expirationInputMethod: expirationInputMethod,
                 shoppingListTabEnabled: shoppingListTabEnabled
             )

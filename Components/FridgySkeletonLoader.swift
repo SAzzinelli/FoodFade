@@ -1,62 +1,36 @@
 import SwiftUI
 
-/// Skeleton loader per Fridgy Card
-/// Mostrato mentre Fridgy sta generando il suggerimento
+/// Loader per il suggerimento Fridgy: overlay leggero con icona Fridgy (Bravo) e frase
+/// Comunica che il caricamento non è istantaneo
 struct FridgySkeletonLoader: View {
-    @State private var shimmerOffset: CGFloat = -200
+    @State private var opacity: Double = 0.6
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Icona skeleton
-            Circle()
-                .fill(Color.gray.opacity(0.2))
-                .frame(width: 36, height: 36)
+        HStack(spacing: 14) {
+            Image("FridgyBravo")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 52, height: 52)
             
-            // Contenuto skeleton
-            VStack(alignment: .leading, spacing: 6) {
-                // Titolo skeleton
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 120, height: 12)
-                
-                // Messaggio skeleton (2 righe)
-                VStack(alignment: .leading, spacing: 6) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 200, height: 12)
-                    
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 160, height: 12)
-                }
-            }
+            Text("fridgy.loading".localized)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.secondary)
+                .opacity(opacity)
             
-            Spacer()
+            Spacer(minLength: 0)
         }
         .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color.gray.opacity(0.1))
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.secondarySystemGroupedBackground))
         )
         .overlay(
-            // Shimmer effect
-            GeometryReader { geometry in
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.clear,
-                        Color.white.opacity(0.3),
-                        Color.clear
-                    ]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .frame(width: geometry.size.width)
-                .offset(x: shimmerOffset)
-            }
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
         )
         .onAppear {
-            withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                shimmerOffset = 400
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                opacity = 1.0
             }
         }
     }

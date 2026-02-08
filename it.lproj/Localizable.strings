@@ -22,6 +22,10 @@
 "home.subtitle.multiple" = "Hai %d prodotti da gestire";
 "home.progress.empty.title" = "Nessun prodotto inserito";
 "home.progress.empty.subtitle" = "Aggiungi il primo prodotto per vedere qui il tuo riepilogo";
+"home.rings.ok" = "Prodotti OK";
+"home.rings.inscadenza" = "In scadenza";
+"home.rings.scaduti" = "Scaduti";
+"home.rings.title" = "Attualmente in casa";
 
 /* Navigation */
 "nav.home" = "Home";
@@ -140,7 +144,15 @@
 
 /* Statistics */
 "stats.title" = "Statistiche";
-"stats.waste_score" = "Waste Score";
+"stats.waste_score" = "Waste score";
+"stats.food_waste" = "Spreco del cibo";
+"stats.categories" = "Categorie";
+"stats.how_long_products" = "Quanto tieni i prodotti";
+"stats.how_long.avg_title" = "In media li consumi dopo";
+"stats.how_long.day" = "giorno";
+"stats.how_long.days" = "giorni";
+"stats.how_long.footer" = "Media calcolata sui prodotti che hai segnato come consumati.";
+"stats.in_detail" = "Nel dettaglio";
 "stats.consumed" = "consumati";
 "stats.this_month" = "Questo mese";
 "stats.consumed_items" = "Consumati";
@@ -293,6 +305,7 @@
 "fridgy.footer.enabled.available" = "Fridgy fornisce suggerimenti personalizzati e consigli in base al tuo inventario.";
 "fridgy.footer.enabled.unavailable" = "Fridgy non è disponibile su questo dispositivo.";
 "fridgy.footer.disabled" = "Fridgy è disattivato. L'app funziona al 100% senza suggerimenti intelligenti.";
+"fridgy.loading" = "Sto caricando un suggerimento di Fridgy…";
 
 /* Assistente (Impostazioni - senza menzione Apple Intelligence) */
 "assistant.section.title" = "Assistente";
