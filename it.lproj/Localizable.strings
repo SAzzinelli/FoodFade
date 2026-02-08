@@ -26,6 +26,17 @@
 "home.rings.inscadenza" = "In scadenza";
 "home.rings.scaduti" = "Scaduti";
 "home.rings.title" = "Attualmente in casa";
+"home.expiring.section.title" = "Prodotti in scadenza";
+"home.see.all" = "Vedi tutti";
+"home.kpi.total" = "Totale";
+"home.kpi.expired" = "Scaduti";
+"home.kpi.expiring" = "In scadenza";
+"home.category.products" = "%d Prodotti";
+"home.category.expiring" = "• %d in scadenza";
+"home.category.all_ok" = "• Tutto OK";
+"home.recent.added_today" = "Aggiunto oggi";
+"home.recent.added_yesterday" = "Aggiunto ieri";
+"home.recent.empty" = "Nessun prodotto recente.";
 
 /* Navigation */
 "nav.home" = "Home";
@@ -46,6 +57,7 @@
 "inventory.empty.title" = "Nessun prodotto";
 "inventory.empty.subtitle" = "Aggiungi il tuo primo prodotto per iniziare";
 "inventory.empty.button" = "Aggiungi Prodotto";
+"inventory.category.empty" = "Non ci sono prodotti in questa categoria.";
 "inventory.search.empty.title" = "Nessun risultato";
 "inventory.search.empty.subtitle" = "Nessun risultato per \"%@\". Prova con altri termini.";
 "inventory.sort" = "Ordina";
@@ -83,6 +95,7 @@
 "addfood.photo.file" = "File";
 "addfood.expiration" = "Data di scadenza";
 "addfood.quantity" = "Quantità: %d";
+"addfood.quantity_section" = "Quantità";
 "addfood.notes" = "Note (opzionale)";
 "addfood.notify" = "Notifiche";
 
@@ -90,6 +103,16 @@
 "tags.section" = "Tag";
 "tags.gluten_free" = "Senza glutine";
 "tags.bio" = "Bio";
+"tags.vegan" = "Vegano";
+"tags.vegetarian" = "Vegetariano";
+"tags.lactose_free" = "Senza lattosio";
+"tags.ready" = "Pronto";
+"tags.to_cook" = "Da cucinare";
+"tags.artisan" = "Artigianale";
+"tags.single_portion" = "Monoporzione";
+"tags.multi_portion" = "Multiporzione";
+"addfood.labels" = "Etichette";
+"addfood.labels.more" = "+%d";
 "tags.footer" = "Useremo questi tag per filtrare il tuo inventario e fornirti suggerimenti.";
 "tags.filter_all" = "Tutti";
 "tags.filter_opened" = "Aperto";
@@ -348,6 +371,14 @@
 "addfood.dictation.error.message.no_date" = "Riprova.";
 "addfood.dictation.error.title.not_heard" = "Non ho capito..";
 "addfood.dictation.error.message.not_heard" = "Puoi ripetere?";
+"addfood.where_store" = "DOVE LO CONSERVI?";
+"addfood.change_date" = "Cambia";
+"addfood.unit_piece" = "Unità: Pezzo";
+"addfood.characteristics" = "CARATTERISTICHE";
+"addfood.add_notes" = "Aggiungi note";
+"addfood.add_notes.optional" = "Opzionale";
+"addfood.notify_days" = "3 giorni prima";
+"addfood.barcode.placeholder" = "Scansiona o inserisci";
 
 /* Settings - Inserimento scadenza */
 "settings.expiration.section" = "Inserimento scadenza";

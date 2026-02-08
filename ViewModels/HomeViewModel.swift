@@ -174,32 +174,15 @@ class HomeViewModel: ObservableObject {
     var progressRingPercentage: Double {
         let total = expiringToday.count + toConsume.count + incoming.count + allOk.count
         guard total > 0 else {
-            // Se non ci sono prodotti, restituisci 1.0 per "safeItems" e "healthScore", 0.0 per "atRisk"
             return progressRingMode == .atRisk ? 0.0 : 1.0
         }
         
         switch progressRingMode {
         case .safeItems:
-            // % prodotti "tutto ok" (default)
             return Double(allOk.count) / Double(total)
-            
         case .atRisk:
-            // % prodotti a rischio (invertito)
             let atRiskCount = expiringToday.count + toConsume.count + incoming.count
             return Double(atRiskCount) / Double(total)
-            
-        case .healthScore:
-            // Health score: basato su prodotti consumati vs scaduti (calcolato su tutti gli item)
-            guard let modelContext = modelContext else { return 1.0 }
-            let descriptor = FetchDescriptor<FoodItem>()
-            guard let allItems = try? modelContext.fetch(descriptor) else { return 1.0 }
-            
-            let consumed = allItems.filter { $0.isConsumed }.count
-            let expired = allItems.filter { !$0.isConsumed && $0.expirationStatus == .expired }.count
-            let totalWithHistory = consumed + expired
-            
-            guard totalWithHistory > 0 else { return 1.0 }
-            return Double(consumed) / Double(totalWithHistory)
         }
     }
     

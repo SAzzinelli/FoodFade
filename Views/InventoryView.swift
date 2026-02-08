@@ -203,33 +203,42 @@ struct InventoryView: View {
     }
     
     private var emptyState: some View {
-        VStack(spacing: 20) {
+        let isCategoryFilter = categoryFilter != nil
+        return VStack(spacing: 20) {
             Spacer()
             Image(systemName: searchText.isEmpty ? "tray" : "magnifyingglass")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
             if searchText.isEmpty {
-                Text("inventory.empty.title".localized)
-                    .font(.system(size: 22, weight: .semibold, design: .default))
-                    .foregroundColor(.primary)
-                Text("inventory.empty.subtitle".localized)
-                    .font(.system(size: 16, weight: .regular, design: .default))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                Button {
-                    showingAddFood = true
-                } label: {
-                    Text("inventory.empty.button".localized)
-                        .font(.system(size: 17, weight: .semibold, design: .default))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: 200)
-                        .frame(height: 50)
-                        .background(emptyStateButtonColor)
-                        .cornerRadius(12)
+                if isCategoryFilter {
+                    Text("inventory.category.empty".localized)
+                        .font(.system(size: 18, weight: .semibold, design: .default))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                } else {
+                    Text("inventory.empty.title".localized)
+                        .font(.system(size: 22, weight: .semibold, design: .default))
+                        .foregroundColor(.primary)
+                    Text("inventory.empty.subtitle".localized)
+                        .font(.system(size: 16, weight: .regular, design: .default))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                    Button {
+                        showingAddFood = true
+                    } label: {
+                        Text("inventory.empty.button".localized)
+                            .font(.system(size: 17, weight: .semibold, design: .default))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: 200)
+                            .frame(height: 50)
+                            .background(emptyStateButtonColor)
+                            .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                    .tint(.white)
                 }
-                .buttonStyle(.plain)
-                .tint(.white)
             } else {
                 Text("inventory.search.empty.title".localized)
                     .font(.system(size: 22, weight: .semibold, design: .default))

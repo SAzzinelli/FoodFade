@@ -19,6 +19,14 @@ class AddFoodViewModel: ObservableObject {
     @Published var foodType: FoodType? = nil
     @Published var isGlutenFree: Bool = false
     @Published var isBio: Bool = false
+    @Published var isVegan: Bool = false
+    @Published var isLactoseFree: Bool = false
+    @Published var isVegetarian: Bool = false
+    @Published var isReady: Bool = false
+    @Published var needsCooking: Bool = false
+    @Published var isArtisan: Bool = false
+    @Published var isSinglePortion: Bool = false
+    @Published var isMultiPortion: Bool = false
     
     // Gestione prodotti freschi (semplificata)
     @Published var isFresh: Bool = false { // Prodotto fresco (scade dopo 3 giorni)
@@ -265,6 +273,14 @@ class AddFoodViewModel: ObservableObject {
             foodType: foodType,
             isGlutenFree: isGlutenFree,
             isBio: isBio,
+            isVegan: isVegan,
+            isLactoseFree: isLactoseFree,
+            isVegetarian: isVegetarian,
+            isReady: isReady,
+            needsCooking: needsCooking,
+            isArtisan: isArtisan,
+            isSinglePortion: isSinglePortion,
+            isMultiPortion: isMultiPortion,
             isFresh: isFresh,
             isOpened: false,
             openedDate: nil,
@@ -356,6 +372,14 @@ class AddFoodViewModel: ObservableObject {
         foodType = nil
         isGlutenFree = false
         isBio = false
+        isVegan = false
+        isLactoseFree = false
+        isVegetarian = false
+        isReady = false
+        needsCooking = false
+        isArtisan = false
+        isSinglePortion = false
+        isMultiPortion = false
         isFresh = false
         dateValidationError = nil
     }

@@ -142,9 +142,17 @@ final class FoodItem {
     var photoData: Data? // Foto del prodotto
     var foodType: FoodType? // Tipo di alimento (opzionale)
     
-    // Tag / filtri (Senza glutine, Bio; "Aperto" è isOpened)
+    // Etichette (tag / filtri)
     var isGlutenFree: Bool = false
     var isBio: Bool = false
+    var isVegan: Bool = false
+    var isLactoseFree: Bool = false
+    var isVegetarian: Bool = false
+    var isReady: Bool = false       // Pronto (da consumare così)
+    var needsCooking: Bool = false  // Da cucinare
+    var isArtisan: Bool = false     // Artigianale
+    var isSinglePortion: Bool = false  // Monoporzione
+    var isMultiPortion: Bool = false   // Multiporzione
     
     // Data in cui è stato consumato (per Storico consumi)
     var consumedDate: Date?
@@ -184,6 +192,14 @@ final class FoodItem {
         foodType: FoodType? = nil,
         isGlutenFree: Bool = false,
         isBio: Bool = false,
+        isVegan: Bool = false,
+        isLactoseFree: Bool = false,
+        isVegetarian: Bool = false,
+        isReady: Bool = false,
+        needsCooking: Bool = false,
+        isArtisan: Bool = false,
+        isSinglePortion: Bool = false,
+        isMultiPortion: Bool = false,
         isFresh: Bool = false,
         isOpened: Bool = false,
         openedDate: Date? = nil,
@@ -205,6 +221,14 @@ final class FoodItem {
         self.foodType = foodType
         self.isGlutenFree = isGlutenFree
         self.isBio = isBio
+        self.isVegan = isVegan
+        self.isLactoseFree = isLactoseFree
+        self.isVegetarian = isVegetarian
+        self.isReady = isReady
+        self.needsCooking = needsCooking
+        self.isArtisan = isArtisan
+        self.isSinglePortion = isSinglePortion
+        self.isMultiPortion = isMultiPortion
         self.isFresh = isFresh
         self.isOpened = isOpened
         self.openedDate = openedDate

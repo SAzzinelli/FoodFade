@@ -113,7 +113,7 @@ struct PhotoPickerView: View {
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
         }
-        .sheet(isPresented: $showingCamera) {
+        .fullScreenCover(isPresented: $showingCamera) {
             ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
         }
         .sheet(isPresented: $showingDocumentPicker) {

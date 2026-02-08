@@ -25,6 +25,17 @@
 "home.rings.ok" = "OK";
 "home.rings.inscadenza" = "Expiring soon";
 "home.rings.scaduti" = "Expired";
+"home.expiring.section.title" = "Products expiring soon";
+"home.see.all" = "See all";
+"home.kpi.total" = "Total";
+"home.kpi.expired" = "Expired";
+"home.kpi.expiring" = "Expiring soon";
+"home.category.products" = "%d Products";
+"home.category.expiring" = "• %d expiring";
+"home.category.all_ok" = "• All OK";
+"home.recent.added_today" = "Added today";
+"home.recent.added_yesterday" = "Added yesterday";
+"home.recent.empty" = "No recent products.";
 "home.rings.title" = "Currently at home";
 
 /* Navigation */
@@ -46,6 +57,7 @@
 "inventory.empty.title" = "No products";
 "inventory.empty.subtitle" = "Add your first product to get started";
 "inventory.empty.button" = "Add Product";
+"inventory.category.empty" = "There are no products in this category.";
 "inventory.search.empty.title" = "No results";
 "inventory.search.empty.subtitle" = "No results for \"%@\". Try different terms.";
 "inventory.sort" = "Sort";
@@ -82,6 +94,7 @@
 "addfood.photo.file" = "File";
 "addfood.expiration" = "Expiration date";
 "addfood.quantity" = "Quantity: %d";
+"addfood.quantity_section" = "Quantity";
 "addfood.notes" = "Notes (optional)";
 "addfood.notify" = "Notifications";
 
@@ -89,6 +102,16 @@
 "tags.section" = "Tags";
 "tags.gluten_free" = "Gluten-free";
 "tags.bio" = "Organic";
+"tags.vegan" = "Vegan";
+"tags.vegetarian" = "Vegetarian";
+"tags.lactose_free" = "Lactose-free";
+"tags.ready" = "Ready";
+"tags.to_cook" = "To cook";
+"tags.artisan" = "Artisan";
+"tags.single_portion" = "Single portion";
+"tags.multi_portion" = "Multi portion";
+"addfood.labels" = "Labels";
+"addfood.labels.more" = "+%d";
 "tags.footer" = "We'll use these tags to filter your inventory and provide suggestions.";
 "tags.filter_all" = "All";
 "tags.filter_opened" = "Opened";
@@ -348,6 +371,14 @@
 "addfood.dictation.error.message.no_date" = "Try again.";
 "addfood.dictation.error.title.not_heard" = "I didn't understand..";
 "addfood.dictation.error.message.not_heard" = "Can you repeat?";
+"addfood.where_store" = "WHERE DO YOU STORE IT?";
+"addfood.change_date" = "Change";
+"addfood.unit_piece" = "Unit: Piece";
+"addfood.characteristics" = "CHARACTERISTICS";
+"addfood.add_notes" = "Add notes";
+"addfood.add_notes.optional" = "Optional";
+"addfood.notify_days" = "3 days before";
+"addfood.barcode.placeholder" = "Scan or enter";
 
 /* Settings - Expiration input */
 "settings.expiration.section" = "Expiration input";

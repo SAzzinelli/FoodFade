@@ -83,13 +83,11 @@ enum HomeSummaryStyle: String, Codable, CaseIterable {
 enum ProgressRingMode: String, Codable, CaseIterable {
     case safeItems = "safeItems"        // % prodotti "tutto ok" (default)
     case atRisk = "atRisk"             // % prodotti a rischio (invertito)
-    case healthScore = "healthScore"   // Health score basato su consumati vs scaduti
     
     var displayName: String {
         switch self {
         case .safeItems: return "Prodotti sicuri"
         case .atRisk: return "Prodotti a rischio"
-        case .healthScore: return "Health score"
         }
     }
     
@@ -97,7 +95,6 @@ enum ProgressRingMode: String, Codable, CaseIterable {
         switch self {
         case .safeItems: return "Mostra la percentuale di prodotti che scadono dopo 3+ giorni"
         case .atRisk: return "Mostra la percentuale di prodotti che scadono presto o sono scaduti"
-        case .healthScore: return "Mostra un punteggio basato su prodotti consumati vs scaduti"
         }
     }
 }

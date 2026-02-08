@@ -27,6 +27,14 @@ struct EditFoodView: View {
     
     @State private var isGlutenFree: Bool
     @State private var isBio: Bool
+    @State private var isVegan: Bool
+    @State private var isLactoseFree: Bool
+    @State private var isVegetarian: Bool
+    @State private var isReady: Bool
+    @State private var needsCooking: Bool
+    @State private var isArtisan: Bool
+    @State private var isSinglePortion: Bool
+    @State private var isMultiPortion: Bool
     @State private var isFresh: Bool
     @State private var isOpened: Bool
     
@@ -37,6 +45,14 @@ struct EditFoodView: View {
         _foodType = State(initialValue: item.foodType)
         _isGlutenFree = State(initialValue: item.isGlutenFree)
         _isBio = State(initialValue: item.isBio)
+        _isVegan = State(initialValue: item.isVegan)
+        _isLactoseFree = State(initialValue: item.isLactoseFree)
+        _isVegetarian = State(initialValue: item.isVegetarian)
+        _isReady = State(initialValue: item.isReady)
+        _needsCooking = State(initialValue: item.needsCooking)
+        _isArtisan = State(initialValue: item.isArtisan)
+        _isSinglePortion = State(initialValue: item.isSinglePortion)
+        _isMultiPortion = State(initialValue: item.isMultiPortion)
         _expirationDate = State(initialValue: item.expirationDate)
         _quantity = State(initialValue: item.quantity)
         _notes = State(initialValue: item.notes ?? "")
@@ -99,8 +115,72 @@ struct EditFoodView: View {
                                 .foregroundColor(.primary)
                         }
                     }
+                    Toggle(isOn: $isVegan) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "carrot.fill")
+                                .foregroundColor(.green)
+                            Text("tags.vegan".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $isLactoseFree) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "drop.fill")
+                                .foregroundColor(.blue)
+                            Text("tags.lactose_free".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $isVegetarian) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "leaf.circle.fill")
+                                .foregroundColor(.green)
+                            Text("tags.vegetarian".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $isReady) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text("tags.ready".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $needsCooking) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "flame.fill")
+                                .foregroundColor(.orange)
+                            Text("tags.to_cook".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $isArtisan) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "hammer.fill")
+                                .foregroundColor(.brown)
+                            Text("tags.artisan".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $isSinglePortion) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.purple)
+                            Text("tags.single_portion".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    Toggle(isOn: $isMultiPortion) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.3.fill")
+                                .foregroundColor(.purple)
+                            Text("tags.multi_portion".localized)
+                                .foregroundColor(.primary)
+                        }
+                    }
                 } header: {
-                    Text("tags.section".localized)
+                    Text("addfood.labels".localized)
                 }
                 
                 Section {
@@ -284,6 +364,14 @@ struct EditFoodView: View {
         item.notify = notify
         item.isGlutenFree = isGlutenFree
         item.isBio = isBio
+        item.isVegan = isVegan
+        item.isLactoseFree = isLactoseFree
+        item.isVegetarian = isVegetarian
+        item.isReady = isReady
+        item.needsCooking = needsCooking
+        item.isArtisan = isArtisan
+        item.isSinglePortion = isSinglePortion
+        item.isMultiPortion = isMultiPortion
         item.isFresh = isFresh
         item.isOpened = isOpened
         item.lastUpdated = Date()

@@ -21,19 +21,26 @@ struct AddFoodView: View {
     @State private var showingSuggestions = false
     @State private var showingFullScreenImage = false
     @State private var isPhotoSectionExpanded = false
+    @State private var showNotesField = false
+    @State private var showingPhotoSourceDialog = false
+    @State private var showingCamera = false
+    @State private var showingLabelsSheet = false
+    @State private var showingPhotoLibrary = false
+    @State private var showingDocumentPicker = false
     
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
                 Form {
-                    productSection
-                    photoSection
-                    categorySection
-                    foodTypeSection
-                    tagsSection
+                    storageSection
+                    nameAndPhotoSection
+                    barcodeSection
                     expirationSection
-                    notificationsSection
+                    quantitySection
+                    labelsSection
+                    notificationsAndNotesSection
                 }
+                .listStyle(.insetGrouped)
                 .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
                 
                 suggestionsOverlay
@@ -74,6 +81,21 @@ struct AddFoodView: View {
                     FullScreenImageView(image: image)
                 }
             }
+            .fullScreenCover(isPresented: $showingCamera) {
+                ImagePicker(sourceType: .camera, selectedImage: $viewModel.selectedPhoto)
+            }
+            .sheet(isPresented: $showingPhotoLibrary) {
+                ImagePicker(sourceType: .photoLibrary, selectedImage: $viewModel.selectedPhoto)
+            }
+            .sheet(isPresented: $showingDocumentPicker) {
+                DocumentPicker(selectedImage: $viewModel.selectedPhoto)
+            }
+            .sheet(isPresented: $showingLabelsSheet) {
+                moreLabelsSheet
+            }
+            .onAppear {
+                showNotesField = !viewModel.notes.isEmpty
+            }
             .onChange(of: showingScanner) { oldValue, newValue in
                 print("🔄 AddFoodView - showingScanner cambiato: \(oldValue) -> \(newValue)")
             }
@@ -110,304 +132,337 @@ struct AddFoodView: View {
         }
     }
     
-    // MARK: - Sections
+    // MARK: - Sezioni (ordine come nell’esempio)
     
-    private var productSection: some View {
+    private var storageSection: some View {
         Section {
-            // Nome prodotto e immagine affiancati
             HStack(spacing: 12) {
-                nameField
-                imageField
+                ForEach(FoodCategory.allCases, id: \.self) { category in
+                    AddFoodStorageButton(
+                        category: category,
+                        isSelected: viewModel.category == category
+                    ) {
+                        viewModel.category = category
+                    }
+                }
             }
-            barcodeField
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
         } header: {
-            Text("addfood.product".localized)
-        } footer: {
-            Text("addfood.product.footer".localized)
-        }
-    }
-    
-    private var nameField: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Nome")
+            Text("addfood.where_store".localized)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.secondary)
-            TextField("addfood.name.placeholder".localized, text: $viewModel.name)
-                .onChange(of: viewModel.name) { oldValue, newValue in
-                    showingSuggestions = !newValue.isEmpty && !viewModel.filterSuggestions(for: newValue).isEmpty
-                }
         }
-        .frame(maxWidth: .infinity)
     }
     
-    private var imageField: some View {
-        VStack(alignment: .leading, spacing: 0) {
+    private var nameAndPhotoSection: some View {
+        Section {
+            HStack(spacing: 12) {
+                Image(systemName: "pencil")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
+                TextField("addfood.name.placeholder".localized, text: $viewModel.name)
+                    .onChange(of: viewModel.name) { _, newValue in
+                        showingSuggestions = !newValue.isEmpty && !viewModel.filterSuggestions(for: newValue).isEmpty
+                    }
+                addPhotoButton
+            }
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+        } header: {
+            Text("addfood.name".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private var addPhotoButton: some View {
+        Button {
+            showingPhotoSourceDialog = true
+        } label: {
             if let image = viewModel.selectedPhoto {
-                ZStack(alignment: .topTrailing) {
-                    Button {
-                        showingFullScreenImage = true
-                    } label: {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 60, height: 60)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Button {
-                        viewModel.selectedPhoto = nil
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 18))
-                            .foregroundColor(.white)
-                            .background(Color.red)
-                            .clipShape(Circle())
-                    }
-                    .offset(x: 4, y: -4)
-                }
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 44, height: 44)
+                    .clipShape(Circle())
             } else {
                 Image(systemName: "photo")
-                    .font(.system(size: 24))
+                    .font(.system(size: 22))
                     .foregroundColor(.secondary)
-                    .frame(width: 60, height: 60)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .frame(width: 44, height: 44)
+                    .background(Color(.tertiarySystemFill))
+                    .clipShape(Circle())
             }
-        }
-    }
-    
-    private var barcodeField: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Codice a barre")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.secondary)
-            
-            HStack(spacing: 12) {
-                scanButton
-                barcodeDisplay
-            }
-        }
-    }
-    
-    private var scanButton: some View {
-        Button {
-            showingScanner = true
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "barcode.viewfinder")
-                    .font(.system(size: 14))
-                
-                if viewModel.isLoadingProduct {
-                    ProgressView()
-                        .scaleEffect(0.7)
-                } else {
-                    Text("Scansiona")
-                        .font(.system(size: 13, weight: .medium))
-                }
-            }
-            .foregroundColor(colorScheme == .dark ? .black : .primary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(colorScheme == .dark ? Color(white: 0.92) : Color(.secondarySystemGroupedBackground))
-            .cornerRadius(8)
         }
         .buttonStyle(.plain)
-    }
-    
-    @ViewBuilder
-    private var barcodeDisplay: some View {
-        if let barcode = viewModel.barcode {
-            Text(barcode)
-                .font(.system(.body, design: .monospaced))
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(10)
-        } else {
-            Text("Nessun codice")
-                .font(.system(size: 15))
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(10)
+        .confirmationDialog("addfood.photo.optional".localized, isPresented: $showingPhotoSourceDialog) {
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button("addfood.photo.take".localized) { showingCamera = true }
+            }
+            Button("addfood.photo.library".localized) { showingPhotoLibrary = true }
+            Button("addfood.photo.file".localized) { showingDocumentPicker = true }
+            Button("Annulla", role: .cancel) {}
         }
     }
     
-    private var photoSection: some View {
+    private var barcodeSection: some View {
         Section {
-            DisclosureGroup(isExpanded: $isPhotoSectionExpanded) {
-                PhotoPickerView(selectedImage: $viewModel.selectedPhoto)
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 16))
+            HStack(spacing: 12) {
+                Image(systemName: "barcode")
+                    .font(.system(size: 18))
+                    .foregroundColor(.secondary)
+                if let barcode = viewModel.barcode {
+                    Text(barcode)
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundColor(.primary)
+                } else {
+                    Text("addfood.barcode.placeholder".localized)
                         .foregroundColor(.secondary)
-                    Text("addfood.photo.optional".localized)
                 }
-            }
-        }
-    }
-    
-    private var categorySection: some View {
-        Section {
-            CategoryPicker(selectedCategory: $viewModel.category)
-        } header: {
-            Text("addfood.category".localized)
-        }
-    }
-    
-    private var foodTypeSection: some View {
-        Section {
-            FoodTypePicker(selectedFoodType: $viewModel.foodType)
-        } header: {
-            Text("addfood.foodtype".localized)
-        } footer: {
-            Text("addfood.foodtype.footer".localized)
-        }
-    }
-    
-    private var tagsSection: some View {
-        Section {
-            Toggle(isOn: $viewModel.isGlutenFree) {
-                HStack(spacing: 8) {
-                    Image(systemName: "heart.text.square.fill")
-                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagGlutenFree))
-                    Text("tags.gluten_free".localized)
-                        .foregroundColor(.primary)
+                Spacer()
+                Button {
+                    showingScanner = true
+                } label: {
+                    Image(systemName: "barcode.viewfinder")
+                        .font(.system(size: 20))
+                        .foregroundColor(ThemeManager.shared.primaryColor)
+                        .frame(width: 44, height: 44)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
             }
-            Toggle(isOn: $viewModel.isBio) {
-                HStack(spacing: 8) {
-                    Image(systemName: "leaf.fill")
-                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .tagBio))
-                    Text("tags.bio".localized)
-                        .foregroundColor(.primary)
-                }
-            }
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
         } header: {
-            Text("tags.section".localized)
-        } footer: {
-            Text("tags.footer".localized)
+            Text("addfood.barcode".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
         }
     }
     
     private var expirationSection: some View {
         let useDictation = (settings.first?.expirationInputMethod ?? .calendar) == .dictation
-        
         return Section {
             Toggle("addfood.is_fresh".localized, isOn: $viewModel.isFresh)
             
             if !viewModel.isFresh {
+                // Riga data in evidenza
+                HStack {
+                    Text(viewModel.expirationDate.expirationShortLabel)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Image(systemName: "calendar")
+                        .font(.system(size: 18))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 4)
+                
+                // Azione: dettatura o calendario
                 if useDictation {
-                    HStack(spacing: 12) {
-                        Button {
-                            showingDictationOverlay = true
-                            Task {
-                                await dictationService.startListening(
-                                    onDate: { date in
-                                        viewModel.expirationDate = date
-                                        viewModel.validateDate()
-                                        showingDictationOverlay = false
-                                    },
-                                    onError: { key in
-                                        if key == "addfood.dictation.error.no_date" {
-                                            errorTitle = "addfood.dictation.error.title.no_date".localized
-                                            errorMessage = "addfood.dictation.error.message.no_date".localized
-                                        } else {
-                                            errorTitle = "addfood.dictation.error.title.not_heard".localized
-                                            errorMessage = "addfood.dictation.error.message.not_heard".localized
-                                        }
-                                        showingError = true
-                                        showingDictationOverlay = false
+                    Button {
+                        showingDictationOverlay = true
+                        Task {
+                            await dictationService.startListening(
+                                onDate: { date in
+                                    viewModel.expirationDate = date
+                                    viewModel.validateDate()
+                                    showingDictationOverlay = false
+                                },
+                                onError: { key in
+                                    if key == "addfood.dictation.error.no_date" {
+                                        errorTitle = "addfood.dictation.error.title.no_date".localized
+                                        errorMessage = "addfood.dictation.error.message.no_date".localized
+                                    } else {
+                                        errorTitle = "addfood.dictation.error.title.not_heard".localized
+                                        errorMessage = "addfood.dictation.error.message.not_heard".localized
                                     }
-                                )
-                            }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "mic.fill")
-                                    .font(.system(size: 16))
-                                Text("addfood.dictation.button".localized)
-                                    .font(.system(size: 15, weight: .medium))
-                            }
-                            .foregroundColor(colorScheme == .dark ? .black : .white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
-                            .cornerRadius(10)
+                                    showingError = true
+                                    showingDictationOverlay = false
+                                }
+                            )
                         }
-                        .buttonStyle(.plain)
-                        .disabled(dictationService.isListening)
-                        
-                        Text(viewModel.expirationDate.expirationShortLabel)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 10)
-                            .cornerRadius(10)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "mic.fill")
+                                .font(.system(size: 18))
+                            Text("addfood.dictation.button".localized)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        .foregroundColor(colorScheme == .dark ? .black : .white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .buttonStyle(.plain)
+                    .disabled(dictationService.isListening)
                 } else {
                     DatePicker(
                         "addfood.expiration".localized,
                         selection: $viewModel.expirationDate,
                         displayedComponents: .date
                     )
-                    .onChange(of: viewModel.expirationDate) { oldValue, newValue in
+                    .onChange(of: viewModel.expirationDate) { _, _ in
                         viewModel.validateDate()
                     }
                 }
                 
                 if let errorMessage = viewModel.dateValidationError {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.circle.fill")
                             .foregroundColor(.red)
                         Text(errorMessage)
                             .font(.system(size: 13))
                             .foregroundColor(.red)
                     }
-                    .padding(.top, 4)
                 }
             }
-            
-            Stepper(String(format: "addfood.quantity".localized, viewModel.quantity), value: $viewModel.quantity, in: 1...99)
         } header: {
             Text("addfood.expiration_section".localized)
-        } footer: {
-            if viewModel.isFresh {
-                Text("addfood.expiration.auto".localized)
-            } else {
-                Text("addfood.expiration.manual".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private var quantitySection: some View {
+        Section {
+            VStack(spacing: 16) {
+                HStack(spacing: 24) {
+                    Button {
+                        if viewModel.quantity > 1 { viewModel.quantity -= 1 }
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(viewModel.quantity > 1 ? ThemeManager.shared.primaryColor : Color(.tertiaryLabel))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.quantity <= 1)
+                    
+                    Text("\(viewModel.quantity)")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.primary)
+                        .frame(minWidth: 44)
+                    
+                    Button {
+                        if viewModel.quantity < 99 { viewModel.quantity += 1 }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(viewModel.quantity < 99 ? ThemeManager.shared.primaryColor : Color(.tertiaryLabel))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.quantity >= 99)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            }
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+        } header: {
+            Text("addfood.quantity_section".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private var labelsSection: some View {
+        let primaryLabels: [(title: String, icon: String, color: Color, isSelected: Bool, action: () -> Void)] = [
+            ("tags.vegan".localized, "carrot.fill", .green, viewModel.isVegan, { viewModel.isVegan.toggle() }),
+            ("tags.vegetarian".localized, "leaf.circle.fill", .green, viewModel.isVegetarian, { viewModel.isVegetarian.toggle() }),
+            ("tags.gluten_free".localized, "heart.text.square.fill", ThemeManager.shared.semanticIconColor(for: .tagGlutenFree), viewModel.isGlutenFree, { viewModel.isGlutenFree.toggle() }),
+            ("tags.lactose_free".localized, "drop.fill", .blue, viewModel.isLactoseFree, { viewModel.isLactoseFree.toggle() })
+        ]
+        let moreCount = 6 // Bio, Pronto, Da cucinare, Artigianale, Monoporzione, Multiporzione
+        return Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    ForEach(Array(primaryLabels.enumerated()), id: \.offset) { _, label in
+                        AddFoodCharacteristicPill(
+                            title: label.title,
+                            icon: label.icon,
+                            isSelected: label.isSelected,
+                            color: label.color
+                        ) { label.action() }
+                    }
+                    Button {
+                        showingLabelsSheet = true
+                    } label: {
+                        Text(String(format: "addfood.labels.more".localized, moreCount))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(Color(.tertiarySystemFill))
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 8)
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+        } header: {
+            Text("addfood.labels".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private var moreLabelsSheet: some View {
+        NavigationStack {
+            List {
+                AddFoodLabelRow(title: "tags.bio".localized, icon: "leaf.fill", color: .green, isOn: $viewModel.isBio)
+                AddFoodLabelRow(title: "tags.ready".localized, icon: "checkmark.circle.fill", color: .green, isOn: $viewModel.isReady)
+                AddFoodLabelRow(title: "tags.to_cook".localized, icon: "flame.fill", color: .orange, isOn: $viewModel.needsCooking)
+                AddFoodLabelRow(title: "tags.artisan".localized, icon: "hammer.fill", color: .brown, isOn: $viewModel.isArtisan)
+                AddFoodLabelRow(title: "tags.single_portion".localized, icon: "person.fill", color: .purple, isOn: $viewModel.isSinglePortion)
+                AddFoodLabelRow(title: "tags.multi_portion".localized, icon: "person.3.fill", color: .purple, isOn: $viewModel.isMultiPortion)
+            }
+            .navigationTitle("addfood.labels".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Fatto") {
+                        showingLabelsSheet = false
+                    }
+                }
             }
         }
     }
     
-    private var notificationsSection: some View {
+    private var notificationsAndNotesSection: some View {
         Section {
             Toggle(isOn: $viewModel.notify) {
-                Label("addfood.notify_before".localized, systemImage: "bell.fill")
+                HStack(spacing: 12) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(ThemeManager.shared.primaryColor)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("addfood.notify_before".localized)
+                            .foregroundColor(.primary)
+                        Text("addfood.notify_days".localized)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
             
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "note.text")
-                    .font(.system(size: 16))
-                    .foregroundColor(.secondary)
-                    .frame(width: 24, alignment: .center)
+            Toggle(isOn: $showNotesField) {
+                HStack(spacing: 12) {
+                    Image(systemName: "note.text")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("addfood.add_notes".localized)
+                            .foregroundColor(.primary)
+                        Text("addfood.add_notes.optional".localized)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            
+            if showNotesField {
                 TextField("addfood.notes".localized, text: $viewModel.notes, axis: .vertical)
                     .lineLimit(3...6)
-            }
-        } header: {
-            Text("addfood.notifications_section".localized)
-        } footer: {
-            if viewModel.notify {
-                Text("addfood.notify.footer".localized)
             }
         }
     }
@@ -464,6 +519,93 @@ struct AddFoodView: View {
         } catch {
             errorMessage = error.localizedDescription
             showingError = true
+        }
+    }
+}
+
+// MARK: - Helper views stile riferimento
+
+private struct AddFoodStorageButton: View {
+    let category: FoodCategory
+    let isSelected: Bool
+    let action: () -> Void
+    
+    private var categoryColor: Color {
+        ThemeManager.shared.semanticIconColor(for: .category(category))
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: category.icon)
+                    .font(.title2)
+                    .foregroundColor(isSelected ? .white : categoryColor)
+                    .frame(width: 50, height: 50)
+                    .background(isSelected ? categoryColor : categoryColor.opacity(0.1))
+                    .cornerRadius(12)
+                
+                Text(category.rawValue)
+                    .font(.caption)
+                    .foregroundColor(isSelected ? categoryColor : .primary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? categoryColor.opacity(0.1) : Color.clear)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct AddFoodCharacteristicPill: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+            }
+            .foregroundColor(isSelected ? .white : color)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                Capsule()
+                    .fill(isSelected ? color : color.opacity(0.15))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct AddFoodLabelRow: View {
+    let title: String
+    let icon: String
+    let color: Color
+    @Binding var isOn: Bool
+    
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(color)
+                    .frame(width: 28, alignment: .center)
+                Text(title)
+                    .foregroundColor(.primary)
+            }
         }
     }
 }

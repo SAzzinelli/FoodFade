@@ -30,7 +30,7 @@ struct SettingsView: View {
                         Image("FridgySettingsHeader")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 160, maxHeight: 160)
+                            .frame(maxWidth: 220, maxHeight: 220)
                         VStack(spacing: 4) {
                             Text("Personalizza la tua esperienza")
                                 .font(.system(size: 16, weight: .semibold, design: .default))
