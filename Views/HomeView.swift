@@ -95,6 +95,16 @@ struct HomeView: View {
                             .foregroundColor(ThemeManager.naturalHomeLogoColor)
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingAddFood = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(Color.primary)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .sheet(isPresented: $showingAddFood) {
                 AddFoodView()

@@ -225,8 +225,8 @@ struct AddFoodView: View {
                     showingScanner = true
                 } label: {
                     Image(systemName: "barcode.viewfinder")
-                        .font(.system(size: 20))
-                        .foregroundColor(addFormControlColor)
+                        .font(.system(size: 22))
+                        .foregroundColor(.secondary)
                         .frame(width: 44, height: 44)
                         .background(Color(.tertiarySystemFill))
                         .clipShape(Circle())

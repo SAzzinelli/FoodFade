@@ -8,8 +8,8 @@ class BarcodeScannerService: NSObject, ObservableObject {
     @Published var isScanning = false
     @Published var scannedBarcode: String?
     @Published var errorMessage: String?
-    
-    var captureSession: AVCaptureSession?
+    /// Sessione di cattura; deve essere @Published così la vista si aggiorna quando è pronta.
+    @Published var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     private var metadataOutput: AVCaptureMetadataOutput?
     
@@ -28,16 +28,24 @@ class BarcodeScannerService: NSObject, ObservableObject {
         }
     }
     
+    /// True se in esecuzione sul simulatore (fotocamera non disponibile, evita errori Fig -12710/-17281).
+    private static var isSimulator: Bool {
+        ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
+    }
+
     /// Inizia la scansione
     @MainActor
     func startScanning() async {
+        if Self.isSimulator {
+            errorMessage = "Scansione disponibile solo su dispositivo reale"
+            return
+        }
         guard await requestCameraPermission() else {
             errorMessage = "Autorizzazione fotocamera negata"
             return
         }
-        
         guard !isScanning else { return }
-        
+
         let session = AVCaptureSession()
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
             errorMessage = "Fotocamera non disponibile"
@@ -82,10 +90,10 @@ class BarcodeScannerService: NSObject, ObservableObject {
         captureSession = session
         isScanning = true
         errorMessage = nil
-        
-        // Avvia la sessione in background
-        DispatchQueue.global(qos: .userInitiated).async {
-            session.startRunning()
+
+        // Avvia la sessione in background (startRunning può bloccare; sul simulatore non si avvia dalla vista)
+        DispatchQueue.global(qos: .userInitiated).async { [weak session] in
+            session?.startRunning()
         }
     }
     

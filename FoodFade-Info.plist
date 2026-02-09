@@ -2,10 +2,38 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
-	<key>CFBundleVersion</key>
-	<string>9</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>FoodFade_opt1</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>FoodFade_opt1</string>
+			</dict>
+			<key>FoodFade_opt2</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>FoodFade_opt2</string>
+			</dict>
+		</dict>
+	</dict>
+	<key>CFBundleIcons~ipad</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>FoodFade_opt1</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>FoodFade_opt1</string>
+			</dict>
+			<key>FoodFade_opt2</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>FoodFade_opt2</string>
+			</dict>
+		</dict>
+	</dict>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

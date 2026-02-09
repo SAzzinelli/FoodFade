@@ -13,6 +13,16 @@ struct BarcodeScannerView: View {
     @State private var hasProcessedBarcode = false // Evita doppia elaborazione
     
     private let scanAreaSize: CGFloat = 250
+
+    /// Sul simulatore la fotocamera non è disponibile (errori Fig -12710/-17281); mostriamo messaggio.
+    /// Controllo a runtime così funziona anche se la build non è stata fatta per simulatore.
+    private static var isSimulator: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
+        #endif
+    }
     
     var body: some View {
         NavigationStack {
@@ -21,6 +31,7 @@ struct BarcodeScannerView: View {
                 if cameraPermissionGranted && scannerService.isScanning,
                    let session = scannerService.captureSession {
                     CameraPreviewView(session: session)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .ignoresSafeArea()
                         .background(
                             GeometryReader { geometry in
@@ -34,8 +45,49 @@ struct BarcodeScannerView: View {
                             }
                         )
                 } else {
-                    Color.black
-                        .ignoresSafeArea()
+                    ZStack {
+                        Color.black
+                            .ignoresSafeArea()
+                        if Self.isSimulator {
+                            VStack(spacing: 16) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.white.opacity(0.7))
+                                Text("Solo su dispositivo reale")
+                                    .foregroundColor(.white)
+                                    .font(.headline)
+                                Text("La scansione codici a barre non è disponibile sul simulatore. Usa un iPhone o iPad per scansionare.")
+                                    .foregroundColor(.white.opacity(0.8))
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
+                            }
+                        } else if !cameraPermissionGranted {
+                            VStack(spacing: 12) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.white.opacity(0.7))
+                                Text("Fotocamera non autorizzata")
+                                    .foregroundColor(.white)
+                                    .font(.headline)
+                                Text("Attiva l’accesso alla fotocamera in Impostazioni per scansionare i codici a barre.")
+                                    .foregroundColor(.white.opacity(0.8))
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
+                            }
+                        } else if !scannerService.isScanning, scannerService.errorMessage != nil {
+                            VStack(spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.yellow)
+                                Text(scannerService.errorMessage ?? "Errore fotocamera")
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
+                            }
+                        }
+                    }
                 }
                 
                 // Overlay scuro con buco trasparente
@@ -79,7 +131,7 @@ struct BarcodeScannerView: View {
                     // Spacer inferiore
                     Spacer()
                     
-                    // Controlli - allineati in basso
+                    // Controlli - allineati in basso (colore icona come in AddFood per coerenza)
                     HStack(spacing: 40) {
                         // Torcia
                         Button {
@@ -92,7 +144,7 @@ struct BarcodeScannerView: View {
                                 
                                 Image(systemName: "bolt.fill")
                                     .font(.title2)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(ThemeManager.shared.primaryColor)
                             }
                         }
                         .buttonStyle(.plain)
@@ -111,7 +163,7 @@ struct BarcodeScannerView: View {
                                 
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.title2)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(ThemeManager.shared.primaryColor)
                             }
                         }
                         .buttonStyle(.plain)
@@ -133,19 +185,14 @@ struct BarcodeScannerView: View {
                 }
             }
             .task {
-                print("🎬 BarcodeScannerView - task iniziato")
-                // Richiedi permessi e avvia scanner in parallelo per velocità
+                guard !Self.isSimulator else {
+                    // Sul simulatore non avviare la camera (evita errori Fig -12710/-17281)
+                    return
+                }
                 async let permission = scannerService.requestCameraPermission()
                 cameraPermissionGranted = await permission
-                print("📷 BarcodeScannerView - Permesso fotocamera: \(cameraPermissionGranted)")
-                
                 if cameraPermissionGranted {
-                    print("🚀 BarcodeScannerView - Avvio scanning...")
-                    // Avvia immediatamente senza delay
                     await scannerService.startScanning()
-                    print("✅ BarcodeScannerView - Scanning avviato")
-                } else {
-                    print("❌ BarcodeScannerView - Permesso fotocamera negato")
                 }
             }
             .onDisappear {

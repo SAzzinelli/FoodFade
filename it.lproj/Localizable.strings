@@ -205,13 +205,15 @@
 /* Settings */
 "settings.title" = "Impostazioni";
 "settings.appearance" = "Aspetto";
-"settings.app_icon.primary" = "FoodFade (predefinita)";
-"settings.app_icon.opt1" = "FoodFade 1";
-"settings.app_icon.opt2" = "FoodFade 2";
+"settings.app_icon.primary" = "Default - Fridgy";
+"settings.app_icon.opt1" = "Natura";
+"settings.app_icon.opt2" = "Ghiacciolino";
 "settings.app_icon.section" = "Icona app";
 "settings.app_icon.footer" = "Scegli l'icona da mostrare sulla home.";
 "settings.app_icon.error" = "Impossibile cambiare icona. Riprova.";
 "settings.app_icon.error.title" = "Icona non cambiata";
+"settings.app_icon.changed.title" = "Icona cambiata";
+"settings.app_icon.changed.message" = "Hai cambiato l'icona in %@.";
 "settings.notifications" = "Notifiche";
 "settings.notifications.enable" = "Notifiche";
 "settings.notifications.message" = "Ricevi notifiche quando i tuoi prodotti stanno per scadere";
