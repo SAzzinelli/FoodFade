@@ -98,16 +98,20 @@ struct HomeView: View {
                             .foregroundColor(ThemeManager.naturalHomeLogoColor)
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingAddFood = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(Color.primary)
-                    }
-                    .buttonStyle(.plain)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                Button {
+                    showingAddFood = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 58, height: 58)
                 }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor).interactive(), in: .circle)
+                .padding(.trailing, 20)
+                .padding(.bottom, 18)
             }
             .sheet(isPresented: $showingAddFood) {
                 AddFoodView()
@@ -400,19 +404,22 @@ struct HomeView: View {
                 icon: "square.stack.3d.up.fill",
                 label: "home.kpi.total".localized,
                 value: viewModel.totalActiveItems,
-                color: .green
+                color: .green,
+                glowWhenPositive: false
             )
             HomeKPICard(
                 icon: "trash.fill",
                 label: "home.kpi.expired".localized,
                 value: viewModel.expiredCount,
-                color: .red
+                color: .red,
+                glowWhenPositive: true
             )
             HomeKPICard(
                 icon: "clock.fill",
                 label: "home.kpi.expiring".localized,
                 value: viewModel.inScadenzaCount,
-                color: .orange
+                color: .orange,
+                glowWhenPositive: true
             )
         }
     }
@@ -668,6 +675,8 @@ private struct HomeKPICard: View {
     let label: String
     let value: Int
     let color: Color
+    /// Se true, quando value > 0 applica un glow esterno del colore della card (solo Scaduti / In scadenza).
+    var glowWhenPositive: Bool = false
     
     var body: some View {
         VStack(spacing: 10) {
@@ -684,8 +693,19 @@ private struct HomeKPICard: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
         .padding(.horizontal, 12)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                Color(.secondarySystemGroupedBackground)
+                if glowWhenPositive && value > 0 {
+                    color.opacity(0.16)
+                }
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(
+            color: glowWhenPositive && value > 0 ? color.opacity(0.35) : .clear,
+            radius: 10
+        )
     }
 }
 
@@ -827,7 +847,7 @@ private struct SummaryCardView: View {
     }
 }
 
-// MARK: - Card categoria Home (icona, titolo, X Prodotti • Y in scadenza / Tutto OK, chevron)
+// MARK: - Card categoria Home (icona, titolo, X Prodotti sotto; pill stato a destra: Tutto OK / N in scadenza)
 private struct HomeCategoryCard: View {
     let category: FoodCategory
     let productCount: Int
@@ -845,12 +865,19 @@ private struct HomeCategoryCard: View {
         }
     }
     
-    private var subtitle: String {
-        let products = String(format: "home.category.products".localized, productCount)
+    private var productCountText: String {
+        String(format: "home.category.products".localized, productCount)
+    }
+    
+    private var statusPillText: String {
         if expiringCount == 0 {
-            return "\(products) \("home.category.all_ok".localized)"
+            return "home.category.all_ok".localized.replacingOccurrences(of: "• ", with: "")
         }
-        return "\(products) \(String(format: "home.category.expiring".localized, expiringCount))"
+        return String(format: "home.category.expiring".localized, expiringCount).replacingOccurrences(of: "• ", with: "")
+    }
+    
+    private var statusPillColor: Color {
+        expiringCount == 0 ? .green : .orange
     }
     
     var body: some View {
@@ -866,12 +893,20 @@ private struct HomeCategoryCard: View {
                 Text(category.rawValue)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.primary)
-                Text(subtitle)
+                Text(productCountText)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.secondary)
             }
             
             Spacer()
+            
+            Text(statusPillText)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(statusPillColor)
+                .clipShape(Capsule())
             
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .semibold))

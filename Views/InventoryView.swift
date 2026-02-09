@@ -93,6 +93,21 @@ struct InventoryView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }
+            .overlay(alignment: .bottomTrailing) {
+                Button {
+                    showingAddFood = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 58, height: 58)
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor).interactive(), in: .circle)
+                .padding(.trailing, 20)
+                .padding(.bottom, 18)
+                .accessibilityLabel("common.add".localized)
+            }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 8) {
@@ -103,16 +118,6 @@ struct InventoryView: View {
                             .font(.system(size: 20, weight: .bold, design: .default))
                             .foregroundColor(ThemeManager.naturalHomeLogoColor)
                     }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddFood = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(.primary)
-                    }
-                    .accessibilityLabel("common.add".localized)
                 }
             }
             .sheet(isPresented: $showingAddFood) {
