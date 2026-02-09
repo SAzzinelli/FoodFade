@@ -66,10 +66,11 @@ struct InventoryView: View {
                                     Button(role: .destructive) {
                                         viewModel.deleteItem(item)
                                     } label: { Label("common.delete".localized, systemImage: "trash") }
+                                    .tint(.red)
                                     Button {
                                         selectedItem = item
                                     } label: { Label("common.edit".localized, systemImage: "pencil") }
-                                    .tint(ThemeManager.shared.primaryColor)
+                                    .tint(ThemeManager.shared.isNaturalStyle ? Color(.tertiaryLabel) : ThemeManager.shared.primaryColor)
                                 }
                             }
                         }
