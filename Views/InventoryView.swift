@@ -77,6 +77,7 @@ struct InventoryView: View {
                         .listStyle(.plain)
                         .scrollContentBackground(.hidden)
                         .background(Color(.systemGroupedBackground))
+                        .contentMargins(.top, AppTheme.spacingBelowLargeTitle, for: .scrollContent)
                     }
                     .padding(.horizontal, 20)
                 }
@@ -84,7 +85,7 @@ struct InventoryView: View {
             .searchable(text: $searchText, prompt: Text("inventory.search.prompt".localized))
             .background(Color(.systemGroupedBackground))
             .navigationTitle("nav.inventory".localized)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .safeAreaInset(edge: .bottom) {
                 Text(String(format: "inventory.total_items".localized, filteredItems.count))
                     .font(.system(size: 13, weight: .medium))

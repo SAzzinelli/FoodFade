@@ -46,7 +46,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 8, trailing: 20))
                 .listRowBackground(Color(.secondarySystemGroupedBackground))
                 
                 // 1. RIEPILOGO IN HOME
@@ -114,7 +114,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Funzionalità")
                 } footer: {
-                    Text("Scegli se mostrare l'anello con percentuale oppure solo il riepilogo numerico in Home. Le opzioni della barra in basso sono separate.")
+                    Text("Scegli se mostrare l'anello con stato (tutto ok, da tenere d'occhio...) oppure solo il riepilogo numerico in Home. Le opzioni della barra in basso sono separate.")
                 }
                 
                 // 2. AVVISI
@@ -365,9 +365,10 @@ struct SettingsView: View {
                     Text("settings.reset.footer".localized)
                 }
             }
+            .contentMargins(.top, AppTheme.spacingBelowLargeTitle, for: .scrollContent)
             .tint(listTint)
             .navigationTitle("Impostazioni")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 8) {

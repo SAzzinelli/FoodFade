@@ -48,11 +48,12 @@ struct ShoppingListView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .contentMargins(.top, AppTheme.spacingBelowLargeTitle, for: .scrollContent)
                 }
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("shopping.title".localized)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 8) {

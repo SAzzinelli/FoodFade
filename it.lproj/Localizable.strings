@@ -20,8 +20,29 @@
 "home.subtitle.no_items" = "Inizia aggiungendo i tuoi prodotti";
 "home.subtitle.single" = "Hai 1 prodotto da gestire";
 "home.subtitle.multiple" = "Hai %d prodotti da gestire";
-"home.progress.empty.title" = "Nessun prodotto inserito";
-"home.progress.empty.subtitle" = "Aggiungi il primo prodotto per vedere qui il tuo riepilogo";
+"home.progress.empty.title" = "Qui è tutto vuoto, per ora";
+"home.progress.empty.subtitle" = "Aggiungi un prodotto e iniziamo a tenere d'occhio le scadenze";
+
+"home.ring.legend.safe" = "Quanto sei in anticipo sulle scadenze";
+"home.ring.legend.risk" = "Quanto c'è da controllare";
+"home.ring.safe.all_ok" = "Tutto sotto controllo";
+"home.ring.safe.almost_ok" = "Quasi perfetto";
+"home.ring.safe.few_safe" = "C'è da fare attenzione";
+"home.ring.safe.none_safe" = "Occhio alle scadenze";
+"home.ring.risk.none" = "Nessun problema";
+"home.ring.risk.low" = "Poco da controllare";
+"home.ring.risk.medium" = "Qualcosa da sistemare";
+"home.ring.risk.high" = "Serve attenzione";
+
+"home.ring.subtitle.safe.perfect" = "😌 Vai sereno, è tutto ok";
+"home.ring.subtitle.safe.urgent_one" = "👀 C'è un prodotto da controllare";
+"home.ring.subtitle.safe.urgent_many" = "👀 Ci sono alcuni prodotti da controllare";
+"home.ring.subtitle.safe.incoming" = "📅 Qualche scadenza si avvicina";
+"home.ring.subtitle.safe.fallback" = "🔍 Dai un'occhiata alle scadenze";
+"home.ring.subtitle.risk.none" = "😊 Tutto tranquillo";
+"home.ring.subtitle.risk.one" = "⚠️ Un prodotto da non dimenticare";
+"home.ring.subtitle.risk.many" = "⚠️ %d prodotti da controllare";
+
 "home.rings.ok" = "Prodotti OK";
 "home.rings.inscadenza" = "In scadenza";
 "home.rings.scaduti" = "Scaduti";
@@ -190,12 +211,17 @@
 "stats.expired" = "Scaduti";
 "stats.most_wasted" = "Tipi più sprecati";
 "stats.by_category" = "Per categoria";
-"stats.used_vs_wasted.description" = "Questa sezione mostra il confronto tra i prodotti che hai consumato in tempo e quelli scaduti. Serve a capire se stai usando il frigo bene o se tendi a lasciar scadere troppo. Il grafico delle ultime settimane ti aiuta a vedere l’andamento nel tempo.";
-"stats.by_category.description" = "Qui vedi le statistiche divise per luogo di conservazione: Frigorifero, Congelatore e Dispensa. Per ogni categoria puoi vedere quanti prodotti hai consumato rispetto al totale. Utile per capire dove sprechi di più (es. frigo vs dispensa) e dove migliorare.";
+"stats.section.in_brief" = "In breve";
+"stats.section.tip" = "Un'idea per te";
+"stats.section.data" = "I tuoi dati";
+"stats.used_vs_wasted.description" = "Qui vedi quanto hai usato in tempo e quanto è scaduto. Un colpo d'occhio per capire se sei in pari con le scadenze o se qualcosa spesso va a scadere.";
+"stats.by_category.description" = "Le statistiche per dove conservi: frigo, congelatore, dispensa. Scopri dove usi tutto in tempo e dove qualcosa scade—utile per aggiustare le abitudini.";
 "stats.section.content" = "Contenuto";
 "stats.section.instructions" = "Istruzioni";
 "stats.what_is" = "Cos'è?";
-"stats.details.description" = "Dettagli di utilizzo dell’app: quali prodotti aggiungi più spesso e quali scadono senza essere consumati. Ti aiuta a identificare abitudini (es. prodotti che compri troppo o che dimentichi) e a ridurre gli sprechi con scelte più consapevoli.";
+"stats.waste_score.description" = "Un modo semplice per capire quanto stai usando il cibo prima che scada. Se è alto vai bene, se è basso qualcosa sta scadendo. Dai un'occhiata alle date e pianifica un po'—aiuta.";
+"stats.details.description" = "Cosa aggiungi di più e cosa spesso scade senza essere usato. Ti aiuta a notare le abitudini—ad esempio comprare troppo qualcosa o dimenticarlo in fondo—così puoi correggere e sprecare meno.";
+"stats.fridgy_off_tip" = "Attiva Fridgy nelle Impostazioni per ricevere qui consigli su misura.";
 "stats.advice" = "Consigli per te";
 "stats.message.excellent" = "Ottimo lavoro! Stai riducendo gli sprechi.";
 "stats.message.good" = "Stai facendo bene! Continua così.";

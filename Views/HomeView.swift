@@ -54,32 +54,32 @@ struct HomeView: View {
                     // Header Section
                     headerSection
                         .padding(.top, 8)
-                        .padding(.bottom, 24)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     
                     // Progress Section
                     progressSection
-                        .padding(.bottom, 24)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     
                     // 3 KPI: Totale, Scaduti, In scadenza
                     homeKPIRow
-                        .padding(.bottom, 24)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     
                     // Prodotti in scadenza (scroll orizzontale card)
                     expiringProductsSection
-                        .padding(.bottom, 24)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     
                     // Categorie (accordion)
                     categoriesAccordionSection
-                        .padding(.bottom, 24)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     
                     // Prodotti recenti (accordion)
                     recentItemsAccordionSection
-                        .padding(.bottom, 24)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     
                     // Banner informativo suggerimenti intelligenti (mostrato una volta dopo aver aggiunto/modificato un oggetto)
                     if showingSmartSuggestionsBanner && !hasShownSmartSuggestionsBanner {
                         smartSuggestionsInfoBanner
-                            .padding(.bottom, 24)
+                            .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -245,14 +245,12 @@ struct HomeView: View {
                     unfilledOpacity: 0.15,
                     animationsEnabled: ThemeManager.shared.animationsEnabled
                 ) {
-                    VStack(spacing: 4) {
-                        Text("\(Int(round(percentage * 100)))%")
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(.primary)
-                        Text(progressRingLabel)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
+                    Text(progressRingLabel)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .padding(.horizontal, 8)
                 }
                 .frame(maxWidth: .infinity)
                 Text(progressRingSubtitle)
@@ -328,37 +326,37 @@ struct HomeView: View {
     private var progressRingLegend: String {
         switch currentProgressRingMode {
         case .safeItems:
-            return "Quanto sei in tempo con le scadenze"
+            return "home.ring.legend.safe".localized
         case .atRisk:
-            return "Quanto è sotto controllo"
+            return "home.ring.legend.risk".localized
         }
     }
     
-    /// Testo dentro l'anello (senza emoji; le emoji restano solo sotto nel subtitle)
+    /// Testo dentro l'anello: stati chiari (0% = nessun prodotto “in sicurezza”, tutti da tenere d'occhio)
     private var progressRingLabel: String {
         let percentage = viewModel.progressRingPercentage
         
         switch currentProgressRingMode {
         case .safeItems:
             if percentage >= 0.8 {
-                return "Tutto ok"
+                return "home.ring.safe.all_ok".localized
             } else if percentage >= 0.5 {
-                return "Quasi tutto ok"
+                return "home.ring.safe.almost_ok".localized
             } else if percentage > 0 {
-                return "Attenzione"
+                return "home.ring.safe.few_safe".localized   // 1–49%: pochi prodotti ancora “in sicurezza”
             } else {
-                return "Da controllare"
+                return "home.ring.safe.none_safe".localized // 0%: nessuno in sicurezza, tutti da tenere d'occhio
             }
             
         case .atRisk:
             if percentage == 0.0 {
-                return "Nessun rischio"
+                return "home.ring.risk.none".localized
             } else if percentage <= 0.2 {
-                return "Basso rischio"
+                return "home.ring.risk.low".localized
             } else if percentage <= 0.5 {
-                return "Rischio medio"
+                return "home.ring.risk.medium".localized
             } else {
-                return "Alto rischio"
+                return "home.ring.risk.high".localized
             }
         }
     }
@@ -370,27 +368,27 @@ struct HomeView: View {
         switch currentProgressRingMode {
         case .safeItems:
             if percentage == 1.0 {
-                return "😌 Tutto tranquillo!"
+                return "home.ring.subtitle.safe.perfect".localized
             } else if urgentCount > 0 {
                 if urgentCount == 1 {
-                    return "👀 C’è un prodotto da tenere d’occhio"
+                    return "home.ring.subtitle.safe.urgent_one".localized
                 } else {
-                    return "👀 Qualche prodotto da tenere d’occhio"
+                    return "home.ring.subtitle.safe.urgent_many".localized
                 }
             } else if viewModel.incoming.count > 0 {
-                return "📅 Qualche scadenza in vista"
+                return "home.ring.subtitle.safe.incoming".localized
             } else {
-                return "🔍 Dai un’occhiata alle scadenze"
+                return "home.ring.subtitle.safe.fallback".localized
             }
             
         case .atRisk:
             let atRiskCount = viewModel.expiringToday.count + viewModel.toConsume.count + viewModel.incoming.count
             if percentage == 0.0 {
-                return "😊 Tutto sotto controllo"
+                return "home.ring.subtitle.risk.none".localized
             } else if atRiskCount == 1 {
-                return "⚠️ Un prodotto da non dimenticare"
+                return "home.ring.subtitle.risk.one".localized
             } else {
-                return "⚠️ \(atRiskCount) prodotti da tenere d’occhio"
+                return String(format: "home.ring.subtitle.risk.many".localized, atRiskCount)
             }
         }
     }

@@ -72,14 +72,15 @@ struct StatisticsView: View {
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
+                    .padding(.top, AppTheme.spacingBelowLargeTitle)
+                    .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                 } else {
                     emptyState
                 }
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Statistiche")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 8) {
@@ -384,8 +385,62 @@ struct StatisticsView: View {
         }
         return weeklyPoints.isEmpty ? nil : weeklyPoints.reversed()
     }
-    
+}
+
+// MARK: - Card "In breve" (testo introduttivo umano, senza tono fiscale)
+private struct StatInBriefCard: View {
+    let text: String
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: "text.bubble.fill")
+                .font(.system(size: 22))
+                .foregroundStyle(.secondary.opacity(0.9))
+                .frame(width: 36, height: 36)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("stats.section.in_brief".localized)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.primary)
+                Text(text)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(.secondary)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(16)
     }
+}
+
+// MARK: - Card "Un'idea per te" (consiglio / Come migliorare)
+private struct StatTipCard<Content: View>: View {
+    let content: Content
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: "lightbulb.fill")
+                .font(.system(size: 22))
+                .foregroundStyle(.orange.opacity(0.9))
+                .frame(width: 36, height: 36)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("stats.section.tip".localized)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.primary)
+                content
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(16)
+    }
+}
 
 // MARK: - Dettaglio Waste Score
 private struct WasteScoreDetailView: View {
@@ -434,7 +489,7 @@ private struct WasteScoreDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Contenuto: Fridgy + percentuale in pill con glow
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("stats.section.content".localized)
+                    Text("stats.section.data".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(spacing: 16) {
@@ -445,16 +500,10 @@ private struct WasteScoreDetailView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(maxWidth: 140, maxHeight: 140)
-                        Text("\(Int(animatedWasteScore * 100))%")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 28)
-                            .padding(.vertical, 12)
-                            .background(wasteScoreSentiment.pillColor)
-                            .clipShape(Capsule())
-                            .shadow(color: wasteScoreSentiment.glowColor.opacity(0.5), radius: 10, x: 0, y: 0)
-                            .shadow(color: wasteScoreSentiment.glowColor.opacity(0.3), radius: 16, x: 0, y: 0)
-                        Text(title(percentage: data.wasteScore)).font(.system(size: 18, weight: .bold)).foregroundColor(.primary)
+                        Text(title(percentage: data.wasteScore))
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
                         Text(subtitle(wasted: data.monthlyStats.expired)).font(.system(size: 14)).foregroundColor(.secondary).multilineTextAlignment(.center)
                         Button { } label: {
                             HStack(spacing: 6) {
@@ -490,41 +539,21 @@ private struct WasteScoreDetailView: View {
                     .cornerRadius(16)
                 }
                 
-                // Cos'è? e come migliorare (solo titolo dentro la card, come "Come migliorare")
-                VStack(alignment: .leading, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Label("stats.what_is".localized, systemImage: "book.closed.fill")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                        Text("Il Waste Score è la percentuale di prodotti che hai consumato prima della scadenza. 100% significa che nulla è andato sprecato; più il valore è basso, più prodotti sono scaduti senza essere usati. Controlla spesso le scadenze e pianifica i pasti per migliorare.")
-                            .font(.system(size: 14))
+                StatInBriefCard(text: "stats.waste_score.description".localized)
+                
+                StatTipCard {
+                    if isLoadingImprove {
+                        FridgySkeletonLoader()
+                    } else if let tip = improveTip {
+                        Text(tip)
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                            .lineSpacing(4)
+                    } else if !IntelligenceManager.shared.isFridgyAvailable {
+                        Text("stats.fridgy_off_tip".localized)
+                            .font(.system(size: 15))
                             .foregroundColor(.secondary)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .cornerRadius(16)
-                    
-                    VStack(alignment: .leading, spacing: 10) {
-                        Label("Come migliorare", systemImage: "lightbulb.fill")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                        if isLoadingImprove {
-                            FridgySkeletonLoader()
-                        } else if let tip = improveTip {
-                            Text(tip)
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                        } else if !IntelligenceManager.shared.isFridgyAvailable {
-                            Text("Attiva i suggerimenti Fridgy nelle Impostazioni per ricevere consigli personalizzati.")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .cornerRadius(16)
                 }
             }
             .padding(20)
@@ -568,24 +597,11 @@ private struct UsedVsWastedDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Cos'è?
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.secondary)
-                    Text("stats.used_vs_wasted.description".localized)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
+                StatInBriefCard(text: "stats.used_vs_wasted.description".localized)
                 
                 // Contenuto
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("stats.section.content".localized)
+                    Text("stats.section.data".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 12) {
@@ -646,24 +662,10 @@ private struct CategoryDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Cos'è?
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.secondary)
-                    Text("stats.by_category.description".localized)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
+                StatInBriefCard(text: "stats.by_category.description".localized)
                 
-                // Contenuto
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("stats.section.content".localized)
+                    Text("stats.section.data".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 16) {
@@ -777,24 +779,10 @@ private struct DetailsDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Cos'è?
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("stats.what_is".localized, systemImage: "book.closed.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.secondary)
-                    Text("stats.details.description".localized)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(16)
+                StatInBriefCard(text: "stats.details.description".localized)
                 
-                // Contenuto
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("stats.section.content".localized)
+                    Text("stats.section.data".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 16) {

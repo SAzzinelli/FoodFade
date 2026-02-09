@@ -2,6 +2,9 @@ import SwiftUI
 
 /// Sistema di colori e tema dell'app
 struct AppTheme {
+    /// Spazio sotto il large title (e tra sezioni principali): uguale in Home, Statistiche, Impostazioni, Lista spesa, Inventario
+    static let spacingBelowLargeTitle: CGFloat = 24
+
     // Colori principali
     static let primaryGreen = Color(red: 0.2, green: 0.8, blue: 0.4)
     static let primaryGreenDark = Color(red: 0.15, green: 0.7, blue: 0.35)

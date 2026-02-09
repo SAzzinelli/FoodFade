@@ -20,8 +20,30 @@
 "home.subtitle.no_items" = "Start by adding your products";
 "home.subtitle.single" = "You have 1 product to manage";
 "home.subtitle.multiple" = "You have %d products to manage";
-"home.progress.empty.title" = "No products yet";
-"home.progress.empty.subtitle" = "Add your first item to see your progress here";
+"home.progress.empty.title" = "Nothing here yet";
+"home.progress.empty.subtitle" = "Add a product and we'll start tracking expirations";
+
+/* Home – Progress ring (legenda, label dentro anello, sottotitoli) */
+"home.ring.legend.safe" = "How ahead of expirations you are";
+"home.ring.legend.risk" = "How much needs checking";
+"home.ring.safe.all_ok" = "All under control";
+"home.ring.safe.almost_ok" = "Almost there";
+"home.ring.safe.few_safe" = "Needs attention";
+"home.ring.safe.none_safe" = "Watch the expirations";
+"home.ring.risk.none" = "No issues";
+"home.ring.risk.low" = "Very little to check";
+"home.ring.risk.medium" = "A few things to handle";
+"home.ring.risk.high" = "Needs attention";
+
+"home.ring.subtitle.safe.perfect" = "😌 You're all set";
+"home.ring.subtitle.safe.urgent_one" = "👀 One product needs a look";
+"home.ring.subtitle.safe.urgent_many" = "👀 A few products need a look";
+"home.ring.subtitle.safe.incoming" = "📅 Some expirations are coming up";
+"home.ring.subtitle.safe.fallback" = "🔍 Take a look at expirations";
+"home.ring.subtitle.risk.none" = "😊 All good here";
+"home.ring.subtitle.risk.one" = "⚠️ One product not to forget";
+"home.ring.subtitle.risk.many" = "⚠️ %d products to check";
+
 "home.rings.ok" = "OK";
 "home.rings.inscadenza" = "Expiring soon";
 "home.rings.scaduti" = "Expired";
@@ -189,12 +211,17 @@
 "stats.expired" = "Expired";
 "stats.most_wasted" = "Most wasted types";
 "stats.by_category" = "By category";
-"stats.used_vs_wasted.description" = "This section compares the food you used in time versus what expired. It helps you see if you're using your fridge well or if you tend to let too much go to waste. The chart shows how this trend changes over the last weeks.";
-"stats.by_category.description" = "Here you see stats by storage place: Fridge, Freezer, and Pantry. For each category you see how many items you consumed vs the total. Useful to spot where you waste more (e.g. fridge vs pantry) and where to improve.";
+"stats.section.in_brief" = "In a nutshell";
+"stats.section.tip" = "An idea for you";
+"stats.section.data" = "Your data";
+"stats.used_vs_wasted.description" = "Here you see how much you used in time versus what expired. A quick way to understand if you're on top of things or if something often slips past the date.";
+"stats.by_category.description" = "Stats by where you store food: fridge, freezer, pantry. See where you use things in time and where they tend to expire—handy to adjust habits in one place.";
 "stats.section.content" = "Content";
 "stats.section.instructions" = "Instructions";
 "stats.what_is" = "What is it?";
-"stats.details.description" = "Usage details: which products you add most often and which expire without being used. Helps you spot habits (e.g. items you buy too much or forget about) and reduce waste with more conscious choices.";
+"stats.waste_score.description" = "A simple way to see how well you're using food before it expires. When it's high, you're doing great; when it's low, a few things are getting away. Check dates and plan a bit—it helps.";
+"stats.details.description" = "What you add most and what often expires unused. Helps you notice patterns—like buying too much of something or forgetting it in the back—so you can tweak and waste less.";
+"stats.fridgy_off_tip" = "Turn on Fridgy in Settings to get personalised tips here.";
 "stats.advice" = "Tips for you";
 "stats.message.excellent" = "Great job! You're reducing waste.";
 "stats.message.good" = "You're doing well! Keep it up.";
