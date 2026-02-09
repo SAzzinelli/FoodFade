@@ -344,6 +344,7 @@
 "fridgy.footer.enabled.available" = "Fridgy fornisce suggerimenti personalizzati e consigli in base al tuo inventario.";
 "fridgy.footer.enabled.unavailable" = "Fridgy non è disponibile su questo dispositivo.";
 "fridgy.footer.disabled" = "Fridgy è disattivato. L'app funziona al 100% senza suggerimenti intelligenti.";
+"fridgy.footer.beta" = "Funzione in versione beta: soggetta a modifiche e può commettere errori. I consigli non sostituiscono il buon senso in cucina.";
 "fridgy.loading" = "Sto caricando un suggerimento di Fridgy…";
 
 /* Assistente (Impostazioni - senza menzione Apple Intelligence) */

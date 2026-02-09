@@ -247,7 +247,8 @@ class LocalFridgyProvider: IntelligenceProvider {
             let names = compatibleItems.map { $0.name }.joined(separator: " e ")
             suggestion = "💡 Puoi abbinarlo con \(names) che hai già"
         } else if item.expirationStatus == .soon {
-            suggestion = "💡 Scade tra \(item.daysRemaining) giorni — potresti pianificarlo"
+            let days = item.daysRemaining
+            suggestion = "💡 Scade tra \(days) \(days == 1 ? "giorno" : "giorni") — potresti pianificarlo"
         }
         
         // Valida e restituisci solo se passa

@@ -84,7 +84,7 @@ struct InventoryView: View {
             .searchable(text: $searchText, prompt: Text("inventory.search.prompt".localized))
             .background(Color(.systemGroupedBackground))
             .navigationTitle("nav.inventory".localized)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 Text(String(format: "inventory.total_items".localized, filteredItems.count))
                     .font(.system(size: 13, weight: .medium))
@@ -93,6 +93,16 @@ struct InventoryView: View {
                     .padding(.vertical, 8)
             }
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "leaf.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                        Text("FoodFade")
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingAddFood = true

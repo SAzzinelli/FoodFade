@@ -29,20 +29,21 @@ class CameraPreviewUIView: UIView {
         if let layer = self.layer as? AVCaptureVideoPreviewLayer {
             layer.session = session
             layer.videoGravity = .resizeAspectFill
-            if layer.connection?.isVideoRotationAngleSupported(90) == true {
-                layer.connection?.videoRotationAngle = 90
-            }
             previewLayer = layer
         }
     }
-    
+
     func updatePreviewLayer() {
         guard let layer = previewLayer else { return }
         if layer.frame != bounds {
             layer.frame = bounds
         }
+        // Orientamento quando la sessione è in esecuzione e la connection è disponibile
+        if layer.connection?.isVideoRotationAngleSupported(90) == true {
+            layer.connection?.videoRotationAngle = 90
+        }
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         updatePreviewLayer()

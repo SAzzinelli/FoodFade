@@ -34,6 +34,16 @@ struct FridgyRules {
     - I suggerimenti devono riguardare SOLO utilizzo, ricette, consumo entro scadenza, non dove conservare (è già deciso dall'utente).
     """
     
+    /// Coerenza culinaria: i suggerimenti devono restare sul tema, niente abbinamenti assurdi
+    static let culinaryCoherencePrompt = """
+    COERENZA CULINARIA (obbligatorio):
+    - Suggerisci SOLO ricette e utilizzi culinariamente sensati. Resta sul tema cibo/cucina reale.
+    - NON abbinare mai: biscotti, cracker, dolci da forno, cioccolato, marmellata, barrette con piatti salati (risotto, pasta al sugo, brodo, carne, pesce, verdure in padella).
+    - NON proporre di mettere biscotti nel risotto, nella pasta, nelle zuppe, nelle insalate o in piatti salati.
+    - Dolci e prodotti da colazione (biscotti, cereali dolci, miele su pietanze salate) vanno suggeriti solo per colazione/dessert/snack dolce, mai in primi o secondi.
+    - Se gli ingredienti non si prestano a un piatto coerente, rispondi con 'nessun suggerimento' invece di inventare abbinamenti assurdi.
+    """
+    
     /// Valida l'output di Fridgy secondo le regole assolute
     static func validate(_ output: String) -> ValidationResult {
         // 1. Controlla lunghezza
@@ -156,7 +166,8 @@ struct FridgyPromptBuilder {
     static func itemPrompt(item: FoodItem, compatibleItems: [FoodItem]) -> String {
         var context = "Alimento: \(item.name)"
         context += "\nStato: \(item.isOpened ? "aperto" : "chiuso")"
-        context += "\nScade tra: \(item.daysRemaining) giorni"
+        let d = item.daysRemaining
+        context += "\nScade tra: \(d) \(d == 1 ? "giorno" : "giorni")"
         
         if !compatibleItems.isEmpty {
             context += "\nIngredienti compatibili disponibili: \(compatibleItems.prefix(3).map { $0.name }.joined(separator: ", "))"

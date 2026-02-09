@@ -343,6 +343,7 @@
 "fridgy.footer.enabled.available" = "Fridgy provides personalized suggestions and tips based on your inventory.";
 "fridgy.footer.enabled.unavailable" = "Fridgy is not available on this device.";
 "fridgy.footer.disabled" = "Fridgy is disabled. The app works at 100% without intelligent suggestions.";
+"fridgy.footer.beta" = "This feature is in beta: it may change and can make mistakes. Suggestions do not replace common sense in the kitchen.";
 "fridgy.loading" = "Loading a Fridgy suggestion…";
 
 /* Assistente (Settings - no Apple Intelligence mention) */

@@ -49,7 +49,7 @@ struct ItemDetailView: View {
                                     .font(.system(size: 56, weight: .bold, design: .rounded))
                                     .foregroundStyle(item.daysRemaining <= 2 ? .orange : .green)
                                 
-                                Text(item.daysRemaining >= 0 ? "giorni rimanenti" : "giorni fa")
+                                Text(daysRemainingLabel)
                                     .font(.system(size: 15, weight: .regular))
                                     .foregroundStyle(.secondary)
                             }
@@ -97,13 +97,13 @@ struct ItemDetailView: View {
                     HStack {
                         Label("Scade il", systemImage: "calendar")
                             .font(.system(size: 15))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(detailAccentColor)
                         
                         Spacer()
                         
                         Text(item.effectiveExpirationDate.formatted(date: .long, time: .omitted))
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(item.expirationStatus == .expired || item.expirationStatus == .today ? .red : .primary)
+                            .foregroundStyle(item.expirationStatus == .expired || item.expirationStatus == .today ? .red : detailAccentColor)
                     }
                     
                     // Data di aggiunta
@@ -203,6 +203,7 @@ struct ItemDetailView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .listSectionSpacing(6)
             .contentMargins(.top, 4, for: .scrollContent)
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("")
@@ -267,7 +268,9 @@ struct ItemDetailView: View {
             .safeAreaInset(edge: .bottom) {
                 actionButtons
                     .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                     .padding(.bottom, 8)
+                    .background(.ultraThinMaterial)
             }
     }
     
@@ -308,23 +311,21 @@ struct ItemDetailView: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            // Pulsante L'hai aperto? – sfondo arancione, testo bianco
+            // Pulsante L'hai aperto? – Liquid Glass con tint arancione
             if !item.isFresh {
                 Button {
                     toggleOpenedStatus()
                 } label: {
                     Text("itemdetail.opened.button".localized)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                 }
                 .buttonStyle(.plain)
-                .background(ThemeManager.naturalHomeLogoColor)
-                .clipShape(Capsule())
+                .glassEffect(.regular.tint(ThemeManager.naturalHomeLogoColor).interactive(), in: .capsule)
             }
             
-            // Pulsante Consumato – sfondo verde, testo bianco
+            // Pulsante Consumato – Liquid Glass con tint verde
             Button {
                 if item.quantity > 1 {
                     showingConsumedQuantitySheet = true
@@ -334,13 +335,11 @@ struct ItemDetailView: View {
             } label: {
                 Text("Consumato")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
             }
             .buttonStyle(.plain)
-            .background(Color.green)
-            .clipShape(Capsule())
+            .glassEffect(.regular.tint(.green).interactive(), in: .capsule)
             .disabled(item.isConsumed)
         }
     }
@@ -382,6 +381,20 @@ struct ItemDetailView: View {
         case .today: return .orange
         case .soon: return .orange
         case .safe: return .green
+        }
+    }
+    
+    private var detailAccentColor: Color {
+        ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
+    }
+    
+    /// Testo singolare/plurale: "1 giorno rimanente" / "X giorni rimanenti" o "1 giorno fa" / "X giorni fa"
+    private var daysRemainingLabel: String {
+        let n = abs(item.daysRemaining)
+        if item.daysRemaining >= 0 {
+            return n == 1 ? "giorno rimanente" : "giorni rimanenti"
+        } else {
+            return n == 1 ? "giorno fa" : "giorni fa"
         }
     }
     

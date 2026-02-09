@@ -12,6 +12,8 @@ class BarcodeScannerService: NSObject, ObservableObject {
     @Published var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     private var metadataOutput: AVCaptureMetadataOutput?
+    /// Coda seriale per configurazione e avvio sessione (richiesto da AVFoundation).
+    private let sessionQueue = DispatchQueue(label: "FoodFade.BarcodeScanner.Session")
     
     /// Verifica i permessi della fotocamera
     @MainActor
@@ -46,54 +48,53 @@ class BarcodeScannerService: NSObject, ObservableObject {
         }
         guard !isScanning else { return }
 
-        let session = AVCaptureSession()
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
             errorMessage = "Fotocamera non disponibile"
             return
         }
-        
+
         let videoInput: AVCaptureDeviceInput
-        
         do {
             videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
         } catch {
             errorMessage = "Errore nella configurazione della fotocamera"
             return
         }
-        
+
+        let session = AVCaptureSession()
+        session.beginConfiguration()
+        session.sessionPreset = .high
+
         if session.canAddInput(videoInput) {
             session.addInput(videoInput)
         } else {
+            session.commitConfiguration()
             errorMessage = "Impossibile aggiungere input alla sessione"
             return
         }
-        
+
         let output = AVCaptureMetadataOutput()
-        
         if session.canAddOutput(output) {
             session.addOutput(output)
-            
             output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             output.metadataObjectTypes = [.ean8, .ean13, .upce, .code128, .qr, .pdf417]
-            
-            // Salva il riferimento per configurare l'area di interesse
             self.metadataOutput = output
-            
-            // Configura l'area di interesse dopo che la sessione è pronta
-            // L'area è normalizzata (0.0 - 1.0) con origine in alto a sinistra
-            // Per ora lasciamo tutta l'area, sarà configurata meglio nella vista
         } else {
+            session.commitConfiguration()
             errorMessage = "Impossibile aggiungere output alla sessione"
             return
         }
-        
-        captureSession = session
-        isScanning = true
+        session.commitConfiguration()
+
         errorMessage = nil
 
-        // Avvia la sessione in background (startRunning può bloccare; sul simulatore non si avvia dalla vista)
-        DispatchQueue.global(qos: .userInitiated).async { [weak session] in
-            session?.startRunning()
+        // Configurazione e avvio sulla coda seriale; assegna alla UI solo quando la sessione è in esecuzione (preview funziona su device)
+        sessionQueue.async { [weak self] in
+            session.startRunning()
+            DispatchQueue.main.async {
+                self?.captureSession = session
+                self?.isScanning = true
+            }
         }
     }
     
@@ -101,12 +102,15 @@ class BarcodeScannerService: NSObject, ObservableObject {
     @MainActor
     func stopScanning() {
         turnOffTorch()
-        captureSession?.stopRunning()
+        let session = captureSession
         captureSession = nil
-        videoPreviewLayer = nil
-        metadataOutput = nil
         isScanning = false
         scannedBarcode = nil
+        videoPreviewLayer = nil
+        metadataOutput = nil
+        sessionQueue.async {
+            session?.stopRunning()
+        }
     }
     
     /// Spegne la torcia (chiamato anche da stopScanning per evitare che resti accesa uscendo)

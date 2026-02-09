@@ -5,6 +5,8 @@ import CoreData
 
 @main
 struct FoodFadeApp: App {
+    @UIApplicationDelegateAdaptor(NotificationDelegate.self) private var notificationDelegate
+
     init() {
         // Carica le impostazioni del tema all'avvio
         loadThemeSettings()
@@ -18,6 +20,7 @@ struct FoodFadeApp: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView()
+                .environmentObject(NotificationService.shared)
                 .modelContainer(modelContainer)
                 .onAppear {
                     AppIconManager.applySavedIconIfNeeded()
@@ -177,6 +180,7 @@ struct FoodFadeApp: App {
 struct ContentView: View {
     @State private var selectedTab = 0
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var notificationService: NotificationService
     @StateObject private var themeManager = ThemeManager.shared
     @Query private var settings: [AppSettings]
     
@@ -243,6 +247,21 @@ struct ContentView: View {
             // Il preferredColorScheme viene calcolato dinamicamente tramite la computed property
             // Non serve .id() perché preferredColorScheme è reattivo
         }
+        .onChange(of: notificationService.itemIdToOpenFromNotification) { _, id in
+            if id != nil { selectedTab = 0 }
+        }
+        .onChange(of: notificationService.itemIdToMarkAsConsumedFromNotification) { _, id in
+            guard let id = id else { return }
+            let predicate = #Predicate<FoodItem> { $0.id == id }
+            var descriptor = FetchDescriptor<FoodItem>(predicate: predicate)
+            descriptor.fetchLimit = 1
+            if let item = try? modelContext.fetch(descriptor).first {
+                item.isConsumed = true
+                item.consumedDate = Date()
+                try? modelContext.save()
+            }
+            notificationService.itemIdToMarkAsConsumedFromNotification = nil
+        }
     }
     
     /// Carica le impostazioni del tema dal database
@@ -297,6 +316,7 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(NotificationService.shared)
         .modelContainer(for: [FoodItem.self, AppSettings.self, UserProfile.self, ShoppingList.self, ShoppingItem.self], inMemory: true)
 }
 

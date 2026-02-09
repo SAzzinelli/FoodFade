@@ -26,9 +26,12 @@ struct HomeView: View {
     @State private var recentItemsAccordionExpanded = true
     @State private var categoryToOpen: FoodCategory?
     @State private var showExpiringSoonView = false
+    /// Item da aprire in dettaglio quando l'utente arriva da una notifica (in scadenza / scaduto).
+    @State private var itemToOpenFromNotification: FoodItem?
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var notificationService: NotificationService
     
     /// In dark mode logo/titolo sempre arancione; in light segue tema
     private var homeLogoColor: Color {
@@ -181,6 +184,24 @@ struct HomeView: View {
             }
             .navigationDestination(isPresented: $showExpiringSoonView) {
                 ExpiringSoonView()
+            }
+            .onAppear {
+                openItemFromNotificationIfNeeded()
+            }
+            .onChange(of: notificationService.itemIdToOpenFromNotification) { _, _ in
+                openItemFromNotificationIfNeeded()
+            }
+            .fullScreenCover(item: $itemToOpenFromNotification) { item in
+                NavigationStack {
+                    ItemDetailView(item: item)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Chiudi") {
+                                    itemToOpenFromNotification = nil
+                                }
+                            }
+                        }
+                }
             }
         }
         .tint(ThemeManager.shared.primaryColor)
@@ -583,6 +604,17 @@ struct HomeView: View {
         .padding(16)
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
+    }
+    
+    /// Apre i dettagli dell'oggetto quando l'utente arriva da una notifica (in scadenza / scaduto).
+    private func openItemFromNotificationIfNeeded() {
+        guard let id = notificationService.itemIdToOpenFromNotification else { return }
+        guard let item = allItems.first(where: { $0.id == id }) else {
+            notificationService.itemIdToOpenFromNotification = nil
+            return
+        }
+        itemToOpenFromNotification = item
+        notificationService.itemIdToOpenFromNotification = nil
     }
 }
 
@@ -1000,5 +1032,6 @@ extension ExpirationStatus {
 
 #Preview {
     HomeView()
+        .environmentObject(NotificationService.shared)
         .modelContainer(for: [FoodItem.self, UserProfile.self])
 }

@@ -52,8 +52,18 @@ struct ShoppingListView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("shopping.title".localized)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "leaf.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                        Text("FoodFade")
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         newListName = ""

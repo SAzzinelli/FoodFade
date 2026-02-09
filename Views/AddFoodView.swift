@@ -31,6 +31,7 @@ struct AddFoodView: View {
     @State private var showingCamera = false
     @State private var showingPhotoLibrary = false
     @State private var showingDocumentPicker = false
+    @State private var showingDatePicker = false
     
     var body: some View {
         NavigationStack {
@@ -111,6 +112,29 @@ struct AddFoodView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage)
+            }
+            .sheet(isPresented: $showingDatePicker) {
+                NavigationStack {
+                    DatePicker(
+                        "addfood.expiration".localized,
+                        selection: $viewModel.expirationDate,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+                    .padding()
+                    .navigationTitle("addfood.expiration".localized)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Fatto") {
+                                viewModel.validateDate()
+                                showingDatePicker = false
+                            }
+                        }
+                    }
+                }
+                .presentationDetents([.height(420)])
+                .presentationCompactAdaptation(.popover)
             }
             .onAppear {
                 viewModel.setup(modelContext: modelContext)
@@ -242,72 +266,65 @@ struct AddFoodView: View {
     }
     
     private var expirationSection: some View {
-        let useDictation = (settings.first?.expirationInputMethod ?? .calendar) == .dictation
-        return Section {
+        Section {
             Toggle("addfood.is_fresh".localized, isOn: $viewModel.isFresh)
             
             if !viewModel.isFresh {
-                // Riga data in evidenza
-                HStack {
-                    Text(viewModel.expirationDate.expirationShortLabel)
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(addFormControlColor)
-                    Spacer()
-                    Image(systemName: "calendar")
-                        .font(.system(size: 18))
-                        .foregroundColor(.secondary)
+                // Riga data: tap apre il date picker
+                Button {
+                    showingDatePicker = true
+                } label: {
+                    HStack {
+                        Text(viewModel.expirationDate.expirationShortLabel)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(addFormControlColor)
+                        Spacer()
+                        Image(systemName: "calendar")
+                            .font(.system(size: 18))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
+                .buttonStyle(.plain)
                 
-                // Azione: dettatura o calendario
-                if useDictation {
-                    Button {
-                        showingDictationOverlay = true
-                        Task {
-                            await dictationService.startListening(
-                                onDate: { date in
-                                    viewModel.expirationDate = date
-                                    viewModel.validateDate()
-                                    showingDictationOverlay = false
-                                },
-                                onError: { key in
-                                    if key == "addfood.dictation.error.no_date" {
-                                        errorTitle = "addfood.dictation.error.title.no_date".localized
-                                        errorMessage = "addfood.dictation.error.message.no_date".localized
-                                    } else {
-                                        errorTitle = "addfood.dictation.error.title.not_heard".localized
-                                        errorMessage = "addfood.dictation.error.message.not_heard".localized
-                                    }
-                                    showingError = true
-                                    showingDictationOverlay = false
+                // Pulsante dettatura
+                Button {
+                    showingDictationOverlay = true
+                    Task {
+                        await dictationService.startListening(
+                            onDate: { date in
+                                viewModel.expirationDate = date
+                                viewModel.validateDate()
+                                showingDictationOverlay = false
+                            },
+                            onError: { key in
+                                if key == "addfood.dictation.error.no_date" {
+                                    errorTitle = "addfood.dictation.error.title.no_date".localized
+                                    errorMessage = "addfood.dictation.error.message.no_date".localized
+                                } else {
+                                    errorTitle = "addfood.dictation.error.title.not_heard".localized
+                                    errorMessage = "addfood.dictation.error.message.not_heard".localized
                                 }
-                            )
-                        }
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: "mic.fill")
-                                .font(.system(size: 18))
-                            Text("addfood.dictation.button".localized)
-                                .font(.system(size: 16, weight: .medium))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(addFormControlColor)
-                        .clipShape(Capsule())
+                                showingError = true
+                                showingDictationOverlay = false
+                            }
+                        )
                     }
-                    .buttonStyle(.plain)
-                    .disabled(dictationService.isListening)
-                } else {
-                    DatePicker(
-                        "addfood.expiration".localized,
-                        selection: $viewModel.expirationDate,
-                        displayedComponents: .date
-                    )
-                    .onChange(of: viewModel.expirationDate) { _, _ in
-                        viewModel.validateDate()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "mic.fill")
+                            .font(.system(size: 18))
+                        Text("addfood.dictation.button".localized)
+                            .font(.system(size: 16, weight: .medium))
                     }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(addFormControlColor)
+                    .clipShape(Capsule())
                 }
+                .buttonStyle(.plain)
+                .disabled(dictationService.isListening)
                 
                 if let errorMessage = viewModel.dateValidationError {
                     HStack(spacing: 8) {

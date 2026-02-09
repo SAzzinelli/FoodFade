@@ -182,40 +182,6 @@ struct SettingsView: View {
                     }
                 }
                 
-                // 2b. INSERIMENTO SCADENZA
-                Section {
-                    HStack(spacing: 8) {
-                        Image(systemName: "calendar.badge.clock")
-                            .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsExpirationInput))
-                        Text("settings.expiration.input.short".localized)
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Menu {
-                            ForEach(ExpirationInputMethod.allCases, id: \.self) { method in
-                                Button {
-                                    viewModel.expirationInputMethod = method
-                                    viewModel.saveSettings()
-                                } label: {
-                                    Text(method.displayName)
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(viewModel.expirationInputMethod.displayName)
-                                    .foregroundColor(.primary)
-                                Image(systemName: "chevron.up.chevron.down")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .tint(.primary)
-                    }
-                } header: {
-                    Text("settings.expiration.section".localized)
-                } footer: {
-                    Text("settings.expiration.footer".localized)
-                }
-                
                 // 3. FRIDGY (descrizioni sotto senza menzione Apple Intelligence)
                 Section {
                     Toggle(isOn: $viewModel.intelligenceEnabled) {
@@ -224,6 +190,13 @@ struct SettingsView: View {
                                 .foregroundColor(Self.fridgyBlue)
                             Text("fridgy.toggle".localized)
                                 .foregroundColor(.primary)
+                            Text("BETA")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(Color.purple)
+                                .clipShape(Capsule())
                         }
                     }
                     .tint(Self.fridgyBlue)
@@ -258,14 +231,19 @@ struct SettingsView: View {
                 } header: {
                     Text("fridgy.title".localized)
                 } footer: {
-                    if viewModel.intelligenceEnabled {
-                        if viewModel.isAppleIntelligenceAvailable {
-                            Text("fridgy.footer.enabled.available".localized)
+                    VStack(alignment: .leading, spacing: 8) {
+                        if viewModel.intelligenceEnabled {
+                            if viewModel.isAppleIntelligenceAvailable {
+                                Text("fridgy.footer.enabled.available".localized)
+                            } else {
+                                Text("fridgy.footer.enabled.unavailable".localized)
+                            }
                         } else {
-                            Text("fridgy.footer.enabled.unavailable".localized)
+                            Text("fridgy.footer.disabled".localized)
                         }
-                    } else {
-                        Text("fridgy.footer.disabled".localized)
+                        Text("fridgy.footer.beta".localized)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
                     }
                 }
                 
@@ -389,7 +367,19 @@ struct SettingsView: View {
             }
             .tint(listTint)
             .navigationTitle("Impostazioni")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "leaf.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                        Text("FoodFade")
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                    }
+                }
+            }
             .sheet(isPresented: $showingCustomDaysPicker) {
                 CustomDaysPickerView(customDays: $viewModel.customNotificationDays)
                     .onDisappear {

@@ -80,7 +80,7 @@ private struct SafeItemCard: View {
                     .foregroundColor(.primary)
                 
                 HStack(spacing: 16) {
-                    Label("\(item.daysRemaining) giorni", systemImage: "calendar")
+                    Label("\(item.daysRemaining) \(item.daysRemaining == 1 ? "giorno" : "giorni")", systemImage: "calendar")
                     Text("•")
                         .foregroundColor(.secondary)
                     Text("Qtà. \(item.quantity)")

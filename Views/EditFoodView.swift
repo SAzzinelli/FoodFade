@@ -14,6 +14,7 @@ struct EditFoodView: View {
     
     @State private var name: String
     @State private var showingDictationOverlay = false
+    @State private var showingDatePicker = false
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var errorTitle = ""
@@ -139,47 +140,48 @@ struct EditFoodView: View {
                                 .foregroundColor(.accentColor)
                         }
                     } else {
-                        // Prodotto con data di scadenza: Calendario o Dettatura
-                        let useDictation = (settings.first?.expirationInputMethod ?? .calendar) == .dictation
-                        if useDictation {
-                            HStack(spacing: 12) {
-                                Button {
-                                    showingDictationOverlay = true
-                                    Task {
-                                        await dictationService.startListening(
-                                            onDate: { date in
-                                                expirationDate = date
-                                                showingDictationOverlay = false
-                                            },
-                                            onError: { key in
-                                                if key == "addfood.dictation.error.no_date" {
-                                                    errorTitle = "addfood.dictation.error.title.no_date".localized
-                                                    errorMessage = "addfood.dictation.error.message.no_date".localized
-                                                } else {
-                                                    errorTitle = "addfood.dictation.error.title.not_heard".localized
-                                                    errorMessage = "addfood.dictation.error.message.not_heard".localized
-                                                }
-                                                showingError = true
-                                                showingDictationOverlay = false
+                        // Prodotto con data: dettatura + tap sulla data apre il date picker
+                        HStack(spacing: 12) {
+                            Button {
+                                showingDictationOverlay = true
+                                Task {
+                                    await dictationService.startListening(
+                                        onDate: { date in
+                                            expirationDate = date
+                                            showingDictationOverlay = false
+                                        },
+                                        onError: { key in
+                                            if key == "addfood.dictation.error.no_date" {
+                                                errorTitle = "addfood.dictation.error.title.no_date".localized
+                                                errorMessage = "addfood.dictation.error.message.no_date".localized
+                                            } else {
+                                                errorTitle = "addfood.dictation.error.title.not_heard".localized
+                                                errorMessage = "addfood.dictation.error.message.not_heard".localized
                                             }
-                                        )
-                                    }
-                                } label: {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "mic.fill")
-                                            .font(.system(size: 16))
-                                        Text("addfood.dictation.button".localized)
-                                            .font(.system(size: 15, weight: .medium))
-                                    }
-                                    .foregroundColor(colorScheme == .dark ? .black : .white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
-                                    .cornerRadius(10)
+                                            showingError = true
+                                            showingDictationOverlay = false
+                                        }
+                                    )
                                 }
-                                .buttonStyle(.plain)
-                                .disabled(dictationService.isListening)
-                                
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "mic.fill")
+                                        .font(.system(size: 16))
+                                    Text("addfood.dictation.button".localized)
+                                        .font(.system(size: 15, weight: .medium))
+                                }
+                                .foregroundColor(colorScheme == .dark ? .black : .white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(colorScheme == .dark ? Color(white: 0.92) : ThemeManager.shared.primaryColor)
+                                .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(dictationService.isListening)
+                            
+                            Button {
+                                showingDatePicker = true
+                            } label: {
                                 Text(expirationDate.expirationShortLabel)
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(.primary)
@@ -187,12 +189,7 @@ struct EditFoodView: View {
                                     .padding(.vertical, 10)
                                     .cornerRadius(10)
                             }
-                        } else {
-                            DatePicker(
-                                "Data di scadenza",
-                                selection: $expirationDate,
-                                displayedComponents: .date
-                            )
+                            .buttonStyle(.plain)
                         }
                         
                         // Toggle prodotto aperto (solo se non fresco)
@@ -252,6 +249,28 @@ struct EditFoodView: View {
                     isPresented: $showingDictationOverlay,
                     onDismiss: { dictationService.stopListening() }
                 )
+            }
+            .sheet(isPresented: $showingDatePicker) {
+                NavigationStack {
+                    DatePicker(
+                        "Data di scadenza",
+                        selection: $expirationDate,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+                    .padding()
+                    .navigationTitle("Data di scadenza")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Fatto") {
+                                showingDatePicker = false
+                            }
+                        }
+                    }
+                }
+                .presentationDetents([.height(420)])
+                .presentationCompactAdaptation(.popover)
             }
             .alert(errorTitle, isPresented: $showingError) {
                 Button("OK", role: .cancel) {}

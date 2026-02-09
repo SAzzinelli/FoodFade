@@ -9,6 +9,12 @@ class NotificationService: ObservableObject {
     
     private init() {}
     
+    /// ID dell'item da aprire in dettaglio quando l'utente tap sulla notifica (in scadenza / scaduto).
+    @Published var itemIdToOpenFromNotification: UUID?
+    
+    /// ID dell'item da segnare come consumato (azione "Segna come consumato" dalla notifica).
+    @Published var itemIdToMarkAsConsumedFromNotification: UUID?
+    
     /// Richiede l'autorizzazione per le notifiche
     func requestAuthorization() async throws {
         let center = UNUserNotificationCenter.current()
@@ -108,7 +114,8 @@ class NotificationService: ObservableObject {
         } else if daysRemaining == 1 {
             return "Il tuo \(item.name) scade domani \(getEmoji(for: item.name))"
         } else {
-            return "Ricorda: \(item.name) scade tra \(daysRemaining) giorni \(getEmoji(for: item.name))"
+            let word = daysRemaining == 1 ? "giorno" : "giorni"
+            return "Ricorda: \(item.name) scade tra \(daysRemaining) \(word) \(getEmoji(for: item.name))"
         }
     }
     

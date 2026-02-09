@@ -60,8 +60,9 @@ class FridgyServiceImpl: FridgyService {
                 let session = LanguageModelSession(instructions: """
                     \(FridgyRules.basePrompt)
                     \(FridgyRules.storageContextPrompt)
+                    \(FridgyRules.culinaryCoherencePrompt)
                     Non usare parole come "sicuro", "rischioso", "fa bene", "dovresti", "meglio per la salute".
-                    Se non c'è un buon suggerimento, rispondi solo con "nessun suggerimento".
+                    Se non c'è un buon suggerimento o un abbinamento sensato, rispondi solo con "nessun suggerimento".
                     """)
                 
                 // Genera la risposta

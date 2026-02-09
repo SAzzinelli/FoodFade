@@ -2,20 +2,20 @@ import SwiftUI
 import AVFoundation
 import Combine
 
-/// Vista per la scansione di codici a barre
+/// Vista per la scansione di codici a barre.
+/// Su iOS 16+ usa DataScannerViewController (VisionKit) quando disponibile; altrimenti AVFoundation.
 struct BarcodeScannerView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var scannerService: BarcodeScannerService
     let onBarcodeScanned: (String) -> Void
-    
+
     @State private var cameraPermissionGranted = false
     @State private var scanAreaFrame: CGRect = .zero
-    @State private var hasProcessedBarcode = false // Evita doppia elaborazione
-    
+    @State private var hasProcessedBarcode = false
+
     private let scanAreaSize: CGFloat = 250
 
-    /// Sul simulatore la fotocamera non è disponibile (errori Fig -12710/-17281); mostriamo messaggio.
-    /// Controllo a runtime così funziona anche se la build non è stata fatta per simulatore.
+    /// Sul simulatore la fotocamera non è disponibile (errori Fig -12710/-17281).
     private static var isSimulator: Bool {
         #if targetEnvironment(simulator)
         return true
@@ -23,8 +23,88 @@ struct BarcodeScannerView: View {
         return ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
         #endif
     }
-    
+
+    /// VisionKit DataScanner disponibile (evita problemi AVFoundation su device reale).
+    private static var useDataScanner: Bool {
+        if #available(iOS 16.0, *) {
+            return DataScannerRepresentable.isSupported() && DataScannerRepresentable.isAvailable()
+        }
+        return false
+    }
+
     var body: some View {
+        if Self.useDataScanner {
+            dataScannerBody
+        } else {
+            avFoundationBody
+        }
+    }
+
+    @available(iOS 16.0, *)
+    private var dataScannerBody: some View {
+        NavigationStack {
+            ZStack {
+                // Camera + DataScanner VisionKit
+                DataScannerRepresentable(onBarcodeScanned: { code in
+                    onBarcodeScanned(code)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { dismiss() }
+                }, onDismiss: { dismiss() })
+                .ignoresSafeArea()
+
+                // Overlay scuro con buco trasparente (come con AVFoundation)
+                ZStack {
+                    Color.black.opacity(0.5)
+                        .ignoresSafeArea()
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: scanAreaSize, height: scanAreaSize)
+                        .blendMode(.destinationOut)
+                }
+                .compositingGroup()
+                .allowsHitTesting(false)
+
+                // Testo e controlli
+                VStack(spacing: 0) {
+                    Spacer()
+                    VStack(spacing: 4) {
+                        Text("Posiziona il codice")
+                            .foregroundColor(.white)
+                            .font(.headline)
+                        Text("a barre qui")
+                            .foregroundColor(.white.opacity(0.8))
+                            .font(.subheadline)
+                    }
+                    .offset(y: -scanAreaSize/2 - 40)
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.2))
+                                .frame(width: 60, height: 60)
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(ThemeManager.shared.primaryColor)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .contentShape(Circle())
+                    .frame(width: 60, height: 60)
+                    .padding(.bottom, 50)
+                }
+            }
+            .navigationTitle("Scansiona Codice")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Chiudi") { dismiss() }
+                        .foregroundColor(.white)
+                }
+            }
+        }
+    }
+
+    private var avFoundationBody: some View {
         NavigationStack {
             ZStack {
                 // Camera preview

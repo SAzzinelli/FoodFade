@@ -79,8 +79,18 @@ struct StatisticsView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Statistiche")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "leaf.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                        Text("FoodFade")
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundColor(ThemeManager.naturalHomeLogoColor)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
                         ConsumedHistoryView()
