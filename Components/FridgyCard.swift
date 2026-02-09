@@ -6,12 +6,27 @@ struct FridgyCard: View {
     let context: FridgyContext
     let message: String
     
-    @State private var glowRotation: Double = 0
     @State private var glowIntensity: Double = 0.6
     
+    /// Periodo rotazione gradiente (secondi)
+    private let rotationPeriod: TimeInterval = 5.0
+    
     var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 30)) { timeline in
+            let now = timeline.date.timeIntervalSinceReferenceDate
+            let rotation = (now.truncatingRemainder(dividingBy: rotationPeriod)) / rotationPeriod * 360
+            
+            fridgyContent(glowRotation: rotation)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
+                glowIntensity = 1.0
+            }
+        }
+    }
+    
+    private func fridgyContent(glowRotation: Double) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Riga titolo: icona Fridgy + titolo Consiglia (poca distanza dal testo sotto)
             HStack(alignment: .center, spacing: 12) {
                 Image("FridgySettingsHeader")
                     .resizable()
@@ -27,7 +42,6 @@ struct FridgyCard: View {
                 Spacer()
             }
             
-            // Testo del consiglio sotto, a tutta larghezza (senza indent/tabulazione)
             Text(message)
                 .font(.system(size: 15, weight: .regular, design: .default))
                 .foregroundStyle(.primary)
@@ -35,7 +49,6 @@ struct FridgyCard: View {
         }
         .padding(16)
         .background(
-            // Background glow iridescente animato - transizione fluida senza interruzioni
             ZStack {
                 RoundedRectangle(cornerRadius: 18)
                     .fill(
@@ -47,7 +60,6 @@ struct FridgyCard: View {
                     )
                     .opacity(0.2)
                 
-                // Glow interno radiale
                 RoundedRectangle(cornerRadius: 18)
                     .fill(
                         RadialGradient(
@@ -64,7 +76,6 @@ struct FridgyCard: View {
             }
         )
         .overlay(
-            // Bordo glow iridescente animato - transizione fluida
             RoundedRectangle(cornerRadius: 18)
                 .stroke(
                     AngularGradient(
@@ -77,17 +88,6 @@ struct FridgyCard: View {
                 .shadow(color: color.opacity(glowIntensity * 0.5), radius: 8, x: 0, y: 0)
                 .shadow(color: color.opacity(glowIntensity * 0.3), radius: 12, x: 0, y: 0)
         )
-        .onAppear {
-            // Animazione continua del glow - il gradiente lungo rende la transizione fluida
-            withAnimation(.linear(duration: 5.0).repeatForever(autoreverses: false)) {
-                glowRotation = 360
-            }
-            
-            // Animazione pulsante dell'intensità
-            withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
-                glowIntensity = 1.0
-            }
-        }
     }
     
     // MARK: - Stili basati sul contesto

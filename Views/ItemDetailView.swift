@@ -203,7 +203,7 @@ struct ItemDetailView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .listSectionSpacing(6)
+            .listSectionSpacing(12)
             .contentMargins(.top, 4, for: .scrollContent)
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("")
@@ -270,12 +270,6 @@ struct ItemDetailView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .padding(.bottom, 8)
-                    .background {
-                        ZStack {
-                            Rectangle().fill(.ultraThinMaterial)
-                            Color.white.opacity(colorScheme == .dark ? 0.55 : 0.85)
-                        }
-                    }
             }
     }
     
