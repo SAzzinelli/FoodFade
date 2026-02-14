@@ -82,7 +82,7 @@ struct OpenedQuantitySheet: View {
                 }
             }
             .onAppear {
-                openedCount = 1
+                openedCount = max(1, min(item.effectiveOpenedQuantity, item.quantity))
             }
         }
     }

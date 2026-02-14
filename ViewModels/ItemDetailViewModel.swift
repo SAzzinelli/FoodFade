@@ -47,12 +47,19 @@ final class ItemDetailViewModel: ObservableObject {
         do {
             let text = try await service.generateMessage(from: payload.promptContext)
             
-            // Validazione: controlla che il testo sia valido
-            let sanitized = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !sanitized.isEmpty && sanitized.count <= 100 {
-                fridgyContext = payload.context
-                fridgyMessage = sanitized
-            } else {
+            // Validazione Fridgy: sanitize + validate (lunghezza, parole proibite, abbinamenti assurdi)
+            let sanitized = FridgyRules.sanitize(text)
+            let validation = FridgyRules.validate(sanitized)
+            switch validation {
+            case .accepted:
+                if !sanitized.isEmpty && sanitized.count <= 100 {
+                    fridgyContext = payload.context
+                    fridgyMessage = sanitized
+                } else {
+                    fridgyMessage = nil
+                    fridgyContext = nil
+                }
+            case .rejected, .noSuggestion:
                 fridgyMessage = nil
                 fridgyContext = nil
             }

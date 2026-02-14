@@ -32,6 +32,8 @@ class NotificationService: ObservableObject {
     /// Programma le notifiche per un FoodItem:
     /// 1) "X giorni prima" alle 9:00 (se quella data è nel futuro)
     /// 2) "Scade oggi" il giorno di scadenza alle 9:00 (così non perdi mai l'avviso)
+    /// Per prodotti con unità aperte/chiuse usa effectiveExpirationDate = prima scadenza tra (chiuse) e (aperte +3gg).
+    /// Va richiamato dopo "apri unità" o "consumato" per aggiornare le date.
     func scheduleNotifications(for item: FoodItem, daysBefore: Int) async {
         guard item.notify, !item.isConsumed else { return }
 

@@ -2,6 +2,24 @@ import Foundation
 
 /// Regole assolute di Fridgy - "Costituzione" della mascotte
 struct FridgyRules {
+    /// Restituisce true se il nome sembra un alimento reale (non un nome di prova tipo "nfvjdofj").
+    /// Evita suggerimenti fuori contesto per prodotti creati per test.
+    static func isReasonableProductName(_ name: String) -> Bool {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 2 else { return false }
+        // Nomi multi-parola di solito sono reali (es. "Latte intero")
+        if trimmed.contains(" ") { return true }
+        let lower = trimmed.lowercased()
+        let vowels = lower.filter { "aeiouàèéìòù".contains($0) }.count
+        let letters = lower.filter { $0.isLetter }.count
+        guard letters >= 2 else { return false }
+        // Parola singola: deve avere almeno 2 vocali o essere molto breve (es. "Tè")
+        if vowels >= 2 { return true }
+        if trimmed.count <= 3 && vowels >= 1 { return true }
+        // Troppe consonanti senza vocali = probabile gibberish (es. nfvjdofj)
+        return false
+    }
+    
     /// Parole proibite che Fridgy non può mai usare
     static let forbiddenWords: Set<String> = [
         "sicuro", "rischioso", "fa bene", "dovresti", "meglio per la salute",
@@ -87,6 +105,16 @@ struct FridgyRules {
             return .rejected(reason: "Suggerimento troppo breve, non aggiunge valore")
         }
         
+        // 6. Abbinamenti assurdi: dolci/colazione in piatti salati
+        let absurdSweet = ["biscotti", "cracker", "cioccolato", "marmellata", "barrette", "cereali", "miele"]
+        let savoryDishes = ["zuppa", "zuppe", "risotto", "pasta ", "brodo", "insalata", "minestra", "minestrone", "ragù", "sugo "]
+        let lower = output.lowercased()
+        let hasSweet = absurdSweet.contains { lower.contains($0) }
+        let hasSavory = savoryDishes.contains { lower.contains($0) }
+        if hasSweet && hasSavory {
+            return .rejected(reason: "Abbinamento culinario non sensato (dolce in piatto salato)")
+        }
+        
         return .accepted
     }
     
@@ -133,7 +161,7 @@ enum ValidationResult {
 struct FridgyPromptBuilder {
     /// Prompt per Home (opportunità generica)
     static func homePrompt(items: [FoodItem]) -> String {
-        let activeItems = items.filter { !$0.isConsumed }
+        let activeItems = items.filter { !$0.isConsumed && FridgyRules.isReasonableProductName($0.name) }
         let expiring = activeItems.filter { $0.expirationStatus == .today || $0.expirationStatus == .expired }
         let soon = activeItems.filter { $0.expirationStatus == .soon }
         let opened = activeItems.filter { $0.isOpened }
@@ -162,7 +190,7 @@ struct FridgyPromptBuilder {
         """
     }
     
-    /// Prompt per Dettaglio alimento (consiglio specifico)
+    /// Prompt per Dettaglio alimento (consiglio specifico). Non usare se !isReasonableProductName(item.name).
     static func itemPrompt(item: FoodItem, compatibleItems: [FoodItem]) -> String {
         var context = "Alimento: \(item.name)"
         context += "\nStato: \(item.isOpened ? "aperto" : "chiuso")"
@@ -184,24 +212,25 @@ struct FridgyPromptBuilder {
         """
     }
     
-    /// Prompt per Statistiche (insight descrittivo)
+    /// Prompt per Statistiche (insight descrittivo). Waste score alto = molti consumati in tempo (bene), basso = molti scaduti (male).
     static func statisticsPrompt(items: [FoodItem], statistics: StatisticsData) -> String {
         let consumed = items.filter { $0.isConsumed }.count
         let expired = items.filter { !$0.isConsumed && $0.expirationStatus == .expired }.count
+        let scorePercent = Int(statistics.wasteScore * 100)
         
         var context = "Statistiche periodo:"
-        context += "\nConsumati: \(consumed)"
-        context += "\nScaduti: \(expired)"
-        context += "\nWaste Score: \(Int(statistics.wasteScore * 100))%"
+        context += "\nConsumati in tempo: \(consumed)"
+        context += "\nScaduti (non consumati): \(expired)"
+        context += "\nWaste Score: \(scorePercent)% (percentuale consumati prima della scadenza; più alto = meno sprechi)"
+        context += "\nQuesto mese: \(statistics.monthlyStats.consumed) consumati, \(statistics.monthlyStats.expired) scaduti."
         
         return """
         \(FridgyRules.basePrompt)
         
-        Contesto:
+        Contesto Statistiche / Waste Score:
         \(context)
         
-        Genera UN insight descrittivo e neutro su un pattern osservato.
-        Usa tono neutro, descrittivo, non giudicante.
+        Genera UN insight breve e utile: se il waste score è alto riconosci il risultato positivo; se è basso suggerisci un'idea pratica (es. controllare le scadenze, mettere in vista i prodotti in scadenza). Massimo 25 parole, tono amichevole e non giudicante.
         Se non c'è un pattern interessante, rispondi 'nessun suggerimento'.
         """
     }

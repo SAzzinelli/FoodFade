@@ -16,6 +16,9 @@ struct FridgyPayload {
     
     /// Genera il payload per un alimento specifico
     static func forFoodItem(_ item: FoodItem) -> FridgyPayload? {
+        // Nessun suggerimento per nomi di prova / non riconoscibili (es. "nfvjdofj")
+        guard FridgyRules.isReasonableProductName(item.name) else { return nil }
+        
         // Caso critico: aperto + pochi giorni
         let storageLine = "Luogo di conservazione attuale: \(item.category.rawValue). Non suggerire di cambiare luogo; suggerisci solo utilizzo o consumo."
         
@@ -327,11 +330,25 @@ struct FridgyPayload {
     
     /// Payload per suggerimento "Come migliorare" nello Waste Score (solo statistiche)
     static func forWasteScoreImprovement(statistics: StatisticsData) -> FridgyPayload? {
+        let scorePercent = Int(statistics.wasteScore * 100)
+        let consumed = statistics.monthlyStats.consumed
+        let expired = statistics.monthlyStats.expired
+        let contextLine: String
+        if scorePercent >= 80 {
+            contextLine = "L'utente sta andando molto bene: consuma la maggior parte dei prodotti prima della scadenza."
+        } else if scorePercent >= 50 {
+            contextLine = "L'utente ha margine di miglioramento: alcuni prodotti scadono prima di essere consumati."
+        } else {
+            contextLine = "L'utente ha molti prodotti che scadono: serve un'idea concreta per ridurre gli sprechi."
+        }
         return FridgyPayload(
             context: statistics.monthlyStats.expired > 0 ? .warning : .tip,
             promptContext: """
-            Waste score: \(Int(statistics.wasteScore * 100))%. Questo mese: \(statistics.monthlyStats.consumed) consumati, \(statistics.monthlyStats.expired) scaduti.
-            Suggerisci UNA breve idea pratica per migliorare (es. controllare scadenze, pianificare i pasti). Massimo 25 parole, tono amichevole.
+            Contesto Waste Score (Statistiche FoodFade).
+            Il waste score è la percentuale di prodotti consumati in tempo (alta = bene, bassa = molti scaduti).
+            \(contextLine)
+            Dati: waste score \(scorePercent)%. Questo mese: \(consumed) consumati, \(expired) scaduti.
+            Scrivi UNA sola frase: un suggerimento breve e pratico (es. controllare il frigo il weekend, scrivere una mini-lista per la spesa, mettere in vista i prodotti in scadenza). Niente giudizi, solo un'idea utile. Massimo 25 parole, tono amichevole.
             """
         )
     }

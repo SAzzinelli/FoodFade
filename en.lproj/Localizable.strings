@@ -158,6 +158,9 @@
 "itemdetail.opened_quantity.confirm" = "Confirm";
 "itemdetail.portion.closed" = "%d closed (expires %@)";
 "itemdetail.portion.opened" = "%d opened (expires %@)";
+"itemdetail.portion.closed.count" = "%d closed";
+"itemdetail.portion.opened.count" = "%d opened";
+"itemdetail.portion.expires" = "Expires %@";
 "inventory.empty.title" = "No products";
 "inventory.empty.subtitle" = "Add your first product to get started";
 "inventory.empty.button" = "Add Product";
@@ -359,6 +362,9 @@
 "settings.app_icon.error.title" = "Icon not changed";
 "settings.app_icon.changed.title" = "Icon changed";
 "settings.app_icon.changed.message" = "You changed the icon to %@.";
+"settings.beta" = "Beta";
+"settings.ocr_expiration.title" = "OCR expiration from photo";
+"settings.ocr_expiration.footer" = "In Add Product, you can scan the expiration date from a photo. Only the date is read; other text is ignored. May not work on all packages.";
 "settings.notifications" = "Notifications";
 "settings.notifications.enable" = "Notifications";
 "settings.notifications.message" = "Receive notifications when your products are about to expire";
@@ -491,6 +497,11 @@
 "fridgy.footer.disabled" = "Fridgy is disabled. The app works at 100% without intelligent suggestions.";
 "fridgy.footer.beta" = "This feature is in beta: it may change and can make mistakes. Suggestions do not replace common sense in the kitchen.";
 "fridgy.loading" = "Loading a Fridgy suggestion…";
+"fridgy.chat.title" = "Chat with Fridgy";
+"fridgy.chat.placeholder" = "Ask about food, storage, waste…";
+"fridgy.chat.send" = "Send";
+"fridgy.chat.unavailable" = "Enable Fridgy in Settings to chat here.";
+"fridgy.chat.error_reply" = "Sorry, I couldn't reply. Please try again.";
 
 /* Assistente (Settings - no Apple Intelligence mention) */
 "assistant.section.title" = "Assistant";
@@ -528,6 +539,14 @@
 "addfood.dictation.error.message.no_date" = "Try again.";
 "addfood.dictation.error.title.not_heard" = "I didn't understand..";
 "addfood.dictation.error.message.not_heard" = "Can you repeat?";
+"addfood.ocr.title" = "Scan expiration date";
+"addfood.ocr.prompt" = "Take or choose a photo of the package. Only the expiration date will be read (other text is ignored).";
+"addfood.ocr.camera" = "Take photo";
+"addfood.ocr.library" = "Choose from library";
+"addfood.ocr.analyzing" = "Analyzing…";
+"addfood.ocr.no_date.title" = "No date found";
+"addfood.ocr.no_date.message" = "No expiration date was found in the image. Try a clearer photo or another package.";
+"addfood.ocr.button" = "Scan from photo";
 "addfood.where_store" = "WHERE DO YOU STORE IT?";
 "addfood.change_date" = "Change";
 "addfood.unit_piece" = "Unit: Piece";

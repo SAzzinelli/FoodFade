@@ -84,7 +84,10 @@
 		FC21E0B62F03196000996820 /* ConsumedHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */; };
 		FC21E0B92F03196000996820 /* ConsumedQuantitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */; };
 		FC21E0BB2F03196100996820 /* OpenedQuantitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BC2F03196100996820 /* OpenedQuantitySheet.swift */; };
+		FC21E0D22F03197100996820 /* ChatWithFridgyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D12F03197100996820 /* ChatWithFridgyView.swift */; };
+		FC21E0D72F03197200996820 /* ExpirationOCRSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D32F03197200996820 /* ExpirationOCRSheet.swift */; };
 		FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */; };
+		FC21E0D42F03197200996820 /* ExpirationOCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D52F03197200996820 /* ExpirationOCRService.swift */; };
 		FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */; };
 		FC21E0C62F03196600996820 /* FridgyBravoOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */; };
 		FC21E0C82F03196800996820 /* AppIconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C72F03196700996820 /* AppIconPickerView.swift */; };
@@ -120,7 +123,10 @@
 		FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumedHistoryView.swift; sourceTree = "<group>"; };
 		FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumedQuantitySheet.swift; sourceTree = "<group>"; };
 		FC21E0BC2F03196100996820 /* OpenedQuantitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenedQuantitySheet.swift; sourceTree = "<group>"; };
+		FC21E0D12F03197100996820 /* ChatWithFridgyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatWithFridgyView.swift; sourceTree = "<group>"; };
 		FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationDictationService.swift; sourceTree = "<group>"; };
+		FC21E0D32F03197200996820 /* ExpirationOCRSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationOCRSheet.swift; sourceTree = "<group>"; };
+		FC21E0D52F03197200996820 /* ExpirationOCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationOCRService.swift; sourceTree = "<group>"; };
 		FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationListeningOverlay.swift; sourceTree = "<group>"; };
 		FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyBravoOverlay.swift; sourceTree = "<group>"; };
 		FC21E0C72F03196700996820 /* AppIconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconPickerView.swift; sourceTree = "<group>"; };
@@ -308,6 +314,7 @@
 				FC21E0DE2F03196B00996820 /* NotificationDelegate.swift */,
 				FC21E0CD2F03196D00996820 /* TrophyService.swift */,
 				FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */,
+				FC21E0D52F03197200996820 /* ExpirationOCRService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -356,6 +363,8 @@
 				FC994F1C2F029671006D9CF0 /* ExpiringTodayView.swift */,
 				FC994F1D2F029671006D9CF0 /* HomeView.swift */,
 				FC994F1E2F029671006D9CF0 /* IncomingView.swift */,
+				FC21E0D12F03197100996820 /* ChatWithFridgyView.swift */,
+				FC21E0D32F03197200996820 /* ExpirationOCRSheet.swift */,
 				FC994F1F2F029671006D9CF0 /* InventoryView.swift */,
 				FC994F202F029671006D9CF0 /* ItemDetailView.swift */,
 				FC994F212F029671006D9CF0 /* KPIStatusView.swift */,
@@ -495,6 +504,7 @@
 				FC2128E62F029921001A2A52 /* NotificationService.swift in Sources */,
 				FC21E0DF2F03196B00996820 /* NotificationDelegate.swift in Sources */,
 				FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */,
+				FC21E0D42F03197200996820 /* ExpirationOCRService.swift in Sources */,
 				FC2128E02F029921001A2A53 /* AppIconManager.swift in Sources */,
 				FC2128E72F029921001A2A52 /* Extensions.swift in Sources */,
 				FC343FBF2F02A00100299160 /* GenderHelper.swift in Sources */,
@@ -523,6 +533,9 @@
 				FC2128F82F029921001A2A52 /* HomeView.swift in Sources */,
 				FC2128F92F029921001A2A52 /* IncomingView.swift in Sources */,
 				FC2128FA2F029921001A2A52 /* InventoryView.swift in Sources */,
+				FC21E0D22F03197100996820 /* ChatWithFridgyView.swift in Sources */,
+				FC21E0D72F03197200996820 /* ExpirationOCRSheet.swift in Sources */,
+				FC21E0D42F03197200996820 /* ExpirationOCRService.swift in Sources */,
 				FC2128FB2F029921001A2A52 /* ItemDetailView.swift in Sources */,
 				FC21E0902F03096D00996820 /* AddFoodView.swift in Sources */,
 				FC2128FC2F029921001A2A52 /* KPIStatusView.swift in Sources */,

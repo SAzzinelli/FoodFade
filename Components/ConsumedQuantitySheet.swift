@@ -142,8 +142,22 @@ struct ConsumedQuantitySheet: View {
         
         do {
             try modelContext.save()
+            rescheduleOrCancelNotifications()
         } catch {
             showingSaveError = true
+        }
+    }
+    
+    /// Se consumato: cancella notifiche. Altrimenti ri-programma in base a effectiveExpirationDate (unità rimanenti).
+    private func rescheduleOrCancelNotifications() {
+        Task {
+            if item.isConsumed {
+                await NotificationService.shared.cancelNotifications(for: item.id)
+            } else {
+                let descriptor = FetchDescriptor<AppSettings>()
+                guard let settings = try? modelContext.fetch(descriptor).first, settings.notificationsEnabled else { return }
+                await NotificationService.shared.scheduleNotifications(for: item, daysBefore: settings.effectiveNotificationDays)
+            }
         }
     }
 }

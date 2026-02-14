@@ -35,6 +35,7 @@ struct AddFoodView: View {
     @State private var showingPhotoLibrary = false
     @State private var showingDocumentPicker = false
     @State private var showingDatePicker = false
+    @State private var showingOCRExpirationSheet = false
     
     var body: some View {
         NavigationStack {
@@ -124,6 +125,14 @@ struct AddFoodView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage)
+            }
+            .sheet(isPresented: $showingOCRExpirationSheet) {
+                ExpirationOCRSheet { date in
+                    if let d = date {
+                        viewModel.expirationDate = d
+                        viewModel.validateDate()
+                    }
+                }
             }
             .sheet(isPresented: $showingDatePicker) {
                 NavigationStack {
@@ -337,6 +346,25 @@ struct AddFoodView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(dictationService.isListening)
+                
+                if settings.first?.ocrExpirationEnabled == true {
+                    Button {
+                        showingOCRExpirationSheet = true
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "camera.viewfinder")
+                                .font(.system(size: 18))
+                            Text("addfood.ocr.button".localized)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 100/255, green: 175/255, blue: 230/255))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
                 
                 if let errorMessage = viewModel.dateValidationError {
                     HStack(spacing: 8) {

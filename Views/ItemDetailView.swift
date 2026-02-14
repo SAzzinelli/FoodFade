@@ -154,28 +154,70 @@ struct ItemDetailView: View {
                         }
                         
                         if item.effectiveOpenedQuantity > 0, let openedDate = item.openedDate {
-                            HStack {
+                            VStack(alignment: .leading, spacing: 14) {
                                 Label("itemdetail.opened_product".localized, systemImage: "lock.open.fill")
-                                    .font(.system(size: 15))
+                                    .font(.system(size: 15, weight: .medium))
                                     .foregroundStyle(.orange)
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 2) {
+                                
+                                HStack(spacing: 10) {
+                                    Image(systemName: "calendar.badge.clock")
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(.secondary)
                                     Text("Aperto il \(openedDate.formatted(date: .abbreviated, time: .omitted))")
                                         .font(.system(size: 15))
                                         .foregroundStyle(.secondary)
-                                    if item.quantity > item.effectiveOpenedQuantity && item.effectiveOpenedQuantity > 0 {
-                                        let closedCount = item.quantity - item.effectiveOpenedQuantity
-                                        let closedExp = item.unopenedExpirationDate
-                                        let openedExp = Calendar.current.date(byAdding: .day, value: 3, to: openedDate) ?? openedDate
-                                        Text(String(format: "itemdetail.portion.closed".localized, closedCount, formatDateShort(closedExp)))
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(.secondary)
-                                        Text(String(format: "itemdetail.portion.opened".localized, item.effectiveOpenedQuantity, formatDateShort(openedExp)))
-                                            .font(.system(size: 12))
+                                    Spacer(minLength: 0)
+                                }
+                                
+                                if item.quantity > item.effectiveOpenedQuantity && item.effectiveOpenedQuantity > 0 {
+                                    let closedCount = item.quantity - item.effectiveOpenedQuantity
+                                    let closedExp = item.unopenedExpirationDate
+                                    let openedExp = Calendar.current.date(byAdding: .day, value: 3, to: openedDate) ?? openedDate
+                                    
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "lock.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(.blue)
+                                        Text(String(format: "itemdetail.portion.closed.count".localized, closedCount))
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundStyle(.primary)
+                                        Spacer(minLength: 0)
+                                        Text(String(format: "itemdetail.portion.expires".localized, formatDateShort(closedExp)))
+                                            .font(.system(size: 14))
                                             .foregroundStyle(.secondary)
                                     }
+                                    .padding(.top, 2)
+                                    
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "lock.open.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(.orange)
+                                        Text(String(format: "itemdetail.portion.opened.count".localized, item.effectiveOpenedQuantity))
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundStyle(.primary)
+                                        Spacer(minLength: 0)
+                                        Text(String(format: "itemdetail.portion.expires".localized, formatDateShort(openedExp)))
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(.secondary)
+                                    }
+                                } else {
+                                    let openedExp = Calendar.current.date(byAdding: .day, value: 3, to: openedDate) ?? openedDate
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "lock.open.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(.orange)
+                                        Text(String(format: "itemdetail.portion.opened.count".localized, item.effectiveOpenedQuantity))
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundStyle(.primary)
+                                        Spacer(minLength: 0)
+                                        Text(String(format: "itemdetail.portion.expires".localized, formatDateShort(openedExp)))
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .padding(.top, 2)
                                 }
                             }
+                            .padding(.vertical, 4)
                         }
                         
                         if item.useAdvancedExpiry && item.effectiveOpenedQuantity == 0 {
@@ -344,32 +386,22 @@ struct ItemDetailView: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            // Pulsante L'hai aperto? (arancione) oppure Aperto (grigio, disattivato)
+            // Pulsante L'hai aperto? (sempre attivo: puoi aprire altre unità in qualsiasi momento)
             if !item.isFresh {
-                if item.effectiveOpenedQuantity > 0 {
-                    Text("itemdetail.opened.label".localized)
+                Button {
+                    if item.quantity == 1 {
+                        applyOpened(quantity: 1)
+                    } else {
+                        showingOpenedQuantitySheet = true
+                    }
+                } label: {
+                    Text("itemdetail.opened.button".localized)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color(.tertiarySystemFill))
-                        .clipShape(Capsule())
-                } else {
-                    Button {
-                        if item.quantity == 1 {
-                            applyOpened(quantity: 1)
-                        } else {
-                            showingOpenedQuantitySheet = true
-                        }
-                    } label: {
-                        Text("itemdetail.opened.button".localized)
-                            .font(.system(size: 14, weight: .medium))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                    }
-                    .buttonStyle(.plain)
-                    .glassEffect(.regular.tint(ThemeManager.naturalHomeLogoColor).interactive(), in: .capsule)
                 }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.naturalHomeLogoColor).interactive(), in: .capsule)
             }
             
             // Pulsante Consumato – Liquid Glass con tint verde
@@ -400,10 +432,20 @@ struct ItemDetailView: View {
         do {
             try modelContext.save()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
+            rescheduleNotificationsForCurrentItem()
         } catch {
             errorTitle = "error.save_failed".localized
             errorMessage = "error.save_failed_message".localized
             showingError = true
+        }
+    }
+    
+    /// Ri-programma le notifiche per questo item (usa effectiveExpirationDate: prima scadenza tra unità chiuse e aperte)
+    private func rescheduleNotificationsForCurrentItem() {
+        Task {
+            let descriptor = FetchDescriptor<AppSettings>()
+            guard let settings = try? modelContext.fetch(descriptor).first, settings.notificationsEnabled else { return }
+            await NotificationService.shared.scheduleNotifications(for: item, daysBefore: settings.effectiveNotificationDays)
         }
     }
     

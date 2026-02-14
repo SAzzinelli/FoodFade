@@ -62,6 +62,7 @@ class FridgyServiceImpl: FridgyService {
                     \(FridgyRules.storageContextPrompt)
                     \(FridgyRules.culinaryCoherencePrompt)
                     Non usare parole come "sicuro", "rischioso", "fa bene", "dovresti", "meglio per la salute".
+                    Se il nome dell'alimento non è un cibo reale e riconoscibile (es. nome di prova o caratteri a caso), rispondi solo "nessun suggerimento".
                     Se non c'è un buon suggerimento o un abbinamento sensato, rispondi solo con "nessun suggerimento".
                     """)
                 
@@ -76,9 +77,9 @@ class FridgyServiceImpl: FridgyService {
                     throw FridgyError.noSuggestion
                 }
                 
-                // Conta le parole (approssimativo)
+                // Conta le parole (approssimativo; consentiamo fino a 25 per suggerimenti Waste Score)
                 let wordCount = text.split(separator: " ").count
-                if wordCount > 20 {
+                if wordCount > 25 {
                     throw FridgyError.tooLong
                 }
                 
@@ -89,6 +90,44 @@ class FridgyServiceImpl: FridgyService {
             }
         default:
             // Il modello non è disponibile
+            throw FridgyError.appleIntelligenceNotAvailable
+        }
+        #else
+        throw FridgyError.appleIntelligenceNotAvailable
+        #endif
+    }
+    
+    // MARK: - Chat con Fridgy (solo FridgyServiceImpl, non nel protocollo)
+    
+    /// Risposta in stile chat: messaggio utente + storia opzionale. Per "Chatta con Fridgy" in Impostazioni.
+    func generateChatReply(userMessage: String, history: [(user: String, assistant: String)]) async throws -> String {
+        guard isAppleIntelligenceAvailable && IntelligenceManager.shared.isFridgyAvailable else {
+            throw FridgyError.appleIntelligenceNotAvailable
+        }
+        if #available(iOS 26.0, macOS 26.0, *) {
+            return try await generateChatReplyWithAppleIntelligence(userMessage: userMessage, history: history)
+        }
+        throw FridgyError.appleIntelligenceNotAvailable
+    }
+    
+    @available(iOS 26.0, macOS 26.0, *)
+    private func generateChatReplyWithAppleIntelligence(userMessage: String, history: [(user: String, assistant: String)]) async throws -> String {
+        #if canImport(FoundationModels)
+        let model = SystemLanguageModel.default
+        switch model.availability {
+        case .available:
+            var conversation = ""
+            for (u, a) in history {
+                conversation += "Utente: \(u)\nFridgy: \(a)\n"
+            }
+            conversation += "Utente: \(userMessage)\nFridgy:"
+            let session = LanguageModelSession(instructions: """
+                Sei Fridgy, la mascotte amichevole dell'app FoodFade. Rispondi alle domande dell'utente su conservazione del cibo, riduzione degli sprechi, scadenze, idee per ricette o utilizzo degli ingredienti. Sii breve (1-3 frasi), utile e non giudicante. Non dare consigli medici o nutrizionali. Se la domanda è fuori tema (non cibo/ FoodFade), rispondi con gentilezza che puoi aiutare soprattutto su cibo e sprechi.
+                """)
+            let response = try await session.respond(to: conversation)
+            let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            return text.isEmpty ? "Posso aiutarti con consigli su conservazione, scadenze e idee per usare gli ingredienti. Chiedimi pure!" : text
+        default:
             throw FridgyError.appleIntelligenceNotAvailable
         }
         #else

@@ -279,9 +279,9 @@ class LocalFridgyProvider: IntelligenceProvider {
             }
         }
         
-        // Insight 2: Trend positivo (descrittivo)
-        if statistics.wasteScore < 0.3 && consumed.count >= 3 {
-            let insight = "💡 Fridgy vede meno sprechi rispetto al periodo precedente"
+        // Insight 2: Trend positivo (waste score alto = molti consumati in tempo)
+        if statistics.wasteScore >= 0.7 && consumed.count >= 3 {
+            let insight = "💡 Stai consumando bene i prodotti prima che scadano: continua così!"
             let sanitized = FridgyRules.sanitize(insight)
             if case .accepted = FridgyRules.validate(sanitized) {
                 insights.append(sanitized)

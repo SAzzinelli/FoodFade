@@ -24,6 +24,7 @@ class SettingsViewModel: ObservableObject {
     @Published var homeSummaryStyle: HomeSummaryStyle = .ring
     @Published var expirationInputMethod: ExpirationInputMethod = .calendar
     @Published var shoppingListTabEnabled: Bool = false
+    @Published var ocrExpirationEnabled: Bool = false
     
     private var modelContext: ModelContext?
     private let notificationService = NotificationService.shared
@@ -60,6 +61,7 @@ class SettingsViewModel: ObservableObject {
             homeSummaryStyle = settings.homeSummaryStyle
             expirationInputMethod = settings.expirationInputMethod
             shoppingListTabEnabled = settings.shoppingListTabEnabled
+            ocrExpirationEnabled = settings.ocrExpirationEnabled
             
             // Aggiorna ThemeManager
             ThemeManager.shared.appearanceMode = appearanceMode
@@ -96,6 +98,7 @@ class SettingsViewModel: ObservableObject {
             settings.homeSummaryStyle = homeSummaryStyle
             settings.expirationInputMethod = expirationInputMethod
             settings.shoppingListTabEnabled = shoppingListTabEnabled
+            settings.ocrExpirationEnabled = ocrExpirationEnabled
             
             try? modelContext.save()
         } else {

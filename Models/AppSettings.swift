@@ -20,6 +20,8 @@ final class AppSettings {
     var homeSummaryStyleRaw: String = HomeSummaryStyle.ring.rawValue     // ring = anello, compact = solo riepilogo
     var expirationInputMethodRaw: String = ExpirationInputMethod.calendar.rawValue
     var shoppingListTabEnabled: Bool = false // Voce "Lista della spesa" in tab bar (off di default)
+    /// Beta: OCR per leggere la data di scadenza dalla fotocamera (solo la data, esclude il resto)
+    var ocrExpirationEnabled: Bool = false
     
     var appearanceMode: AppearanceMode {
         get {
@@ -81,7 +83,8 @@ final class AppSettings {
         homeSummaryStyle: HomeSummaryStyle = .ring,
         expirationInputMethod: ExpirationInputMethod = .calendar,
         hasChosenCloudUsage: Bool = false,
-        shoppingListTabEnabled: Bool = false
+        shoppingListTabEnabled: Bool = false,
+        ocrExpirationEnabled: Bool = false
     ) {
         self.id = id
         self.notificationsEnabled = notificationsEnabled
@@ -97,6 +100,7 @@ final class AppSettings {
         self.expirationInputMethodRaw = expirationInputMethod.rawValue
         self.hasChosenCloudUsage = hasChosenCloudUsage
         self.shoppingListTabEnabled = shoppingListTabEnabled
+        self.ocrExpirationEnabled = ocrExpirationEnabled
     }
     
     

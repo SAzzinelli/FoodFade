@@ -228,6 +228,19 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    
+                    if viewModel.intelligenceEnabled && viewModel.isAppleIntelligenceAvailable {
+                        NavigationLink {
+                            ChatWithFridgyView()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "bubble.left.and.bubble.right.fill")
+                                    .foregroundColor(Self.fridgyBlue)
+                                Text("fridgy.chat.title".localized)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                    }
                 } header: {
                     Text("fridgy.title".localized)
                 } footer: {
@@ -245,6 +258,33 @@ struct SettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
+                }
+                
+                // 3b. BETA – OCR data di scadenza da foto
+                Section {
+                    Toggle(isOn: $viewModel.ocrExpirationEnabled) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "camera.viewfinder")
+                                .foregroundColor(Self.fridgyBlue)
+                            Text("settings.ocr_expiration.title".localized)
+                                .foregroundColor(.primary)
+                            Text("BETA")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(Self.fridgyBlue)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .tint(Self.fridgyBlue)
+                    .onChange(of: viewModel.ocrExpirationEnabled) { _, _ in
+                        viewModel.saveSettings()
+                    }
+                } header: {
+                    Text("settings.beta".localized)
+                } footer: {
+                    Text("settings.ocr_expiration.footer".localized)
                 }
                 
                 // 4. ASPETTO
