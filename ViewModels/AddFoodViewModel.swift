@@ -27,6 +27,8 @@ class AddFoodViewModel: ObservableObject {
     @Published var isArtisan: Bool = false
     @Published var isSinglePortion: Bool = false
     @Published var isMultiPortion: Bool = false
+    /// Prezzo (opzionale) – testo per campo numerico
+    @Published var priceText: String = ""
     
     // Gestione prodotti freschi (semplificata)
     @Published var isFresh: Bool = false { // Prodotto fresco (scade dopo 3 giorni)
@@ -144,11 +146,19 @@ class AddFoodViewModel: ObservableObject {
     }
     
     func handleBarcodeScanned(_ barcode: String) {
+        #if DEBUG
         print("📱 AddFoodViewModel - Barcode scanned: \(barcode)")
+        #endif
         self.barcode = barcode
         Task {
             await lookupProduct(barcode: barcode)
         }
+    }
+    
+    /// Applica un barcode iniziale (es. da scanner in Home) e avvia il lookup
+    func applyInitialBarcode(_ barcode: String?) {
+        guard let barcode = barcode, !barcode.isEmpty else { return }
+        handleBarcodeScanned(barcode)
     }
     
     private func lookupProduct(barcode: String) async {
@@ -261,6 +271,13 @@ class AddFoodViewModel: ObservableObject {
             baseExpirationDate = expirationDate
         }
         
+        let parsedPrice: Double? = {
+            let t = priceText.trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: ",", with: ".")
+            guard !t.isEmpty, let v = Double(t), v >= 0 else { return nil }
+            return v
+        }()
+        
         let item = FoodItem(
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
             category: category,
@@ -284,7 +301,8 @@ class AddFoodViewModel: ObservableObject {
             isFresh: isFresh,
             isOpened: false,
             openedDate: nil,
-            useAdvancedExpiry: false
+            useAdvancedExpiry: false,
+            price: parsedPrice
         )
         
         // Verifica configurazione CloudKit
@@ -381,6 +399,7 @@ class AddFoodViewModel: ObservableObject {
         isSinglePortion = false
         isMultiPortion = false
         isFresh = false
+        priceText = ""
         dateValidationError = nil
     }
     

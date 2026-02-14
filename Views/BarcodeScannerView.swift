@@ -66,10 +66,9 @@ struct BarcodeScannerView: View {
                 VStack(spacing: 0) {
                     Spacer()
                     VStack(spacing: 4) {
-                        Text("Posiziona il codice")
+                        Text("barcode.placeholder".localized)
                             .foregroundColor(.white)
                             .font(.headline)
-                        Text("a barre qui")
                             .foregroundColor(.white.opacity(0.8))
                             .font(.subheadline)
                     }
@@ -97,7 +96,7 @@ struct BarcodeScannerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Chiudi") { dismiss() }
+                    Button("common.close".localized) { dismiss() }
                         .foregroundColor(.white)
                 }
             }
@@ -133,10 +132,10 @@ struct BarcodeScannerView: View {
                                 Image(systemName: "camera.fill")
                                     .font(.system(size: 50))
                                     .foregroundColor(.white.opacity(0.7))
-                                Text("Solo su dispositivo reale")
+                                Text("barcode.simulator.title".localized)
                                     .foregroundColor(.white)
                                     .font(.headline)
-                                Text("La scansione codici a barre non è disponibile sul simulatore. Usa un iPhone o iPad per scansionare.")
+                                Text("barcode.simulator.message".localized)
                                     .foregroundColor(.white.opacity(0.8))
                                     .font(.subheadline)
                                     .multilineTextAlignment(.center)
@@ -147,10 +146,10 @@ struct BarcodeScannerView: View {
                                 Image(systemName: "camera.fill")
                                     .font(.system(size: 50))
                                     .foregroundColor(.white.opacity(0.7))
-                                Text("Fotocamera non autorizzata")
+                                Text("barcode.camera.denied.title".localized)
                                     .foregroundColor(.white)
                                     .font(.headline)
-                                Text("Attiva l’accesso alla fotocamera in Impostazioni per scansionare i codici a barre.")
+                                Text("barcode.camera.denied.message".localized)
                                     .foregroundColor(.white.opacity(0.8))
                                     .font(.subheadline)
                                     .multilineTextAlignment(.center)
@@ -190,12 +189,9 @@ struct BarcodeScannerView: View {
                     
                     // Testo sopra l'area di scansione (senza bordo verde)
                     VStack(spacing: 4) {
-                        Text("Posiziona il codice")
+                        Text("barcode.placeholder".localized)
                             .foregroundColor(.white)
                             .font(.headline)
-                        
-                        Text("a barre qui")
-                            .foregroundColor(.white.opacity(0.8))
                             .font(.subheadline)
                     }
                     .offset(y: -scanAreaSize/2 - 40)
@@ -257,7 +253,7 @@ struct BarcodeScannerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Chiudi") {
+                    Button("common.close".localized) {
                         scannerService.stopScanning()
                         dismiss()
                     }

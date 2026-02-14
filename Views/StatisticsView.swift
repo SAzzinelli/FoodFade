@@ -30,6 +30,13 @@ struct StatisticsView: View {
                         // Card di ingresso alle viste dettaglio (solo titoli)
                         VStack(spacing: 12) {
                             NavigationLink {
+                                TrophiesView()
+                            } label: {
+                                StatEntryCard(icon: "trophy.fill", title: "trophy.title".localized, iconColor: primaryColor)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            NavigationLink {
                                 WasteScoreDetailView(data: data, primaryColor: primaryColor, primaryColorDark: themeManager.primaryColorDark)
                             } label: {
                                 StatEntryCard(icon: "chart.pie.fill", title: "stats.waste_score".localized, iconColor: primaryColor)
@@ -59,6 +66,22 @@ struct StatisticsView: View {
                                     AverageDaysDetailView(data: data, primaryColor: primaryColor)
                                 } label: {
                                     StatEntryCard(icon: "clock.badge.checkmark", title: "stats.how_long_products".localized, iconColor: Color(red: 0.2, green: 0.6, blue: 0.7))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            
+                            if data.costStatsWeek != nil || data.costStatsMonth != nil || data.costStatsYear != nil {
+                                NavigationLink {
+                                    CostDetailView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(icon: "eurosign.circle.fill", title: "stats.costs.title".localized, iconColor: .orange)
+                                }
+                                .buttonStyle(.plain)
+                                
+                                NavigationLink {
+                                    PriceOverviewView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(icon: "chart.line.uptrend.xyaxis", title: "stats.prices.title".localized, iconColor: .orange)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -103,8 +126,14 @@ struct StatisticsView: View {
                 }
             }
             .tint(primaryColor)
-            .onAppear { calculateStatistics() }
-            .onChange(of: allItems.count) { _, _ in calculateStatistics() }
+            .onAppear {
+                calculateStatistics()
+                TrophyService.shared.checkTrophies(items: allItems)
+            }
+            .onChange(of: allItems.count) { _, _ in
+                calculateStatistics()
+                TrophyService.shared.checkTrophies(items: allItems)
+            }
         }
     }
     
@@ -117,11 +146,11 @@ struct StatisticsView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: 160, maxHeight: 160)
                 VStack(spacing: 6) {
-                    Text("Riepilogo di utilizzo e spreco.")
+                    Text("stats.intro.title".localized)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
-                    Text("Waste Score, grafici e approfondimenti per categoria e tempi. Per monitorare le tue abitudini.")
+                    Text("stats.intro.subtitle".localized)
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -169,10 +198,10 @@ struct StatisticsView: View {
             Image(systemName: "chart.bar.doc.horizontal")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
-            Text("Nessun dato disponibile")
+            Text("stats.empty.title".localized)
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.primary)
-            Text("Aggiungi qualche prodotto per iniziare")
+            Text("stats.empty.subtitle".localized)
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -220,6 +249,7 @@ struct StatisticsView: View {
         let topWasted = calculateTopProducts(items: allItems.filter { !$0.isConsumed && $0.expirationStatus == .expired }, filterConsumed: false)
         let weeklyData = calculateWeeklyData(calendar: calendar, now: now)
         let categoryStats = calculateCategoryStats(items: periodItems)
+        let (costWeek, costMonth, costYear) = calculateCostStats(calendar: calendar, now: now)
         
         statsData = StatisticsData(
             wasteScore: wasteScore,
@@ -232,8 +262,48 @@ struct StatisticsView: View {
             topAddedProducts: topAdded,
             topWastedProducts: topWasted,
             weeklyData: weeklyData,
-            categoryStats: categoryStats
+            categoryStats: categoryStats,
+            costStatsWeek: costWeek,
+            costStatsMonth: costMonth,
+            costStatsYear: costYear
         )
+    }
+    
+    private func calculateCostStats(calendar: Calendar, now: Date) -> (week: CostStats?, month: CostStats?, year: CostStats?) {
+        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
+        let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) ?? now
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
+        let startOfYear = calendar.date(from: calendar.dateComponents([.year], from: now)) ?? now
+        let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth) ?? now
+        let endOfYear = calendar.date(byAdding: .year, value: 1, to: startOfYear) ?? now
+        
+        func spent(in start: Date, end: Date) -> Double {
+            allItems.filter { item in
+                guard let p = item.price, p > 0 else { return false }
+                return item.createdAt >= start && item.createdAt < end
+            }.reduce(0) { $0 + ($1.price ?? 0) }
+        }
+        func wasted(in start: Date, end: Date) -> Double {
+            allItems.filter { item in
+                guard !item.isConsumed, item.expirationStatus == .expired, let p = item.price, p > 0 else { return false }
+                let exp = item.effectiveExpirationDate
+                return exp >= start && exp < end
+            }.reduce(0) { $0 + ($1.price ?? 0) }
+        }
+        func saved(in start: Date, end: Date) -> Double {
+            allItems.filter { item in
+                guard item.isConsumed, let consumed = item.consumedDate, let p = item.price, p > 0 else { return false }
+                return consumed >= start && consumed < end
+            }.reduce(0) { $0 + ($1.price ?? 0) }
+        }
+        
+        let hasAnyPrice = allItems.contains { ($0.price ?? 0) > 0 }
+        guard hasAnyPrice else { return (nil, nil, nil) }
+        
+        let week = CostStats(spent: spent(in: startOfWeek, end: endOfWeek), wasted: wasted(in: startOfWeek, end: endOfWeek), saved: saved(in: startOfWeek, end: endOfWeek))
+        let month = CostStats(spent: spent(in: startOfMonth, end: endOfMonth), wasted: wasted(in: startOfMonth, end: endOfMonth), saved: saved(in: startOfMonth, end: endOfMonth))
+        let year = CostStats(spent: spent(in: startOfYear, end: endOfYear), wasted: wasted(in: startOfYear, end: endOfYear), saved: saved(in: startOfYear, end: endOfYear))
+        return (week, month, year)
     }
     
     private func calculateCategoryStats(items: [FoodItem]) -> [CategoryStat] {
@@ -521,14 +591,14 @@ private struct WasteScoreDetailView: View {
                     .cornerRadius(16)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Nel periodo")
+                        Text("stats.period".localized)
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.secondary)
                         HStack(spacing: 16) {
-                            Label("\(data.monthlyStats.consumed) consumati", systemImage: "checkmark.circle.fill")
+                            Label("\(data.monthlyStats.consumed) " + "stats.consumed_label".localized, systemImage: "checkmark.circle.fill")
                                 .font(.system(size: 15))
                                 .foregroundColor(.green)
-                            Label("\(data.monthlyStats.expired) scaduti", systemImage: "xmark.circle.fill")
+                            Label("\(data.monthlyStats.expired) " + "stats.expired_label".localized, systemImage: "xmark.circle.fill")
                                 .font(.system(size: 15))
                                 .foregroundColor(.red)
                         }
@@ -608,11 +678,11 @@ private struct UsedVsWastedDetailView: View {
                         Text("stats.food_waste".localized)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
-                        Text("Confronto tra prodotti consumati e scaduti")
+                        Text("stats.chart.consumed_vs_expired".localized)
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                         if let weeklyData = data.weeklyData {
-                            Text("Ultime 4 settimane")
+                            Text("stats.chart.last_4_weeks".localized)
                                 .font(.system(size: 13))
                                 .foregroundColor(.secondary)
                             Chart(weeklyData) { point in
@@ -627,11 +697,11 @@ private struct UsedVsWastedDetailView: View {
                             HStack(spacing: 20) {
                                 HStack(spacing: 6) {
                                     RoundedRectangle(cornerRadius: 4).fill(primaryColor).frame(width: 12, height: 12)
-                                    Text("Consumati").font(.system(size: 13)).foregroundColor(.secondary)
+                                    Text("stats.chart.consumed".localized).font(.system(size: 13)).foregroundColor(.secondary)
                                 }
                                 HStack(spacing: 6) {
                                     RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 12, height: 12)
-                                    Text("Scaduti").font(.system(size: 13)).foregroundColor(.secondary)
+                                    Text("stats.chart.expired".localized).font(.system(size: 13)).foregroundColor(.secondary)
                                 }
                             }
                         }
@@ -767,6 +837,224 @@ private struct AverageDaysDetailView: View {
     }
 }
 
+// MARK: - Dettaglio Andamento prezzi (panoramica, andamento nel tempo, per prodotto)
+private struct PriceOverviewView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    @Query(sort: \FoodItem.createdAt, order: .reverse) private var allItems: [FoodItem]
+    
+    private var itemsWithPrice: [FoodItem] {
+        allItems.filter { ($0.price ?? 0) > 0 }
+    }
+    
+    /// Spesa per mese (ultimi 12 mesi): mese → somma prezzi degli item aggiunti in quel mese
+    private var spentByMonth: [(month: Date, total: Double)] {
+        let calendar = Calendar.current
+        let now = Date()
+        var result: [(Date, Double)] = []
+        for i in (0..<12).reversed() {
+            guard let monthStart = calendar.date(byAdding: .month, value: -i, to: now),
+                  let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart) else { continue }
+            let total = allItems
+                .filter { ($0.price ?? 0) > 0 && $0.createdAt >= monthStart && $0.createdAt < monthEnd }
+                .reduce(0) { $0 + ($1.price ?? 0) }
+            result.append((monthStart, total))
+        }
+        return result
+    }
+    
+    private var totalSpentAllTime: Double {
+        itemsWithPrice.reduce(0) { $0 + ($1.price ?? 0) }
+    }
+    
+    private var averagePrice: Double {
+        guard !itemsWithPrice.isEmpty else { return 0 }
+        return totalSpentAllTime / Double(itemsWithPrice.count)
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                StatInBriefCard(text: "stats.prices.description".localized)
+                
+                // Panoramica
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("stats.prices.overview".localized)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.primary)
+                    VStack(spacing: 0) {
+                        row(title: "stats.prices.total_tracked".localized, value: totalSpentAllTime)
+                        row(title: "stats.prices.products_with_price".localized, value: nil, count: itemsWithPrice.count)
+                        if !itemsWithPrice.isEmpty {
+                            row(title: "stats.prices.average".localized, value: averagePrice)
+                        }
+                    }
+                    .padding(16)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                }
+                
+                // Andamento per mese
+                if !itemsWithPrice.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("stats.prices.trend".localized)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.primary)
+                        VStack(spacing: 8) {
+                            ForEach(Array(spentByMonth.enumerated()), id: \.offset) { _, pair in
+                                HStack {
+                                    Text(monthLabel(pair.month))
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Text(pair.total.formatted(.currency(code: "EUR")))
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(primaryColor)
+                                }
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 14)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                }
+                
+                // Per prodotto
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("stats.prices.by_product".localized)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.primary)
+                    if itemsWithPrice.isEmpty {
+                        Text("stats.prices.no_prices".localized)
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(16)
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(16)
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(itemsWithPrice.prefix(50)) { item in
+                                HStack(spacing: 12) {
+                                    Image(systemName: item.category.iconFill)
+                                        .font(.system(size: 18))
+                                        .foregroundColor(AppTheme.color(for: item.category))
+                                        .frame(width: 36, height: 36)
+                                        .background(AppTheme.color(for: item.category).opacity(0.15))
+                                        .clipShape(Circle())
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.name)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundColor(.primary)
+                                            .lineLimit(1)
+                                        Text(item.category.rawValue)
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Text((item.price ?? 0).formatted(.currency(code: "EUR")))
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(primaryColor)
+                                }
+                                .padding(12)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("stats.prices.title".localized)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    private func row(title: String, value: Double?, count: Int? = nil) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 15))
+                .foregroundColor(.primary)
+            Spacer()
+            if let value = value {
+                Text(value.formatted(.currency(code: "EUR")))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(primaryColor)
+            } else if let count = count {
+                Text("\(count)")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(primaryColor)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+    
+    private func monthLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "MMMM yyyy"
+        f.locale = Locale.current
+        return f.string(from: date)
+    }
+}
+
+// MARK: - Dettaglio Costi e risparmi
+private struct CostDetailView: View {
+    let data: StatisticsData
+    let primaryColor: Color
+    
+    private func row(title: String, value: Double, color: Color) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 16))
+                .foregroundColor(.primary)
+            Spacer()
+            Text(value.formatted(.currency(code: "EUR")))
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(color)
+        }
+        .padding(.vertical, 8)
+    }
+    
+    private func periodCard(title: String, stats: CostStats) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.primary)
+            row(title: "stats.costs.spent".localized, value: stats.spent, color: primaryColor)
+            row(title: "stats.costs.wasted".localized, value: stats.wasted, color: .red)
+            row(title: "stats.costs.saved".localized, value: stats.saved, color: .green)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(16)
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                StatInBriefCard(text: "stats.costs.description".localized)
+                
+                if let week = data.costStatsWeek {
+                    periodCard(title: "stats.costs.this_week".localized, stats: week)
+                }
+                if let month = data.costStatsMonth {
+                    periodCard(title: "stats.costs.this_month".localized, stats: month)
+                }
+                if let year = data.costStatsYear {
+                    periodCard(title: "stats.costs.this_year".localized, stats: year)
+                }
+            }
+            .padding(20)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("stats.costs.title".localized)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 // MARK: - Dettaglio Nel dettaglio (prodotti più aggiunti)
 private struct DetailsDetailView: View {
     let data: StatisticsData
@@ -786,14 +1074,14 @@ private struct DetailsDetailView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.secondary)
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Prodotti più aggiunti")
+                        Text("stats.details.most_added".localized)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.primary)
                         Text("\(data.topAddedProducts.count) prodotti · \(totalAdded) inserimenti totali")
                             .font(.system(size: 13))
                             .foregroundColor(.secondary)
                         if data.topAddedProducts.isEmpty {
-                            Text("I dettagli compariranno man mano che usi l'app")
+                            Text("stats.details.detail_later".localized)
                                 .font(.system(size: 15))
                                 .foregroundColor(.secondary)
                         } else {
@@ -809,7 +1097,7 @@ private struct DetailsDetailView: View {
                                         Text(item.name)
                                             .font(.system(size: 16))
                                             .foregroundColor(.primary)
-                                        Text("aggiunto \(item.count) \(item.count == 1 ? "volta" : "volte")")
+                                        Text(String(format: "stats.details.added_times".localized, item.count))
                                             .font(.system(size: 13))
                                             .foregroundColor(.secondary)
                                     }
@@ -829,7 +1117,7 @@ private struct DetailsDetailView: View {
                     
                     if !data.topWastedProducts.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Prodotti più sprecati")
+                            Text("stats.details.most_wasted".localized)
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.primary)
                             Text("\(data.topWastedProducts.count) prodotti scaduti senza consumo")
@@ -889,6 +1177,9 @@ struct StatisticsData {
     let topWastedProducts: [(name: String, count: Int)]
     let weeklyData: [WeeklyDataPoint]?
     let categoryStats: [CategoryStat]
+    let costStatsWeek: CostStats?
+    let costStatsMonth: CostStats?
+    let costStatsYear: CostStats?
     
     var hasCategoryStats: Bool {
         !categoryStats.isEmpty
@@ -918,7 +1209,10 @@ struct StatisticsData {
             topAddedProducts: [],
             topWastedProducts: [],
             weeklyData: nil,
-            categoryStats: []
+            categoryStats: [],
+            costStatsWeek: nil,
+            costStatsMonth: nil,
+            costStatsYear: nil
         )
     }
 }
@@ -936,6 +1230,13 @@ struct MonthlyStats {
     let consumed: Int
     let expired: Int
     let expiringSoon: Int
+}
+
+/// Statistiche costi per un periodo: spesa (acquistato), sprecato (scaduto), risparmiato (consumato prima di scadere)
+struct CostStats {
+    let spent: Double
+    let wasted: Double
+    let saved: Double
 }
 
 // MARK: - Stat Row

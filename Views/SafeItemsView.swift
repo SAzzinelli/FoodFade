@@ -65,13 +65,21 @@ private struct SafeItemCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Icona categoria
-            Image(systemName: item.category.icon)
-                .font(.system(size: 32))
-                .foregroundColor(categoryColor)
-                .frame(width: 60, height: 60)
-                .background(categoryColor.opacity(0.15))
-                .cornerRadius(12)
+            Group {
+                if let data = item.photoData, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .clipped()
+                } else {
+                    Image(systemName: item.category.icon)
+                        .font(.system(size: 32))
+                        .foregroundColor(categoryColor)
+                }
+            }
+            .frame(width: 60, height: 60)
+            .background(categoryColor.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             
             // Informazioni principali
             VStack(alignment: .leading, spacing: 8) {

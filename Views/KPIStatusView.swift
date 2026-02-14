@@ -12,12 +12,14 @@ struct KPIStatusView: View {
     
     private var title: String {
         switch status {
-        case .expired, .today:
-            return "Scadono Oggi"
+        case .expired:
+            return "kpi.title.expired".localized
+        case .today:
+            return "kpi.title.today".localized
         case .soon:
-            return "Prossimi alla Scadenza"
+            return "kpi.title.soon".localized
         case .safe:
-            return "Prodotti Sicuri"
+            return "kpi.title.safe".localized
         }
     }
     

@@ -25,84 +25,122 @@ class NotificationService: ObservableObject {
         }
     }
     
-    /// Programma la notifica per un FoodItem: viene fissata per (scadenza - daysBefore) alle 9:00, se quella data è nel futuro.
+    /// Identificatori notifiche per item (reminder = X giorni prima, today = giorno di scadenza)
+    private func reminderIdentifier(for itemId: UUID) -> String { "\(itemId.uuidString).reminder" }
+    private func todayIdentifier(for itemId: UUID) -> String { "\(itemId.uuidString).today" }
+
+    /// Programma le notifiche per un FoodItem:
+    /// 1) "X giorni prima" alle 9:00 (se quella data è nel futuro)
+    /// 2) "Scade oggi" il giorno di scadenza alle 9:00 (così non perdi mai l'avviso)
     func scheduleNotifications(for item: FoodItem, daysBefore: Int) async {
         guard item.notify, !item.isConsumed else { return }
-        
+
         let calendar = Calendar.current
         let expirationDate = item.effectiveExpirationDate
         let now = Date()
-        
-        // Data/ora in cui far partire la notifica: giorno di scadenza alle 9:00, meno N giorni
+
         var dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: expirationDate)
         dateComponents.hour = 9
         dateComponents.minute = 0
         guard let expirationAtNine = calendar.date(from: dateComponents) else { return }
-        let triggerDate = calendar.date(byAdding: .day, value: -daysBefore, to: expirationAtNine) ?? expirationAtNine
-        
-        // Non programmare se la data è già passata (evita notifiche inutili)
-        if triggerDate <= now { return }
-        
+
         await cancelNotifications(for: item.id)
-        
-        let content = UNMutableNotificationContent()
-        content.title = "⏰ FoodFade"
-        // Messaggio in base a quanti giorni mancano al momento della notifica (daysBefore)
-        content.body = notificationBody(for: item, daysRemaining: daysBefore)
-        content.sound = .default
-        content.userInfo = ["foodItemId": item.id.uuidString]
-        content.categoryIdentifier = "FOOD_EXPIRATION"
-        
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
-            repeats: false
-        )
-        
-        let request = UNNotificationRequest(
-            identifier: item.id.uuidString,
-            content: content,
-            trigger: trigger
-        )
-        
-        do {
-            try await UNUserNotificationCenter.current().add(request)
-        } catch {
-            print("Errore nella programmazione della notifica: \(error)")
+        await registerCategoryIfNeeded()
+
+        let center = UNUserNotificationCenter.current()
+
+        // 1) Notifica "X giorni prima" (solo se la data è nel futuro)
+        let reminderDate = calendar.date(byAdding: .day, value: -daysBefore, to: expirationAtNine) ?? expirationAtNine
+        if reminderDate > now {
+            let content = UNMutableNotificationContent()
+            content.title = "⏰ FoodFade"
+            content.body = notificationBody(for: item, daysRemaining: daysBefore)
+            content.sound = .default
+            content.userInfo = ["foodItemId": item.id.uuidString]
+            content.categoryIdentifier = "FOOD_EXPIRATION"
+            let trigger = UNCalendarNotificationTrigger(
+                dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: reminderDate),
+                repeats: false
+            )
+            let request = UNNotificationRequest(
+                identifier: reminderIdentifier(for: item.id),
+                content: content,
+                trigger: trigger
+            )
+            do {
+                try await center.add(request)
+            } catch {
+                #if DEBUG
+                print("Errore programmazione notifica reminder: \(error)")
+                #endif
+            }
         }
-        
-        // Aggiungi azioni alla notifica
+
+        // 2) Notifica "Scade oggi" il giorno di scadenza alle 9:00 (sempre se nel futuro)
+        if expirationAtNine > now {
+            let content = UNMutableNotificationContent()
+            content.title = "⏰ FoodFade"
+            content.body = notificationBody(for: item, daysRemaining: 0)
+            content.sound = .default
+            content.userInfo = ["foodItemId": item.id.uuidString]
+            content.categoryIdentifier = "FOOD_EXPIRATION"
+            let trigger = UNCalendarNotificationTrigger(
+                dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: expirationAtNine),
+                repeats: false
+            )
+            let request = UNNotificationRequest(
+                identifier: todayIdentifier(for: item.id),
+                content: content,
+                trigger: trigger
+            )
+            do {
+                try await center.add(request)
+            } catch {
+                #if DEBUG
+                print("Errore programmazione notifica scade oggi: \(error)")
+                #endif
+            }
+        }
+    }
+
+    private func registerCategoryIfNeeded() async {
         let markAsEatenAction = UNNotificationAction(
             identifier: "MARK_AS_EATEN",
-            title: "Segna come consumato",
+            title: NSLocalizedString("notification.action.mark_consumed", comment: ""),
             options: []
         )
-        
         let openAppAction = UNNotificationAction(
             identifier: "OPEN_APP",
-            title: "Apri app",
+            title: NSLocalizedString("notification.action.open_app", comment: ""),
             options: .foreground
         )
-        
         let category = UNNotificationCategory(
             identifier: "FOOD_EXPIRATION",
             actions: [markAsEatenAction, openAppAction],
             intentIdentifiers: [],
             options: []
         )
-        
         UNUserNotificationCenter.current().setNotificationCategories([category])
     }
     
-    /// Cancella le notifiche per un item
+    /// Cancella tutte le notifiche per un item (reminder + scade oggi)
     func cancelNotifications(for itemId: UUID) async {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [itemId.uuidString]
+            withIdentifiers: [itemId.uuidString, reminderIdentifier(for: itemId), todayIdentifier(for: itemId)]
         )
     }
     
     /// Cancella tutte le notifiche
     func cancelAllNotifications() async {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+
+    /// Rischedula le notifiche per tutti gli item passati (utile all'avvio app per non perdere "Scade oggi")
+    func rescheduleNotificationsForItems(_ items: [FoodItem], daysBefore: Int) async {
+        let toNotify = items.filter { $0.notify && !$0.isConsumed }
+        for item in toNotify {
+            await scheduleNotifications(for: item, daysBefore: daysBefore)
+        }
     }
     
     /// Testo della notifica

@@ -106,13 +106,21 @@ private struct AllOkCard: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            // Icona categoria
-            Image(systemName: item.category.iconFill)
-                .font(.system(size: 24))
-                .foregroundColor(categoryColor)
-                .frame(width: 40, height: 40)
-                .background(categoryColor.opacity(0.1))
-                .cornerRadius(8)
+            Group {
+                if let data = item.photoData, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .clipped()
+                } else {
+                    Image(systemName: item.category.iconFill)
+                        .font(.system(size: 24))
+                        .foregroundColor(categoryColor)
+                }
+            }
+            .frame(width: 40, height: 40)
+            .background(categoryColor.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.name)

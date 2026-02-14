@@ -3,6 +3,9 @@ import SwiftData
 
 /// Vista per aggiungere un nuovo alimento
 struct AddFoodView: View {
+    var initialBarcode: String? = nil
+    var onClearInitialBarcode: (() -> Void)? = nil
+    
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
@@ -42,6 +45,7 @@ struct AddFoodView: View {
                     barcodeSection
                     expirationSection
                     quantitySection
+                    priceSection
                     labelsSection
                     notificationsAndNotesSection
                 }
@@ -54,13 +58,13 @@ struct AddFoodView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button("common.annulla".localized) {
                         dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
+                    Button("common.salva".localized) {
                         Task {
                             await saveItem()
                         }
@@ -98,9 +102,17 @@ struct AddFoodView: View {
             }
             .onAppear {
                 showNotesField = !viewModel.notes.isEmpty
+                if let b = initialBarcode {
+                    viewModel.applyInitialBarcode(b)
+                }
+            }
+            .onDisappear {
+                onClearInitialBarcode?()
             }
             .onChange(of: showingScanner) { oldValue, newValue in
+                #if DEBUG
                 print("🔄 AddFoodView - showingScanner cambiato: \(oldValue) -> \(newValue)")
+                #endif
             }
             .fullScreenCover(isPresented: $showingDictationOverlay) {
                 DictationListeningOverlay(
@@ -126,7 +138,7 @@ struct AddFoodView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("Fatto") {
+                            Button("common.done".localized) {
                                 viewModel.validateDate()
                                 showingDatePicker = false
                             }
@@ -226,7 +238,7 @@ struct AddFoodView: View {
             }
             Button("addfood.photo.library".localized) { showingPhotoLibrary = true }
             Button("addfood.photo.file".localized) { showingDocumentPicker = true }
-            Button("Annulla", role: .cancel) {}
+            Button("common.annulla".localized, role: .cancel) {}
         }
     }
     
@@ -380,6 +392,25 @@ struct AddFoodView: View {
             Text("addfood.quantity_section".localized)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.secondary)
+        }
+    }
+    
+    private var priceSection: some View {
+        Section {
+            HStack(spacing: 12) {
+                Image(systemName: "eurosign.circle")
+                    .font(.system(size: 18))
+                    .foregroundColor(.secondary)
+                TextField("addfood.price.placeholder".localized, text: $viewModel.priceText)
+                    .keyboardType(.decimalPad)
+            }
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+        } header: {
+            Text("addfood.price".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+        } footer: {
+            Text("addfood.price.footer".localized)
         }
     }
     

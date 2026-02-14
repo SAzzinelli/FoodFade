@@ -179,46 +179,48 @@ struct FoodFadeApp: App {
 /// Vista principale con TabView
 struct ContentView: View {
     @State private var selectedTab = 0
+    @State private var trophyUnlockedBannerName: String? = nil
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var notificationService: NotificationService
     @StateObject private var themeManager = ThemeManager.shared
     @Query private var settings: [AppSettings]
-    
+    @Query private var allItems: [FoodItem]
+
     private var shoppingListTabEnabled: Bool {
         settings.first?.shoppingListTabEnabled ?? false
     }
-    
+
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "leaf.fill")
+                    Label("nav.home", systemImage: "leaf.fill")
                 }
                 .tag(0)
             
             InventoryView(filterStatus: nil)
                 .tabItem {
-                    Label(String(localized: "nav.inventory"), systemImage: "cabinet")
+                    Label("nav.inventory", systemImage: "cabinet")
                 }
                 .tag(1)
             
             if shoppingListTabEnabled {
                 ShoppingListView()
                     .tabItem {
-                        Label("Lista spesa", systemImage: "cart.fill")
+                        Label("shopping.title", systemImage: "cart.fill")
                     }
                     .tag(2)
             }
             
             StatisticsView()
                 .tabItem {
-                    Label("Statistiche", systemImage: "chart.pie.fill")
+                    Label("nav.statistics", systemImage: "chart.pie.fill")
                 }
                 .tag(shoppingListTabEnabled ? 3 : 2)
             
             SettingsView()
                 .tabItem {
-                    Label("Impostazioni", systemImage: "slider.horizontal.3")
+                    Label("nav.settings", systemImage: "slider.horizontal.3")
                 }
                 .tag(shoppingListTabEnabled ? 4 : 3)
         }
@@ -239,6 +241,13 @@ struct ContentView: View {
         .onAppear {
             loadThemeSettings()
             updateTabBarColor()
+            // Rischedula notifiche una sola volta all'avvio (non a ogni visita alla Home)
+            if settings.first?.notificationsEnabled == true {
+                let days = settings.first?.effectiveNotificationDays ?? 1
+                Task {
+                    await notificationService.rescheduleNotificationsForItems(allItems, daysBefore: days)
+                }
+            }
         }
         .onChange(of: themeManager.accentColor) { oldValue, newValue in
             updateTabBarColor()
@@ -262,6 +271,24 @@ struct ContentView: View {
             }
             notificationService.itemIdToMarkAsConsumedFromNotification = nil
         }
+        .onReceive(NotificationCenter.default.publisher(for: .trophyUnlocked)) { notification in
+            guard let raw = notification.userInfo?["trophyRawValue"] as? String,
+                  let trophy = Trophy(rawValue: raw) else { return }
+            trophyUnlockedBannerName = trophy.displayName
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                trophyUnlockedBannerName = nil
+            }
+        }
+        .overlay(alignment: .top) {
+            if let name = trophyUnlockedBannerName {
+                TrophyUnlockedBanner(trophyName: name)
+                    .padding(.top, 8)
+                    .padding(.horizontal, 20)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(100)
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: trophyUnlockedBannerName != nil)
     }
     
     /// Carica le impostazioni del tema dal database
@@ -311,6 +338,34 @@ struct ContentView: View {
         case .dark:
             return .dark
         }
+    }
+}
+
+/// Banner in-app per trofeo appena sbloccato
+private struct TrophyUnlockedBanner: View {
+    let trophyName: String
+    private var accent: Color {
+        ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "trophy.fill")
+                .font(.system(size: 20))
+                .foregroundColor(accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("trophy.banner.title".localized)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text(trophyName)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
     }
 }
 

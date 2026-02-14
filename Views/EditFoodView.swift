@@ -38,6 +38,7 @@ struct EditFoodView: View {
     @State private var isMultiPortion: Bool
     @State private var isFresh: Bool
     @State private var isOpened: Bool
+    @State private var priceText: String
     
     init(item: FoodItem) {
         self.item = item
@@ -61,6 +62,7 @@ struct EditFoodView: View {
         _isFresh = State(initialValue: item.isFresh)
         _isOpened = State(initialValue: item.isOpened)
         _selectedPhoto = State(initialValue: item.photoData.flatMap { UIImage(data: $0) })
+        _priceText = State(initialValue: item.price.map { String(format: "%.2f", $0) } ?? "")
     }
     
     var body: some View {
@@ -97,6 +99,15 @@ struct EditFoodView: View {
                     Text("Tipo di alimento")
                 } footer: {
                     Text("Scegli il tipo di alimento per statistiche migliori")
+                }
+                
+                Section {
+                    TextField("addfood.price.placeholder".localized, text: $priceText)
+                        .keyboardType(.decimalPad)
+                } header: {
+                    Text("addfood.price".localized)
+                } footer: {
+                    Text("addfood.price.footer".localized)
                 }
                 
                 Section {
@@ -331,6 +342,14 @@ struct EditFoodView: View {
         item.isOpened = isOpened
         item.lastUpdated = Date()
         
+        let parsedPrice: Double? = {
+            let t = priceText.trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: ",", with: ".")
+            guard !t.isEmpty, let v = Double(t), v >= 0 else { return nil }
+            return v
+        }()
+        item.price = parsedPrice
+        
         // Salva foto se presente
         if let photo = selectedPhoto {
             item.photoData = photo.jpegData(compressionQuality: 0.8)
@@ -357,7 +376,9 @@ struct EditFoodView: View {
             
             dismiss()
         } catch {
-            print("Errore nel salvataggio: \(error)")
+            errorTitle = "error.save_failed".localized
+            errorMessage = "error.save_failed_message".localized
+            showingError = true
         }
     }
 }

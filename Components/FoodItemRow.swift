@@ -14,13 +14,21 @@ struct FoodItemRow: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            // Icona categoria (dimensione fissa)
-            Image(systemName: item.category.iconFill)
-                .font(.system(size: 20))
-                .foregroundColor(categoryColor)
-                .frame(width: 40, height: 40)
-                .background(categoryColor.opacity(0.1))
-                .cornerRadius(10)
+            // Foto prodotto (se presente) o icona categoria
+            Group {
+                if let data = item.photoData, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Image(systemName: item.category.iconFill)
+                        .font(.system(size: 20))
+                        .foregroundColor(categoryColor)
+                }
+            }
+            .frame(width: 40, height: 40)
+            .background(categoryColor.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             
             // Nome + metadati in colonna, con spazio garantito
             VStack(alignment: .leading, spacing: 4) {
@@ -94,7 +102,9 @@ struct FoodItemRow: View {
         AppTheme.color(for: item.category)
     }
     
+    /// Verde se prodotto aperto con giorni rimanenti
     private var statusColor: Color {
+        if item.isOpened && item.daysRemaining > 0 { return .green }
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange

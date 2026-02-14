@@ -10,6 +10,77 @@
 "common.add" = "Aggiungi";
 "common.search" = "Cerca";
 "common.all" = "Tutti";
+"common.close" = "Chiudi";
+"common.done" = "Fatto";
+"common.annulla" = "Annulla";
+"common.salva" = "Salva";
+"error.save_failed" = "Salvataggio non riuscito";
+"error.save_failed_message" = "Le modifiche non sono state salvate. Riprova.";
+"error.delete_failed" = "Eliminazione non riuscita";
+"error.delete_failed_message" = "L'elemento non è stato eliminato. Riprova.";
+
+/* Dettaglio prodotto */
+"itemdetail.scade_il" = "Scade il";
+"itemdetail.added_on" = "Aggiunto il";
+"itemdetail.last_update" = "Ultimo aggiornamento";
+"itemdetail.fresh_product" = "Prodotto fresco";
+"itemdetail.opens_in_3" = "Scade dopo 3 giorni";
+"itemdetail.opened_product" = "Prodotto aperto";
+"itemdetail.advanced_expiry" = "Gestione avanzata";
+"itemdetail.notes" = "Note";
+"itemdetail.barcode" = "Codice a barre";
+"itemdetail.edit" = "Modifica";
+"itemdetail.delete" = "Elimina";
+"itemdetail.delete_confirm" = "Sei sicuro di voler eliminare %@?";
+"itemdetail.consumed" = "Consumato";
+
+/* Sezioni Home */
+"home.section.categories" = "Categorie";
+"home.section.recent" = "Prodotti recenti";
+"home.smart_suggestions.title" = "Suggerimenti Intelligenti";
+"home.smart_suggestions.subtitle" = "FoodFade analizza i tuoi prodotti e ti suggerisce quando consumarli per ridurre gli sprechi. I suggerimenti appaiono qui in base alle tue abitudini.";
+"home.reorder.title" = "Riordina le card del Riepilogo";
+"home.reorder.subtitle" = "Decidi in che ordine mostrare le quattro sezioni nella schermata Home.";
+
+/* Statistiche */
+"stats.intro.title" = "Riepilogo di utilizzo e spreco.";
+"stats.intro.subtitle" = "Waste Score, grafici e approfondimenti per categoria e tempi. Per monitorare le tue abitudini.";
+"stats.empty.title" = "Nessun dato disponibile";
+"stats.empty.subtitle" = "Aggiungi qualche prodotto per iniziare";
+"stats.period" = "Nel periodo";
+"stats.consumed_label" = "consumati";
+"stats.expired_label" = "scaduti";
+"stats.chart.consumed_vs_expired" = "Confronto tra prodotti consumati e scaduti";
+"stats.chart.last_4_weeks" = "Ultime 4 settimane";
+"stats.chart.consumed" = "Consumati";
+"stats.chart.expired" = "Scaduti";
+"stats.details.most_added" = "Prodotti più aggiunti";
+"stats.details.most_wasted" = "Prodotti più sprecati";
+"stats.details.detail_later" = "I dettagli compariranno man mano che usi l'app";
+"stats.details.added_times" = "aggiunto %d volte";
+"stats.details.volta" = "volta";
+"stats.details.volte" = "volte";
+
+/* Barcode */
+"barcode.placeholder" = "Posiziona il codice a barre qui";
+"barcode.simulator.title" = "Solo su dispositivo reale";
+"barcode.simulator.message" = "La scansione codici a barre non è disponibile sul simulatore. Usa un iPhone o iPad per scansionare.";
+"barcode.camera.denied.title" = "Fotocamera non autorizzata";
+"barcode.camera.denied.message" = "Attiva l'accesso alla fotocamera in Impostazioni per scansionare i codici a barre.";
+
+/* Sheet consumati */
+"consumed_quantity_sheet.all" = "Tutti (%d)";
+
+/* Modifica alimento */
+"edit.section.product" = "Prodotto";
+"edit.section.photo" = "Foto";
+"edit.section.category" = "Categoria di conservazione";
+"edit.section.food_type" = "Tipo di alimento";
+"edit.section.expiry" = "Scadenza";
+"edit.section.preferences" = "Preferenze";
+"edit.fresh_product" = "Prodotto fresco";
+"edit.change_to_dated" = "Cambia in prodotto con data";
+"edit.opened_on" = "Aperto il";
 
 /* Home */
 "home.title" = "FoodFade";
@@ -65,6 +136,10 @@
 "nav.statistics" = "Statistiche";
 "nav.settings" = "Impostazioni";
 
+/* Notifiche (azioni) */
+"notification.action.mark_consumed" = "Segna come consumato";
+"notification.action.open_app" = "Apri app";
+
 /* Inventory */
 "inventory.search.prompt" = "Cerca prodotto...";
 "inventory.consumed" = "Consumato";
@@ -84,6 +159,12 @@
 "inventory.sort" = "Ordina";
 "inventory.sort.ascending" = "Crescente";
 "inventory.sort.descending" = "Decrescente";
+"inventory.sort.expiration" = "Data scadenza";
+"inventory.sort.name_az" = "Nome A–Z";
+"inventory.sort.category" = "Categoria";
+"inventory.sort.quantity" = "Quantità";
+"inventory.sort.added" = "Data aggiunta";
+"inventory.sort.price" = "Prezzo";
 "inventory.results.count" = "%d prodotti";
 "inventory.total_items" = "Totale elementi: %d";
 
@@ -118,6 +199,9 @@
 "addfood.expiration" = "Data di scadenza";
 "addfood.quantity" = "Quantità: %d";
 "addfood.quantity_section" = "Quantità";
+"addfood.price" = "Prezzo";
+"addfood.price.placeholder" = "es. 2,50";
+"addfood.price.footer" = "Tieni d'occhio la spesa e i risparmi nelle Statistiche.";
 "addfood.notes" = "Note (opzionale)";
 "addfood.notify" = "Notifiche";
 
@@ -227,6 +311,32 @@
 "stats.message.good" = "Stai facendo bene! Continua così.";
 "stats.message.ok" = "Ci stai provando, bravo!";
 "stats.message.encouraging" = "Ogni piccolo passo conta!";
+
+/* Statistiche – Costi */
+"stats.costs.title" = "Costi e risparmi";
+"stats.costs.description" = "Tieni d'occhio quanto spendi, quanto scade senza essere usato e quanto risparmi consumando i prodotti in tempo. Inserisci i prezzi quando aggiungi i prodotti per vedere queste statistiche.";
+"stats.costs.spent" = "Spesa (acquistato)";
+"stats.costs.wasted" = "Sprecato (scaduto)";
+"stats.costs.saved" = "Risparmiato (usato in tempo)";
+"stats.costs.this_week" = "Questa settimana";
+"stats.costs.this_month" = "Questo mese";
+"stats.costs.this_year" = "Questo anno";
+"stats.costs.price_paid" = "Prezzo";
+"stats.prices.title" = "Andamento prezzi";
+"stats.prices.description" = "Panoramica dei prezzi inseriti: valore totale, andamento mensile e prezzo per singolo prodotto.";
+"stats.prices.overview" = "Panoramica";
+"stats.prices.total_tracked" = "Valore totale tracciato";
+"stats.prices.products_with_price" = "Prodotti con prezzo";
+"stats.prices.average" = "Prezzo medio";
+"stats.prices.trend" = "Spesa per mese";
+"stats.prices.by_product" = "Per prodotto";
+"stats.prices.no_prices" = "Nessun prodotto con prezzo. Aggiungi un prezzo quando inserisci o modifichi un prodotto.";
+
+/* KPI / Titoli stato */
+"kpi.title.expired" = "Scaduti";
+"kpi.title.today" = "Scadono oggi";
+"kpi.title.soon" = "Prossimi alla scadenza";
+"kpi.title.safe" = "Prodotti sicuri";
 
 /* Settings */
 "settings.title" = "Impostazioni";
@@ -426,3 +536,38 @@
 "settings.expiration.calendar" = "Calendario";
 "settings.expiration.dictation" = "Dettatura";
 "settings.expiration.footer" = "Scegli se usare il calendario o la dettatura per la data di scadenza.";
+
+/* Trofei (gamification) */
+"trophy.title" = "Trofei";
+"trophy.subtitle" = "Sblocca i trofei gestendo bene il tuo frigo.";
+"trophy.unlocked_on" = "Sbloccato il %@";
+"trophy.locked" = "Sbloccabile";
+"trophy.first_step" = "Primo passo";
+"trophy.first_step_desc" = "Hai aggiunto il primo prodotto.";
+"trophy.full_fridge" = "Frigo pieno";
+"trophy.full_fridge_desc" = "Hai avuto 10 prodotti in inventario.";
+"trophy.fridgy_friend" = "Amico di Fridgy";
+"trophy.fridgy_friend_desc" = "3 giorni di fila senza sprechi.";
+"trophy.week_clean" = "Settimana pulita";
+"trophy.week_clean_desc" = "7 giorni di fila senza sprechi.";
+"trophy.careful_consumer" = "Consumatore attento";
+"trophy.careful_consumer_desc" = "5 prodotti consumati in tempo in un mese.";
+"trophy.waste_fighter" = "Anti-spreco";
+"trophy.waste_fighter_desc" = "Waste score ≥ 80% in un mese.";
+"trophy.master" = "Maestro";
+"trophy.master_desc" = "Hai sbloccato tutti i trofei.";
+"trophy.banner.title" = "Trofeo sbloccato!";
+"trophy.progress.add_one" = "Aggiungi 1 prodotto";
+"trophy.progress.done" = "Completato!";
+"trophy.progress.products" = "%d / %d prodotti";
+"trophy.progress.days_streak" = "%d / %d giorni senza sprechi";
+"trophy.progress.consumed_month" = "%d / %d consumati in tempo questo mese";
+"trophy.progress.waste_need_more" = "Servono almeno 3 elementi questo mese";
+"trophy.progress.waste_score" = "%d%% (serve 80%%)";
+"trophy.progress.master" = "%d / %d trofei sbloccati";
+"trophy.level.products" = "prodotti inseriti";
+"trophy.level.days" = "giorni senza sprechi";
+"trophy.level.consumed" = "consumati in tempo";
+"trophy.level.percent" = "%%";
+"trophy.level.trophies" = "trofei";
+"trophy.levels.title" = "Livelli";

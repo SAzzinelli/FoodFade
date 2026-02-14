@@ -10,6 +10,77 @@
 "common.add" = "Add";
 "common.search" = "Search";
 "common.all" = "All";
+"common.close" = "Close";
+"common.done" = "Done";
+"common.annulla" = "Cancel";
+"common.salva" = "Save";
+"error.save_failed" = "Save failed";
+"error.save_failed_message" = "Your changes could not be saved. Try again.";
+"error.delete_failed" = "Delete failed";
+"error.delete_failed_message" = "The item could not be deleted. Try again.";
+
+/* Item detail */
+"itemdetail.scade_il" = "Expires";
+"itemdetail.added_on" = "Added on";
+"itemdetail.last_update" = "Last update";
+"itemdetail.fresh_product" = "Fresh product";
+"itemdetail.opens_in_3" = "Expires in 3 days";
+"itemdetail.opened_product" = "Opened product";
+"itemdetail.advanced_expiry" = "Advanced expiry";
+"itemdetail.notes" = "Notes";
+"itemdetail.barcode" = "Barcode";
+"itemdetail.edit" = "Edit";
+"itemdetail.delete" = "Delete";
+"itemdetail.delete_confirm" = "Are you sure you want to delete %@?";
+"itemdetail.consumed" = "Consumed";
+
+/* Home sections */
+"home.section.categories" = "Categories";
+"home.section.recent" = "Recent products";
+"home.smart_suggestions.title" = "Smart Suggestions";
+"home.smart_suggestions.subtitle" = "FoodFade analyzes your products and suggests when to consume them to reduce waste. Suggestions appear here based on your habits.";
+"home.reorder.title" = "Reorder summary cards";
+"home.reorder.subtitle" = "Choose the order of the four sections on the Home screen.";
+
+/* Stats */
+"stats.intro.title" = "Usage and waste summary.";
+"stats.intro.subtitle" = "Waste Score, charts and insights by category and time. To monitor your habits.";
+"stats.empty.title" = "No data available";
+"stats.empty.subtitle" = "Add some products to get started";
+"stats.period" = "In the period";
+"stats.consumed_label" = "consumed";
+"stats.expired_label" = "expired";
+"stats.chart.consumed_vs_expired" = "Comparison of consumed vs expired products";
+"stats.chart.last_4_weeks" = "Last 4 weeks";
+"stats.chart.consumed" = "Consumed";
+"stats.chart.expired" = "Expired";
+"stats.details.most_added" = "Most added products";
+"stats.details.most_wasted" = "Most wasted products";
+"stats.details.detail_later" = "Details will appear as you use the app";
+"stats.details.added_times" = "added %d time(s)";
+"stats.details.volta" = "time";
+"stats.details.volte" = "times";
+
+/* Barcode */
+"barcode.placeholder" = "Position the barcode here";
+"barcode.simulator.title" = "Device only";
+"barcode.simulator.message" = "Barcode scanning is not available on the simulator. Use an iPhone or iPad to scan.";
+"barcode.camera.denied.title" = "Camera not authorized";
+"barcode.camera.denied.message" = "Enable camera access in Settings to scan barcodes.";
+
+/* Consumed sheet */
+"consumed_quantity_sheet.all" = "All (%d)";
+
+/* Edit food */
+"edit.section.product" = "Product";
+"edit.section.photo" = "Photo";
+"edit.section.category" = "Storage category";
+"edit.section.food_type" = "Food type";
+"edit.section.expiry" = "Expiry";
+"edit.section.preferences" = "Preferences";
+"edit.fresh_product" = "Fresh product";
+"edit.change_to_dated" = "Change to dated product";
+"edit.opened_on" = "Opened on";
 
 /* Home */
 "home.title" = "FoodFade";
@@ -66,6 +137,10 @@
 "nav.statistics" = "Statistics";
 "nav.settings" = "Settings";
 
+/* Notifications (actions) */
+"notification.action.mark_consumed" = "Mark as consumed";
+"notification.action.open_app" = "Open app";
+
 /* Inventory */
 "inventory.search.prompt" = "Search product...";
 "inventory.consumed" = "Consumed";
@@ -85,6 +160,12 @@
 "inventory.sort" = "Sort";
 "inventory.sort.ascending" = "Ascending";
 "inventory.sort.descending" = "Descending";
+"inventory.sort.expiration" = "Expiration date";
+"inventory.sort.name_az" = "Name A–Z";
+"inventory.sort.category" = "Category";
+"inventory.sort.quantity" = "Quantity";
+"inventory.sort.added" = "Date added";
+"inventory.sort.price" = "Price";
 "inventory.total_items" = "Total items: %d";
 "inventory.results.count" = "%d products";
 
@@ -118,6 +199,9 @@
 "addfood.expiration" = "Expiration date";
 "addfood.quantity" = "Quantity: %d";
 "addfood.quantity_section" = "Quantity";
+"addfood.price" = "Price";
+"addfood.price.placeholder" = "e.g. 2.50";
+"addfood.price.footer" = "Track spending and see savings in Statistics.";
 "addfood.notes" = "Notes (optional)";
 "addfood.notify" = "Notifications";
 
@@ -227,6 +311,32 @@
 "stats.message.good" = "You're doing well! Keep it up.";
 "stats.message.ok" = "You're trying, well done!";
 "stats.message.encouraging" = "Every small step counts!";
+
+/* Statistics – Costs */
+"stats.costs.title" = "Costs & savings";
+"stats.costs.description" = "Track how much you spend, how much expires unused, and how much you save by using products before they expire. Add prices when you add products to see these stats.";
+"stats.costs.spent" = "Spent (purchased)";
+"stats.costs.wasted" = "Wasted (expired)";
+"stats.costs.saved" = "Saved (used in time)";
+"stats.costs.this_week" = "This week";
+"stats.costs.this_month" = "This month";
+"stats.costs.this_year" = "This year";
+"stats.costs.price_paid" = "Price";
+"stats.prices.title" = "Price trends";
+"stats.prices.description" = "Overview of prices you've entered: total value, monthly trend, and price per product.";
+"stats.prices.overview" = "Overview";
+"stats.prices.total_tracked" = "Total value tracked";
+"stats.prices.products_with_price" = "Products with price";
+"stats.prices.average" = "Average price";
+"stats.prices.trend" = "Spending by month";
+"stats.prices.by_product" = "By product";
+"stats.prices.no_prices" = "No products with price yet. Add a price when adding or editing a product.";
+
+/* KPI / Status titles */
+"kpi.title.expired" = "Expired";
+"kpi.title.today" = "Expiring today";
+"kpi.title.soon" = "Expiring soon";
+"kpi.title.safe" = "Safe items";
 
 /* Settings */
 "settings.title" = "Settings";
@@ -427,3 +537,38 @@
 "settings.expiration.calendar" = "Calendar";
 "settings.expiration.dictation" = "Dictation";
 "settings.expiration.footer" = "Choose whether to use the calendar or dictation for the expiration date.";
+
+/* Trophies (gamification) */
+"trophy.title" = "Trophies";
+"trophy.subtitle" = "Unlock trophies by managing your fridge well.";
+"trophy.unlocked_on" = "Unlocked on %@";
+"trophy.locked" = "Unlockable";
+"trophy.first_step" = "First step";
+"trophy.first_step_desc" = "You added your first product.";
+"trophy.full_fridge" = "Full fridge";
+"trophy.full_fridge_desc" = "You had 10 products in inventory.";
+"trophy.fridgy_friend" = "Fridgy's friend";
+"trophy.fridgy_friend_desc" = "3 days in a row with no waste.";
+"trophy.week_clean" = "Clean week";
+"trophy.week_clean_desc" = "7 days in a row with no waste.";
+"trophy.careful_consumer" = "Careful consumer";
+"trophy.careful_consumer_desc" = "5 products consumed in time in one month.";
+"trophy.waste_fighter" = "Waste fighter";
+"trophy.waste_fighter_desc" = "Waste score ≥ 80% in one month.";
+"trophy.master" = "Master";
+"trophy.master_desc" = "You unlocked all trophies.";
+"trophy.banner.title" = "Trophy unlocked!";
+"trophy.progress.add_one" = "Add 1 product";
+"trophy.progress.done" = "Done!";
+"trophy.progress.products" = "%d / %d products";
+"trophy.progress.days_streak" = "%d / %d days no waste";
+"trophy.progress.consumed_month" = "%d / %d consumed in time this month";
+"trophy.progress.waste_need_more" = "Need at least 3 items this month";
+"trophy.progress.waste_score" = "%d%% (need 80%%)";
+"trophy.progress.master" = "%d / %d trophies unlocked";
+"trophy.level.products" = "products";
+"trophy.level.days" = "days";
+"trophy.level.consumed" = "consumed in time";
+"trophy.level.percent" = "%%";
+"trophy.level.trophies" = "trophies";
+"trophy.levels.title" = "Levels";

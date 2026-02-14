@@ -195,7 +195,7 @@ struct SettingsView: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 3)
-                                .background(Color.purple)
+                                .background(Self.fridgyBlue)
                                 .clipShape(Capsule())
                         }
                     }
@@ -265,7 +265,7 @@ struct SettingsView: View {
                     Text("Personalizza l'aspetto e i colori dell'interfaccia")
                 }
                 
-                // 5. SINCRONIZZAZIONE
+                // 5. SINCRONIZZAZIONE (iCloud + backup manuale)
                 Section {
                     HStack {
                         Image(systemName: "icloud.fill")
@@ -278,7 +278,6 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    // Azione manuale di ripristino (solo se iCloud è attivo)
                     if viewModel.iCloudStatus == "Attiva" {
                         Button {
                             viewModel.restoreFromiCloud()
@@ -291,18 +290,7 @@ struct SettingsView: View {
                             }
                         }
                     }
-                } header: {
-                    Text("Sincronizzazione")
-                } footer: {
-                    if viewModel.iCloudStatus == "Attiva" {
-                        Text("I tuoi dati vengono sincronizzati automaticamente sui dispositivi collegati allo stesso Apple ID.")
-                    } else {
-                        Text("iCloud non è disponibile su questo dispositivo.")
-                    }
-                }
-                
-                // 6. BACKUP MANUALE
-                Section {
+                    
                     NavigationLink {
                         BackupRestoreView()
                     } label: {
@@ -314,12 +302,16 @@ struct SettingsView: View {
                         }
                     }
                 } header: {
-                    Text("Backup Manuale")
+                    Text("Sincronizzazione")
                 } footer: {
-                    Text("Esporta o importa i tuoi dati manualmente. Utile per backup locali o trasferimento dati.")
+                    if viewModel.iCloudStatus == "Attiva" {
+                        Text("I tuoi dati vengono sincronizzati automaticamente tra i dispositivi con lo stesso Apple ID. Puoi anche esportare o importare manualmente per backup locali.")
+                    } else {
+                        Text("iCloud non è disponibile su questo dispositivo. Puoi esportare o importare i dati manualmente per backup locali.")
+                    }
                 }
-                
-                // 7. INFORMAZIONI
+
+                // 6. INFORMAZIONI
                 Section {
                     HStack {
                         Image(systemName: "info.circle.fill")
@@ -349,7 +341,7 @@ struct SettingsView: View {
                     Text("Informazioni")
                 }
                 
-                // 8. RIPRISTINO
+                // 9. RIPRISTINO
                 Section {
                     Button {
                         showingResetAlert = true

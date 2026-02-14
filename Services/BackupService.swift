@@ -41,12 +41,24 @@ class BackupService {
                     lastUpdated: item.lastUpdated,
                     notify: item.notify,
                     isConsumed: item.isConsumed,
+                    consumedDate: item.consumedDate,
                     photoData: item.photoData,
                     foodTypeRaw: item.foodType?.rawValue,
                     isFresh: item.isFresh,
                     isOpened: item.isOpened,
                     openedDate: item.openedDate,
-                    useAdvancedExpiry: item.useAdvancedExpiry
+                    useAdvancedExpiry: item.useAdvancedExpiry,
+                    price: item.price,
+                    isGlutenFree: item.isGlutenFree,
+                    isBio: item.isBio,
+                    isVegan: item.isVegan,
+                    isLactoseFree: item.isLactoseFree,
+                    isVegetarian: item.isVegetarian,
+                    isReady: item.isReady,
+                    needsCooking: item.needsCooking,
+                    isArtisan: item.isArtisan,
+                    isSinglePortion: item.isSinglePortion,
+                    isMultiPortion: item.isMultiPortion
                 )
             },
             settings: settings.first.map { s in
@@ -61,7 +73,9 @@ class BackupService {
                     accentColorRaw: s.accentColorRaw,
                     progressRingModeRaw: s.progressRingModeRaw,
                     homeSummaryStyleRaw: s.homeSummaryStyleRaw,
-                    expirationInputMethodRaw: s.expirationInputMethodRaw
+                    expirationInputMethodRaw: s.expirationInputMethodRaw,
+                    hasChosenCloudUsage: s.hasChosenCloudUsage,
+                    shoppingListTabEnabled: s.shoppingListTabEnabled
                 )
             },
             profiles: profiles.map { p in
@@ -185,12 +199,24 @@ class BackupService {
                 lastUpdated: backupItem.lastUpdated,
                 notify: backupItem.notify,
                 isConsumed: backupItem.isConsumed,
+                consumedDate: backupItem.consumedDate,
                 photoData: backupItem.photoData,
                 foodType: foodType,
+                isGlutenFree: backupItem.isGlutenFree,
+                isBio: backupItem.isBio,
+                isVegan: backupItem.isVegan,
+                isLactoseFree: backupItem.isLactoseFree,
+                isVegetarian: backupItem.isVegetarian,
+                isReady: backupItem.isReady,
+                needsCooking: backupItem.needsCooking,
+                isArtisan: backupItem.isArtisan,
+                isSinglePortion: backupItem.isSinglePortion,
+                isMultiPortion: backupItem.isMultiPortion,
                 isFresh: backupItem.isFresh,
                 isOpened: backupItem.isOpened,
                 openedDate: backupItem.openedDate,
-                useAdvancedExpiry: backupItem.useAdvancedExpiry
+                useAdvancedExpiry: backupItem.useAdvancedExpiry,
+                price: backupItem.price
             )
             
             modelContext.insert(item)
@@ -210,7 +236,9 @@ class BackupService {
                 accentColor: (backupSettings.accentColorRaw == "default" ? .orange : AccentColor(rawValue: backupSettings.accentColorRaw) ?? .natural),
                 progressRingMode: ProgressRingMode(rawValue: backupSettings.progressRingModeRaw) ?? .safeItems,
                 homeSummaryStyle: HomeSummaryStyle(rawValue: backupSettings.homeSummaryStyleRaw ?? HomeSummaryStyle.ring.rawValue) ?? .ring,
-                expirationInputMethod: ExpirationInputMethod(rawValue: backupSettings.expirationInputMethodRaw ?? ExpirationInputMethod.calendar.rawValue) ?? .calendar
+                expirationInputMethod: ExpirationInputMethod(rawValue: backupSettings.expirationInputMethodRaw ?? ExpirationInputMethod.calendar.rawValue) ?? .calendar,
+                hasChosenCloudUsage: backupSettings.hasChosenCloudUsage ?? false,
+                shoppingListTabEnabled: backupSettings.shoppingListTabEnabled ?? false
             )
             modelContext.insert(settings)
         }
@@ -282,12 +310,24 @@ class BackupService {
                     existingItem.lastUpdated = backupItem.lastUpdated
                     existingItem.notify = backupItem.notify
                     existingItem.isConsumed = backupItem.isConsumed
+                    existingItem.consumedDate = backupItem.consumedDate
                     existingItem.photoData = backupItem.photoData
                     existingItem.foodType = foodType
                     existingItem.isFresh = backupItem.isFresh
                     existingItem.isOpened = backupItem.isOpened
                     existingItem.openedDate = backupItem.openedDate
                     existingItem.useAdvancedExpiry = backupItem.useAdvancedExpiry
+                    existingItem.price = backupItem.price
+                    existingItem.isGlutenFree = backupItem.isGlutenFree
+                    existingItem.isBio = backupItem.isBio
+                    existingItem.isVegan = backupItem.isVegan
+                    existingItem.isLactoseFree = backupItem.isLactoseFree
+                    existingItem.isVegetarian = backupItem.isVegetarian
+                    existingItem.isReady = backupItem.isReady
+                    existingItem.needsCooking = backupItem.needsCooking
+                    existingItem.isArtisan = backupItem.isArtisan
+                    existingItem.isSinglePortion = backupItem.isSinglePortion
+                    existingItem.isMultiPortion = backupItem.isMultiPortion
                     updated += 1
                 } else {
                     skipped += 1
@@ -310,12 +350,24 @@ class BackupService {
                     lastUpdated: backupItem.lastUpdated,
                     notify: backupItem.notify,
                     isConsumed: backupItem.isConsumed,
+                    consumedDate: backupItem.consumedDate,
                     photoData: backupItem.photoData,
                     foodType: foodType,
+                    isGlutenFree: backupItem.isGlutenFree,
+                    isBio: backupItem.isBio,
+                    isVegan: backupItem.isVegan,
+                    isLactoseFree: backupItem.isLactoseFree,
+                    isVegetarian: backupItem.isVegetarian,
+                    isReady: backupItem.isReady,
+                    needsCooking: backupItem.needsCooking,
+                    isArtisan: backupItem.isArtisan,
+                    isSinglePortion: backupItem.isSinglePortion,
+                    isMultiPortion: backupItem.isMultiPortion,
                     isFresh: backupItem.isFresh,
                     isOpened: backupItem.isOpened,
                     openedDate: backupItem.openedDate,
-                    useAdvancedExpiry: backupItem.useAdvancedExpiry
+                    useAdvancedExpiry: backupItem.useAdvancedExpiry,
+                    price: backupItem.price
                 )
                 
                 modelContext.insert(item)
@@ -417,12 +469,94 @@ struct BackupFoodItem: Codable {
     let lastUpdated: Date
     let notify: Bool
     let isConsumed: Bool
+    let consumedDate: Date?
     let photoData: Data?
     let foodTypeRaw: String?
     let isFresh: Bool
     let isOpened: Bool
     let openedDate: Date?
     let useAdvancedExpiry: Bool
+    let price: Double?
+    let isGlutenFree: Bool
+    let isBio: Bool
+    let isVegan: Bool
+    let isLactoseFree: Bool
+    let isVegetarian: Bool
+    let isReady: Bool
+    let needsCooking: Bool
+    let isArtisan: Bool
+    let isSinglePortion: Bool
+    let isMultiPortion: Bool
+    
+    init(id: UUID, name: String, category: String, expirationDate: Date, quantity: Int, notes: String?, barcode: String?, createdAt: Date, lastUpdated: Date, notify: Bool, isConsumed: Bool, consumedDate: Date?, photoData: Data?, foodTypeRaw: String?, isFresh: Bool, isOpened: Bool, openedDate: Date?, useAdvancedExpiry: Bool, price: Double?, isGlutenFree: Bool = false, isBio: Bool = false, isVegan: Bool = false, isLactoseFree: Bool = false, isVegetarian: Bool = false, isReady: Bool = false, needsCooking: Bool = false, isArtisan: Bool = false, isSinglePortion: Bool = false, isMultiPortion: Bool = false) {
+        self.id = id
+        self.name = name
+        self.category = category
+        self.expirationDate = expirationDate
+        self.quantity = quantity
+        self.notes = notes
+        self.barcode = barcode
+        self.createdAt = createdAt
+        self.lastUpdated = lastUpdated
+        self.notify = notify
+        self.isConsumed = isConsumed
+        self.consumedDate = consumedDate
+        self.photoData = photoData
+        self.foodTypeRaw = foodTypeRaw
+        self.isFresh = isFresh
+        self.isOpened = isOpened
+        self.openedDate = openedDate
+        self.useAdvancedExpiry = useAdvancedExpiry
+        self.price = price
+        self.isGlutenFree = isGlutenFree
+        self.isBio = isBio
+        self.isVegan = isVegan
+        self.isLactoseFree = isLactoseFree
+        self.isVegetarian = isVegetarian
+        self.isReady = isReady
+        self.needsCooking = needsCooking
+        self.isArtisan = isArtisan
+        self.isSinglePortion = isSinglePortion
+        self.isMultiPortion = isMultiPortion
+    }
+    
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        category = try c.decode(String.self, forKey: .category)
+        expirationDate = try c.decode(Date.self, forKey: .expirationDate)
+        quantity = try c.decode(Int.self, forKey: .quantity)
+        notes = try c.decodeIfPresent(String.self, forKey: .notes)
+        barcode = try c.decodeIfPresent(String.self, forKey: .barcode)
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        lastUpdated = try c.decode(Date.self, forKey: .lastUpdated)
+        notify = try c.decode(Bool.self, forKey: .notify)
+        isConsumed = try c.decode(Bool.self, forKey: .isConsumed)
+        consumedDate = try c.decodeIfPresent(Date.self, forKey: .consumedDate)
+        photoData = try c.decodeIfPresent(Data.self, forKey: .photoData)
+        foodTypeRaw = try c.decodeIfPresent(String.self, forKey: .foodTypeRaw)
+        isFresh = try c.decode(Bool.self, forKey: .isFresh)
+        isOpened = try c.decode(Bool.self, forKey: .isOpened)
+        openedDate = try c.decodeIfPresent(Date.self, forKey: .openedDate)
+        useAdvancedExpiry = try c.decode(Bool.self, forKey: .useAdvancedExpiry)
+        price = try c.decodeIfPresent(Double.self, forKey: .price)
+        isGlutenFree = try c.decodeIfPresent(Bool.self, forKey: .isGlutenFree) ?? false
+        isBio = try c.decodeIfPresent(Bool.self, forKey: .isBio) ?? false
+        isVegan = try c.decodeIfPresent(Bool.self, forKey: .isVegan) ?? false
+        isLactoseFree = try c.decodeIfPresent(Bool.self, forKey: .isLactoseFree) ?? false
+        isVegetarian = try c.decodeIfPresent(Bool.self, forKey: .isVegetarian) ?? false
+        isReady = try c.decodeIfPresent(Bool.self, forKey: .isReady) ?? false
+        needsCooking = try c.decodeIfPresent(Bool.self, forKey: .needsCooking) ?? false
+        isArtisan = try c.decodeIfPresent(Bool.self, forKey: .isArtisan) ?? false
+        isSinglePortion = try c.decodeIfPresent(Bool.self, forKey: .isSinglePortion) ?? false
+        isMultiPortion = try c.decodeIfPresent(Bool.self, forKey: .isMultiPortion) ?? false
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, name, category, expirationDate, quantity, notes, barcode, createdAt, lastUpdated, notify, isConsumed, consumedDate, photoData, foodTypeRaw, isFresh, isOpened, openedDate, useAdvancedExpiry, price
+        case isGlutenFree, isBio, isVegan, isLactoseFree, isVegetarian, isReady, needsCooking, isArtisan, isSinglePortion, isMultiPortion
+    }
 }
 
 struct BackupSettings: Codable {
@@ -437,6 +571,47 @@ struct BackupSettings: Codable {
     let progressRingModeRaw: String
     let homeSummaryStyleRaw: String?
     let expirationInputMethodRaw: String?
+    let hasChosenCloudUsage: Bool?
+    let shoppingListTabEnabled: Bool?
+    
+    init(notificationsEnabled: Bool, notificationDaysBefore: Int, customNotificationDays: Int, iCloudSyncEnabled: Bool, smartSuggestionsEnabled: Bool, appearanceModeRaw: String, animationsEnabled: Bool, accentColorRaw: String, progressRingModeRaw: String, homeSummaryStyleRaw: String?, expirationInputMethodRaw: String?, hasChosenCloudUsage: Bool? = nil, shoppingListTabEnabled: Bool? = nil) {
+        self.notificationsEnabled = notificationsEnabled
+        self.notificationDaysBefore = notificationDaysBefore
+        self.customNotificationDays = customNotificationDays
+        self.iCloudSyncEnabled = iCloudSyncEnabled
+        self.smartSuggestionsEnabled = smartSuggestionsEnabled
+        self.appearanceModeRaw = appearanceModeRaw
+        self.animationsEnabled = animationsEnabled
+        self.accentColorRaw = accentColorRaw
+        self.progressRingModeRaw = progressRingModeRaw
+        self.homeSummaryStyleRaw = homeSummaryStyleRaw
+        self.expirationInputMethodRaw = expirationInputMethodRaw
+        self.hasChosenCloudUsage = hasChosenCloudUsage
+        self.shoppingListTabEnabled = shoppingListTabEnabled
+    }
+    
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        notificationsEnabled = try c.decode(Bool.self, forKey: .notificationsEnabled)
+        notificationDaysBefore = try c.decode(Int.self, forKey: .notificationDaysBefore)
+        customNotificationDays = try c.decode(Int.self, forKey: .customNotificationDays)
+        iCloudSyncEnabled = try c.decode(Bool.self, forKey: .iCloudSyncEnabled)
+        smartSuggestionsEnabled = try c.decode(Bool.self, forKey: .smartSuggestionsEnabled)
+        appearanceModeRaw = try c.decode(String.self, forKey: .appearanceModeRaw)
+        animationsEnabled = try c.decode(Bool.self, forKey: .animationsEnabled)
+        accentColorRaw = try c.decode(String.self, forKey: .accentColorRaw)
+        progressRingModeRaw = try c.decode(String.self, forKey: .progressRingModeRaw)
+        homeSummaryStyleRaw = try c.decodeIfPresent(String.self, forKey: .homeSummaryStyleRaw)
+        expirationInputMethodRaw = try c.decodeIfPresent(String.self, forKey: .expirationInputMethodRaw)
+        hasChosenCloudUsage = try c.decodeIfPresent(Bool.self, forKey: .hasChosenCloudUsage)
+        shoppingListTabEnabled = try c.decodeIfPresent(Bool.self, forKey: .shoppingListTabEnabled)
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case notificationsEnabled, notificationDaysBefore, customNotificationDays, iCloudSyncEnabled, smartSuggestionsEnabled
+        case appearanceModeRaw, animationsEnabled, accentColorRaw, progressRingModeRaw, homeSummaryStyleRaw, expirationInputMethodRaw
+        case hasChosenCloudUsage, shoppingListTabEnabled
+    }
 }
 
 struct BackupProfile: Codable {

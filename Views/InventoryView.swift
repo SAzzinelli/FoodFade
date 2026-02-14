@@ -102,9 +102,11 @@ struct InventoryView: View {
                         .font(.system(size: 26, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 58, height: 58)
+                        .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
                 .glassEffect(.regular.tint(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor).interactive(), in: .circle)
+                .zIndex(999)
                 .padding(.trailing, 20)
                 .padding(.bottom, 18)
                 .accessibilityLabel("common.add".localized)
@@ -119,6 +121,50 @@ struct InventoryView: View {
                             .font(.system(size: 20, weight: .bold, design: .default))
                             .foregroundColor(ThemeManager.naturalHomeLogoColor)
                     }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Section {
+                            ForEach(InventorySortOption.allCases, id: \.self) { option in
+                                Button {
+                                    viewModel.sortOption = option
+                                    viewModel.loadData()
+                                } label: {
+                                    HStack {
+                                        Text(option.localizationKey.localized)
+                                        if viewModel.sortOption == option {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Section {
+                            Button {
+                                viewModel.sortAscending = true
+                                viewModel.loadData()
+                            } label: {
+                                HStack {
+                                    Text("inventory.sort.ascending".localized)
+                                    if viewModel.sortAscending { Image(systemName: "checkmark") }
+                                }
+                            }
+                            Button {
+                                viewModel.sortAscending = false
+                                viewModel.loadData()
+                            } label: {
+                                HStack {
+                                    Text("inventory.sort.descending".localized)
+                                    if !viewModel.sortAscending { Image(systemName: "checkmark") }
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down.circle")
+                            .font(.system(size: 20))
+                    }
+                    .accessibilityLabel("inventory.sort".localized)
+                    .disabled(filteredItems.isEmpty)
                 }
             }
             .sheet(isPresented: $showingAddFood) {
@@ -278,7 +324,9 @@ private struct InventoryCard: View {
         AppTheme.color(for: item.category)
     }
     
+    /// Verde se prodotto aperto con giorni rimanenti (scade dopo X giorni = ancora ok)
     private var statusColor: Color {
+        if item.isOpened && item.daysRemaining > 0 { return .green }
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange
@@ -294,12 +342,13 @@ private struct InventoryCard: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 14) {
-                // Thumbnail: foto o icona categoria
+                // Thumbnail: foto (manuale o Open Food) o icona categoria
                 ZStack {
                     if let data = item.photoData, let uiImage = UIImage(data: data) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFill()
+                            .clipped()
                     } else {
                         Image(systemName: item.category.iconFill)
                             .font(.system(size: 22))

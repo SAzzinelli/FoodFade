@@ -4,14 +4,22 @@ import Combine
 
 /// Tipo di ordinamento per l'inventario
 enum InventorySortOption: String, CaseIterable {
-    case expirationDate = "Data scadenza"
-    case name = "Nome"
-    case category = "Categoria"
-    case quantity = "Quantità"
-    case createdAt = "Data aggiunta"
+    case expirationDate
+    case name
+    case category
+    case quantity
+    case createdAt
+    case price
     
-    var displayName: String {
-        rawValue
+    var localizationKey: String {
+        switch self {
+        case .expirationDate: return "inventory.sort.expiration"
+        case .name: return "inventory.sort.name_az"
+        case .category: return "inventory.sort.category"
+        case .quantity: return "inventory.sort.quantity"
+        case .createdAt: return "inventory.sort.added"
+        case .price: return "inventory.sort.price"
+        }
     }
 }
 
@@ -142,6 +150,16 @@ class InventoryViewModel: ObservableObject {
         case .createdAt:
             sorted = items.sorted { item1, item2 in
                 return sortAscending ? item1.createdAt < item2.createdAt : item1.createdAt > item2.createdAt
+            }
+        case .price:
+            sorted = items.sorted { item1, item2 in
+                let p1 = item1.price ?? .greatestFiniteMagnitude
+                let p2 = item2.price ?? .greatestFiniteMagnitude
+                // Senza prezzo in fondo
+                if p1 == .greatestFiniteMagnitude && p2 == .greatestFiniteMagnitude { return item1.name < item2.name }
+                if p1 == .greatestFiniteMagnitude { return false }
+                if p2 == .greatestFiniteMagnitude { return true }
+                return sortAscending ? p1 < p2 : p1 > p2
             }
         }
         

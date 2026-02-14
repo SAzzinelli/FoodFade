@@ -11,6 +11,7 @@ struct ConsumedQuantitySheet: View {
     var onConfirm: ((Int) -> Void)?
     
     @State private var quantityToConsume: Int = 1
+    @State private var showingSaveError = false
     @State private var showFridgyBravo = false
     private var maxQuantity: Int { item.quantity }
     
@@ -61,7 +62,7 @@ struct ConsumedQuantitySheet: View {
                     Button {
                         quantityToConsume = maxQuantity
                     } label: {
-                        Text("Tutti (\(maxQuantity))")
+                        Text(String(format: "consumed_quantity_sheet.all".localized, maxQuantity))
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primary)
                     }
@@ -109,6 +110,11 @@ struct ConsumedQuantitySheet: View {
                     }
                 }
             }
+            .alert("error.save_failed".localized, isPresented: $showingSaveError) {
+                Button("common.ok".localized, role: .cancel) {}
+            } message: {
+                Text("error.save_failed_message".localized)
+            }
         }
     }
     
@@ -136,7 +142,7 @@ struct ConsumedQuantitySheet: View {
         do {
             try modelContext.save()
         } catch {
-            print("ConsumedQuantitySheet save error: \(error)")
+            showingSaveError = true
         }
     }
 }

@@ -26,6 +26,8 @@ struct HomeView: View {
     @State private var recentItemsAccordionExpanded = true
     @State private var categoryToOpen: FoodCategory?
     @State private var showExpiringSoonView = false
+    /// Barcode da passare a AddFoodView quando si apre dalla scanner (nil = apertura normale)
+    @State private var initialBarcodeForAddFood: String? = nil
     /// Item da aprire in dettaglio quando l'utente arriva da una notifica (in scadenza / scaduto).
     @State private var itemToOpenFromNotification: FoodItem?
     
@@ -101,33 +103,35 @@ struct HomeView: View {
             }
             .overlay(alignment: .bottomTrailing) {
                 Button {
+                    initialBarcodeForAddFood = nil
                     showingAddFood = true
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 26, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 58, height: 58)
+                        .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
                 .glassEffect(.regular.tint(ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor).interactive(), in: .circle)
+                .zIndex(999)
                 .padding(.trailing, 20)
                 .padding(.bottom, 18)
             }
             .sheet(isPresented: $showingAddFood) {
-                AddFoodView()
+                AddFoodView(initialBarcode: initialBarcodeForAddFood, onClearInitialBarcode: { initialBarcodeForAddFood = nil })
             }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerView(scannerService: scannerService) { barcode in
-                    // Quando viene scansionato un codice, apri AddFoodView con il barcode
+                    initialBarcodeForAddFood = barcode
                     showingScanner = false
                     showingAddFood = true
-                    // TODO: Passare il barcode a AddFoodView
                 }
             }
             .onAppear {
                 viewModel.setup(modelContext: modelContext)
                 viewModel.loadData()
-                
+                TrophyService.shared.checkTrophies(items: allItems)
                 // Se iCloud è abilitato, forza un refresh per sincronizzare i dati
                 let useiCloud = UserDefaults.standard.bool(forKey: "iCloudSyncEnabled")
                 if useiCloud {
@@ -139,14 +143,16 @@ struct HomeView: View {
                             try? modelContext.save()
                             // Ricarica i dati
                             viewModel.loadData()
+                            #if DEBUG
                             print("☁️ HomeView - Refresh dati dopo sincronizzazione CloudKit")
+                            #endif
                         }
                     }
                 }
             }
             .onChange(of: allItems.count) { oldValue, newValue in
                 viewModel.loadData()
-                
+                TrophyService.shared.checkTrophies(items: allItems)
                 // Mostra il banner informativo quando viene aggiunto un nuovo oggetto
                 if newValue > oldValue && !hasShownSmartSuggestionsBanner {
                     showingSmartSuggestionsBanner = true
@@ -200,7 +206,7 @@ struct HomeView: View {
                     ItemDetailView(item: item)
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
-                                Button("Chiudi") {
+                                Button("common.close".localized) {
                                     itemToOpenFromNotification = nil
                                 }
                             }
@@ -498,7 +504,7 @@ struct HomeView: View {
             }
             .padding(.top, 8)
         } label: {
-            Text("Categorie")
+            Text("home.section.categories".localized)
                 .font(.system(size: 20, weight: .bold, design: .default))
                 .foregroundColor(.primary)
         }
@@ -520,7 +526,7 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 8)
                 } label: {
-                    Text("Prodotti recenti")
+                    Text("home.section.recent".localized)
                         .font(.system(size: 20, weight: .bold, design: .default))
                         .foregroundColor(.primary)
                 }
@@ -542,7 +548,7 @@ struct HomeView: View {
                     }
                     .padding(.top, 8)
                 } label: {
-                    Text("Prodotti recenti")
+                    Text("home.section.recent".localized)
                         .font(.system(size: 20, weight: .bold, design: .default))
                         .foregroundColor(.primary)
                 }
@@ -563,11 +569,11 @@ struct HomeView: View {
                     .frame(width: 32, height: 32)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Suggerimenti Intelligenti")
+                    Text("home.smart_suggestions.title".localized)
                         .font(.system(size: 16, weight: .semibold, design: .default))
                         .foregroundColor(.primary)
                     
-                    Text("FoodFade analizza i tuoi prodotti e ti suggerisce quando consumarli per ridurre gli sprechi. I suggerimenti appaiono qui in base alle tue abitudini.")
+                    Text("home.smart_suggestions.subtitle".localized)
                         .font(.system(size: 14, weight: .regular, design: .default))
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -721,7 +727,9 @@ private struct ExpiringProductCard: View {
         return "\(days) gg"
     }
     
+    /// Verde se prodotto aperto con giorni rimanenti (3, 2, 1 gg)
     private var badgeColor: Color {
+        if item.isOpened && item.daysRemaining > 0 { return .green }
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange
@@ -903,10 +911,12 @@ private struct HomeCategoryCard: View {
             Text(statusPillText)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.white)
-                .padding(.horizontal, 10)
+                .lineLimit(1)
+                .padding(.horizontal, 14)
                 .padding(.vertical, 5)
                 .background(statusPillColor)
                 .clipShape(Capsule())
+                .fixedSize(horizontal: true, vertical: false)
             
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .semibold))
@@ -1007,7 +1017,7 @@ struct KPISettingsView: View {
                             Text("Riordina le card del Riepilogo")
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(.primary)
-                            Text("Decidi in che ordine mostrare le quattro sezioni nella schermata Home.")
+                            Text("home.reorder.subtitle".localized)
                                 .font(.system(size: 15))
                                 .foregroundColor(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)

@@ -13,6 +13,9 @@ struct ItemDetailView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingConsumedQuantitySheet = false
     @State private var showFridgyBravo = false
+    @State private var showingError = false
+    @State private var errorTitle = ""
+    @State private var errorMessage = ""
     
     var body: some View {
         List {
@@ -47,7 +50,7 @@ struct ItemDetailView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("\(abs(item.daysRemaining))")
                                     .font(.system(size: 56, weight: .bold, design: .rounded))
-                                    .foregroundStyle(item.daysRemaining <= 2 ? .orange : .green)
+                                    .foregroundStyle(countdownNumberColor)
                                 
                                 Text(daysRemainingLabel)
                                     .font(.system(size: 15, weight: .regular))
@@ -95,7 +98,7 @@ struct ItemDetailView: View {
                 Section {
                     // Data di scadenza
                     HStack {
-                        Label("Scade il", systemImage: "calendar")
+                        Label("itemdetail.scade_il".localized, systemImage: "calendar")
                             .font(.system(size: 15))
                             .foregroundStyle(detailAccentColor)
                         
@@ -108,7 +111,7 @@ struct ItemDetailView: View {
                     
                     // Data di aggiunta
                     HStack {
-                        Label("Aggiunto il", systemImage: "plus.circle.fill")
+                        Label("itemdetail.added_on".localized, systemImage: "plus.circle.fill")
                             .font(.system(size: 15))
                             .foregroundStyle(.primary)
                         
@@ -122,7 +125,7 @@ struct ItemDetailView: View {
                     // Data ultimo aggiornamento (solo se diverso dalla data di creazione)
                     if item.lastUpdated != item.createdAt {
                         HStack {
-                            Label("Ultimo aggiornamento", systemImage: "clock")
+                            Label("itemdetail.last_update".localized, systemImage: "clock")
                                 .font(.system(size: 15))
                                 .foregroundStyle(.primary)
                             
@@ -136,14 +139,14 @@ struct ItemDetailView: View {
                 }
                 
                 // Dettagli aggiuntivi
-                if item.isFresh || item.isOpened || item.useAdvancedExpiry || item.notes != nil || item.barcode != nil {
+                if item.isFresh || item.isOpened || item.useAdvancedExpiry || item.notes != nil || item.barcode != nil || item.price != nil {
                     Section {
                         if item.isFresh {
                             HStack {
-                                Label("Prodotto fresco", systemImage: "leaf.fill")
+                                Label("itemdetail.fresh_product".localized, systemImage: "leaf.fill")
                                     .font(.system(size: 15))
                                 Spacer()
-                                Text("Scade dopo 3 giorni")
+                                Text("itemdetail.opens_in_3".localized)
                                     .font(.system(size: 15))
                                     .foregroundStyle(.secondary)
                             }
@@ -151,15 +154,15 @@ struct ItemDetailView: View {
                         
                         if item.isOpened, let openedDate = item.openedDate {
                             HStack {
-                                Label("Prodotto aperto", systemImage: "lock.open.fill")
+                                Label("itemdetail.opened_product".localized, systemImage: "lock.open.fill")
                                     .font(.system(size: 15))
-                                    .foregroundStyle(.orange)
+                                    .foregroundStyle(item.daysRemaining > 0 ? .green : .orange)
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 2) {
                                     Text("Aperto il \(openedDate.formatted(date: .abbreviated, time: .omitted))")
                                         .font(.system(size: 15))
                                         .foregroundStyle(.secondary)
-                                    Text("Scade dopo 3 giorni")
+                                    Text("itemdetail.opens_in_3".localized)
                                         .font(.system(size: 13))
                                         .foregroundStyle(.secondary)
                                 }
@@ -168,7 +171,7 @@ struct ItemDetailView: View {
                         
                         if item.useAdvancedExpiry && !item.isOpened {
                             HStack {
-                                Label("Gestione avanzata", systemImage: "clock.fill")
+                                Label("itemdetail.advanced_expiry".localized, systemImage: "clock.fill")
                                     .font(.system(size: 15))
                                 Spacer()
                                 Text("120 giorni se chiuso")
@@ -179,7 +182,7 @@ struct ItemDetailView: View {
                         
                         if let notes = item.notes, !notes.isEmpty {
                             VStack(alignment: .leading, spacing: 4) {
-                                Label("Note", systemImage: "note.text")
+                                Label("itemdetail.notes".localized, systemImage: "note.text")
                                     .font(.system(size: 15))
                                     .foregroundStyle(.primary)
                                 
@@ -191,11 +194,22 @@ struct ItemDetailView: View {
                         
                         if let barcode = item.barcode {
                             HStack {
-                                Label("Codice a barre", systemImage: "barcode")
+                                Label("itemdetail.barcode".localized, systemImage: "barcode")
                                     .font(.system(size: 15))
                                 Spacer()
                                 Text(barcode)
                                     .font(.system(size: 15, design: .monospaced))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                        if let price = item.price {
+                            HStack {
+                                Label("stats.costs.price_paid".localized, systemImage: "eurosign.circle")
+                                    .font(.system(size: 15))
+                                Spacer()
+                                Text(price.formatted(.currency(code: "EUR")))
+                                    .font(.system(size: 15, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -217,14 +231,14 @@ struct ItemDetailView: View {
                             Button {
                                 isEditing = true
                             } label: {
-                                Label("Modifica", systemImage: "pencil")
+                                Label("itemdetail.edit".localized, systemImage: "pencil")
                                     .foregroundStyle(.primary)
                             }
                             Divider()
                             Button(role: .destructive) {
                                 showingDeleteConfirmation = true
                             } label: {
-                                Label("Elimina", systemImage: "trash.fill")
+                                Label("itemdetail.delete".localized, systemImage: "trash.fill")
                             }
                             .tint(.red)
                         } label: {
@@ -255,12 +269,17 @@ struct ItemDetailView: View {
                 }
             }
             .alert("Elimina Prodotto", isPresented: $showingDeleteConfirmation) {
-                Button("Annulla", role: .cancel) {}
-                Button("Elimina", role: .destructive) {
+                Button("common.annulla".localized, role: .cancel) {}
+                Button("itemdetail.delete".localized, role: .destructive) {
                     deleteItem()
                 }
             } message: {
-                Text("Sei sicuro di voler eliminare \(item.name)?")
+                Text(String(format: "itemdetail.delete_confirm".localized, item.name))
+            }
+            .alert(errorTitle, isPresented: $showingError) {
+                Button("common.ok".localized, role: .cancel) {}
+            } message: {
+                Text(errorMessage)
             }
             .task {
                 await viewModel.loadFridgy(for: item)
@@ -332,7 +351,7 @@ struct ItemDetailView: View {
                     markAsConsumed()
                 }
             } label: {
-                Text("Consumato")
+                Text("itemdetail.consumed".localized)
                     .font(.system(size: 16, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
@@ -362,7 +381,9 @@ struct ItemDetailView: View {
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
         } catch {
-            print("Errore nel salvataggio: \(error)")
+            errorTitle = "error.save_failed".localized
+            errorMessage = "error.save_failed_message".localized
+            showingError = true
         }
     }
     
@@ -374,13 +395,23 @@ struct ItemDetailView: View {
         }
     }
     
+    /// Verde se prodotto aperto con giorni rimanenti (badge + barra verdi)
     private var statusColor: Color {
+        if item.isOpened && item.daysRemaining > 0 { return .green }
         switch item.expirationStatus {
         case .expired: return .red
         case .today: return .orange
         case .soon: return .orange
         case .safe: return .green
         }
+    }
+    
+    /// Verde se prodotto aperto con giorni rimanenti, altrimenti come status (arancione/rosso)
+    private var countdownNumberColor: Color {
+        if item.daysRemaining < 0 { return .red }
+        if item.daysRemaining == 0 { return .orange }
+        if item.isOpened { return .green }
+        return item.daysRemaining <= 2 ? .orange : .green
     }
     
     private var detailAccentColor: Color {
@@ -406,7 +437,9 @@ struct ItemDetailView: View {
             try modelContext.save()
             showFridgyBravo = true
         } catch {
-            print("Errore nel salvataggio: \(error)")
+            errorTitle = "error.save_failed".localized
+            errorMessage = "error.save_failed_message".localized
+            showingError = true
         }
     }
     
@@ -417,7 +450,9 @@ struct ItemDetailView: View {
             try modelContext.save()
             dismiss()
         } catch {
-            print("Errore nell'eliminazione: \(error)")
+            errorTitle = "error.delete_failed".localized
+            errorMessage = "error.delete_failed_message".localized
+            showingError = true
         }
     }
 }

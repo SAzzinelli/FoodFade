@@ -142,6 +142,8 @@ final class FoodItem {
     var isConsumed: Bool = false
     var photoData: Data? // Foto del prodotto
     var foodType: FoodType? // Tipo di alimento (opzionale)
+    /// Prezzo (opzionale) – per statistiche e, in futuro, andamento nel tempo del prodotto
+    var price: Double?
     
     // Etichette (tag / filtri)
     var isGlutenFree: Bool = false
@@ -204,7 +206,8 @@ final class FoodItem {
         isFresh: Bool = false,
         isOpened: Bool = false,
         openedDate: Date? = nil,
-        useAdvancedExpiry: Bool = false
+        useAdvancedExpiry: Bool = false,
+        price: Double? = nil
     ) {
         self.id = id
         self.name = name
@@ -234,6 +237,7 @@ final class FoodItem {
         self.isOpened = isOpened
         self.openedDate = openedDate
         self.useAdvancedExpiry = useAdvancedExpiry
+        self.price = price
     }
     
     /// Calcola la data di scadenza effettiva secondo la logica semplificata

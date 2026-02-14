@@ -58,6 +58,9 @@
 		FC2128FF2F029921001A2A52 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F242F029671006D9CF0 /* SplashView.swift */; };
 		FC2129002F029921001A2A52 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F252F029671006D9CF0 /* StatisticsView.swift */; };
 		FC2129012F029921001A2A52 /* ToConsumeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F262F029671006D9CF0 /* ToConsumeView.swift */; };
+		FC21E0CC2F03196C00996820 /* Trophy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0CB2F03196B00996820 /* Trophy.swift */; };
+		FC21E0CE2F03196E00996820 /* TrophyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0CD2F03196D00996820 /* TrophyService.swift */; };
+		FC21E0D02F03197000996820 /* TrophiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0CF2F03196F00996820 /* TrophiesView.swift */; };
 		FC2129022F029921001A2A52 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994F272F029671006D9CF0 /* WelcomeView.swift */; };
 		FC21E0832F03003700996820 /* FridgyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0812F03003700996820 /* FridgyRules.swift */; };
 		FC21E0842F03003700996820 /* IntelligenceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0822F03003700996820 /* IntelligenceProvider.swift */; };
@@ -85,7 +88,7 @@
 		FC21E0C62F03196600996820 /* FridgyBravoOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */; };
 		FC21E0C82F03196800996820 /* AppIconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C72F03196700996820 /* AppIconPickerView.swift */; };
 		FC21E0CA2F03196A00996820 /* DataScannerRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C92F03196900996820 /* DataScannerRepresentable.swift */; };
-		FC21E0CB2F03196B00996820 /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0CC2F03196B00996820 /* NotificationDelegate.swift */; };
+		FC21E0DF2F03196B00996820 /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0DE2F03196B00996820 /* NotificationDelegate.swift */; };
 		FC343FBF2F02A00100299160 /* GenderHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC343FBE2F02A00100299160 /* GenderHelper.swift */; };
 		FC6DB9822F02A68900FA5652 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FC6DB9802F02A68900FA5652 /* InfoPlist.strings */; };
 		FC6DB9852F02A6AB00FA5652 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FC6DB9832F02A6AB00FA5652 /* InfoPlist.strings */; };
@@ -120,6 +123,7 @@
 		FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyBravoOverlay.swift; sourceTree = "<group>"; };
 		FC21E0C72F03196700996820 /* AppIconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconPickerView.swift; sourceTree = "<group>"; };
 		FC21E0C92F03196900996820 /* DataScannerRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataScannerRepresentable.swift; sourceTree = "<group>"; };
+		FC21E0CF2F03196F00996820 /* TrophiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrophiesView.swift; sourceTree = "<group>"; };
 		FC343FBE2F02A00100299160 /* GenderHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenderHelper.swift; sourceTree = "<group>"; };
 		FC6DB9812F02A68900FA5652 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = InfoPlist.strings; sourceTree = "<group>"; };
 		FC6DB9842F02A6AB00FA5652 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -143,6 +147,7 @@
 		FC994EFE2F029671006D9CF0 /* CustomFoodType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFoodType.swift; sourceTree = "<group>"; };
 		FC994EFF2F029671006D9CF0 /* FoodItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodItem.swift; sourceTree = "<group>"; };
 		FC994F002F029671006D9CF0 /* ThemeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettings.swift; sourceTree = "<group>"; };
+		FC21E0CB2F03196B00996820 /* Trophy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trophy.swift; sourceTree = "<group>"; };
 		FC994F012F029671006D9CF0 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		FC994F032F029671006D9CF0 /* AppleIntelligenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceService.swift; sourceTree = "<group>"; };
 		FC994F042F029671006D9CF0 /* BackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
@@ -150,6 +155,8 @@
 		FC994F062F029671006D9CF0 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		FC994F072F029671006D9CF0 /* FoodLookupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLookupService.swift; sourceTree = "<group>"; };
 		FC994F082F029671006D9CF0 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		FC21E0DE2F03196B00996820 /* NotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDelegate.swift; sourceTree = "<group>"; };
+		FC21E0CD2F03196D00996820 /* TrophyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrophyService.swift; sourceTree = "<group>"; };
 		FC994F0A2F029671006D9CF0 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		FC994F0B2F029671006D9CF0 /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		FC994F0C2F029671006D9CF0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -274,6 +281,7 @@
 				FC21E0AD2F03195E00996820 /* ShoppingList.swift */,
 				FC21E0B12F03195E00996820 /* ShoppingItem.swift */,
 				FC994F002F029671006D9CF0 /* ThemeSettings.swift */,
+				FC21E0CB2F03196B00996820 /* Trophy.swift */,
 				FC994F012F029671006D9CF0 /* UserProfile.swift */,
 			);
 			path = Models;
@@ -294,6 +302,8 @@
 				FC994F062F029671006D9CF0 /* CameraPreviewView.swift */,
 				FC994F072F029671006D9CF0 /* FoodLookupService.swift */,
 				FC994F082F029671006D9CF0 /* NotificationService.swift */,
+				FC21E0DE2F03196B00996820 /* NotificationDelegate.swift */,
+				FC21E0CD2F03196D00996820 /* TrophyService.swift */,
 				FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */,
 			);
 			path = Services;
@@ -351,6 +361,7 @@
 				FC994F242F029671006D9CF0 /* SplashView.swift */,
 				FC994F252F029671006D9CF0 /* StatisticsView.swift */,
 				FC994F262F029671006D9CF0 /* ToConsumeView.swift */,
+				FC21E0CF2F03196F00996820 /* TrophiesView.swift */,
 				FC994F272F029671006D9CF0 /* WelcomeView.swift */,
 				FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */,
 				FC21E0B32F03195F00996820 /* ShoppingListView.swift */,
@@ -479,6 +490,7 @@
 				FC21E0922F03099100996820 /* ItemDetailViewModel.swift in Sources */,
 				FC2128E52F029921001A2A52 /* FoodLookupService.swift in Sources */,
 				FC2128E62F029921001A2A52 /* NotificationService.swift in Sources */,
+				FC21E0DF2F03196B00996820 /* NotificationDelegate.swift in Sources */,
 				FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */,
 				FC2128E02F029921001A2A53 /* AppIconManager.swift in Sources */,
 				FC2128E72F029921001A2A52 /* Extensions.swift in Sources */,
@@ -516,6 +528,9 @@
 				FC2128FF2F029921001A2A52 /* SplashView.swift in Sources */,
 				FC2129002F029921001A2A52 /* StatisticsView.swift in Sources */,
 				FC2129012F029921001A2A52 /* ToConsumeView.swift in Sources */,
+				FC21E0CC2F03196C00996820 /* Trophy.swift in Sources */,
+				FC21E0CE2F03196E00996820 /* TrophyService.swift in Sources */,
+				FC21E0D02F03197000996820 /* TrophiesView.swift in Sources */,
 				FC2129022F029921001A2A52 /* WelcomeView.swift in Sources */,
 				FC21E0AE2F03195E00996820 /* ShoppingList.swift in Sources */,
 				FC21E0B22F03195E00996820 /* ShoppingItem.swift in Sources */,
