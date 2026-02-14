@@ -123,9 +123,11 @@
 "home.kpi.total" = "Totale";
 "home.kpi.expired" = "Scaduti";
 "home.kpi.expiring" = "In scadenza";
+"home.category.product" = "Prodotto";
 "home.category.products" = "%d Prodotti";
 "home.category.expiring" = "• %d in scadenza";
-"home.category.all_ok" = "• Tutto OK";
+"home.category.all_ok" = "Tutto ok";
+"home.category.attention" = "Attenzione";
 "home.recent.added_today" = "Aggiunto oggi";
 "home.recent.added_yesterday" = "Aggiunto ieri";
 "home.recent.empty" = "Nessun prodotto recente.";
@@ -150,6 +152,11 @@
 "item.accessibility.hint" = "Doppio tocco per aprire i dettagli";
 "itemdetail.title" = "Dettaglio prodotto";
 "itemdetail.opened.button" = "L'hai aperto?";
+"itemdetail.opened.label" = "Aperto";
+"itemdetail.opened_quantity.prompt" = "Quante ne hai aperte?";
+"itemdetail.opened_quantity.confirm" = "Conferma";
+"itemdetail.portion.closed" = "%d chiuse (scadenza %@)";
+"itemdetail.portion.opened" = "%d aperte (scadenza %@)";
 "inventory.empty.title" = "Nessun prodotto";
 "inventory.empty.subtitle" = "Aggiungi il tuo primo prodotto per iniziare";
 "inventory.empty.button" = "Aggiungi Prodotto";
@@ -331,6 +338,8 @@
 "stats.prices.trend" = "Spesa per mese";
 "stats.prices.by_product" = "Per prodotto";
 "stats.prices.no_prices" = "Nessun prodotto con prezzo. Aggiungi un prezzo quando inserisci o modifichi un prodotto.";
+"stats.prices.empty_title" = "Sezione vuota";
+"stats.prices.empty_why" = "Qui vedrai valore totale, andamento mensile e prezzo per prodotto. Per ora è vuota perché non hai ancora inserito nessun prezzo. Quando aggiungi un prodotto o modifichi uno esistente, puoi indicare il prezzo (campo opzionale): da quel momento le statistiche di questa sezione si popoleranno.";
 
 /* KPI / Titoli stato */
 "kpi.title.expired" = "Scaduti";

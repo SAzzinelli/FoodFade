@@ -162,8 +162,10 @@ final class FoodItem {
     
     // Gestione prodotti freschi e scadenze condizionali
     var isFresh: Bool = false // Prodotto fresco (scade dopo 3 giorni dalla data di aggiunta)
-    var isOpened: Bool = false // Se il prodotto è aperto (scade dopo 3 giorni dall'apertura)
-    var openedDate: Date? // Data di apertura (se aperto)
+    var isOpened: Bool = false // Legacy: se true e openedQuantity==0 si considera tutto aperto
+    var openedDate: Date? // Data di apertura (per le unità aperte)
+    /// Numero di unità aperte (0 = nessuna). Le aperte scadono 3 gg da openedDate; le altre seguono la scadenza originale.
+    var openedQuantity: Int = 0
     var useAdvancedExpiry: Bool = false // Gestione avanzata: prodotto chiuso scade dopo 120 giorni dalla data di aggiunta (anti-oblio)
     
     // Computed property per category (compatibilità CloudKit)
@@ -206,6 +208,7 @@ final class FoodItem {
         isFresh: Bool = false,
         isOpened: Bool = false,
         openedDate: Date? = nil,
+        openedQuantity: Int = 0,
         useAdvancedExpiry: Bool = false,
         price: Double? = nil
     ) {
@@ -236,32 +239,39 @@ final class FoodItem {
         self.isFresh = isFresh
         self.isOpened = isOpened
         self.openedDate = openedDate
+        self.openedQuantity = openedQuantity
         self.useAdvancedExpiry = useAdvancedExpiry
         self.price = price
     }
     
-    /// Calcola la data di scadenza effettiva secondo la logica semplificata
-    /// Priorità: 1. fresco → 2. aperto → 3. chiuso+avanzata → 4. data stampata
-    var effectiveExpirationDate: Date {
+    /// Numero effettivo di unità aperte (retrocompat: se isOpened e openedQuantity==0 → tutta la quantità)
+    var effectiveOpenedQuantity: Int {
+        if openedQuantity > 0 { return min(openedQuantity, quantity) }
+        if isOpened { return quantity }
+        return 0
+    }
+    
+    /// Data di scadenza per le unità ancora chiuse (per UI)
+    var unopenedExpirationDate: Date {
         let calendar = Calendar.current
-        
-        // 1. Prodotto fresco: scade dopo 3 giorni dalla data di aggiunta
-        if isFresh {
-            return calendar.date(byAdding: .day, value: 3, to: createdAt) ?? expirationDate
-        }
-        
-        // 2. Prodotto aperto: scade dopo 3 giorni dalla data di apertura
-        if isOpened, let openedDate = openedDate {
-            return calendar.date(byAdding: .day, value: 3, to: openedDate) ?? expirationDate
-        }
-        
-        // 3. Prodotto chiuso con gestione avanzata: scade dopo 120 giorni dalla data di aggiunta
-        if useAdvancedExpiry && !isOpened {
-            return calendar.date(byAdding: .day, value: 120, to: createdAt) ?? expirationDate
-        }
-        
-        // 4. Fallback: usa la data di scadenza standard (prodotto confezionato con data)
+        if isFresh { return calendar.date(byAdding: .day, value: 3, to: createdAt) ?? expirationDate }
+        if useAdvancedExpiry { return calendar.date(byAdding: .day, value: 120, to: createdAt) ?? expirationDate }
         return expirationDate
+    }
+    
+    /// Data di scadenza per le unità aperte (openedDate + 3 giorni)
+    private var openedPortionExpirationDate: Date? {
+        guard let openedDate = openedDate, effectiveOpenedQuantity > 0 else { return nil }
+        return Calendar.current.date(byAdding: .day, value: 3, to: openedDate)
+    }
+    
+    /// Calcola la data di scadenza effettiva: la prima che scade tra (unità chiuse) e (unità aperte)
+    var effectiveExpirationDate: Date {
+        let unopened = unopenedExpirationDate
+        guard let openedExp = openedPortionExpirationDate else { return unopened }
+        let closedCount = quantity - effectiveOpenedQuantity
+        if closedCount <= 0 { return openedExp }
+        return min(unopened, openedExp)
     }
     
     /// Giorni rimanenti fino alla scadenza (considera logica custom se attiva)

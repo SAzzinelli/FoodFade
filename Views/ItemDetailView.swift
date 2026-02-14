@@ -12,6 +12,7 @@ struct ItemDetailView: View {
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
     @State private var showingConsumedQuantitySheet = false
+    @State private var showingOpenedQuantitySheet = false
     @State private var showFridgyBravo = false
     @State private var showingError = false
     @State private var errorTitle = ""
@@ -139,7 +140,7 @@ struct ItemDetailView: View {
                 }
                 
                 // Dettagli aggiuntivi
-                if item.isFresh || item.isOpened || item.useAdvancedExpiry || item.notes != nil || item.barcode != nil || item.price != nil {
+                if item.isFresh || item.effectiveOpenedQuantity > 0 || item.useAdvancedExpiry || item.notes != nil || item.barcode != nil || item.price != nil {
                     Section {
                         if item.isFresh {
                             HStack {
@@ -152,24 +153,32 @@ struct ItemDetailView: View {
                             }
                         }
                         
-                        if item.isOpened, let openedDate = item.openedDate {
+                        if item.effectiveOpenedQuantity > 0, let openedDate = item.openedDate {
                             HStack {
                                 Label("itemdetail.opened_product".localized, systemImage: "lock.open.fill")
                                     .font(.system(size: 15))
-                                    .foregroundStyle(item.daysRemaining > 0 ? .green : .orange)
+                                    .foregroundStyle(.orange)
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 2) {
                                     Text("Aperto il \(openedDate.formatted(date: .abbreviated, time: .omitted))")
                                         .font(.system(size: 15))
                                         .foregroundStyle(.secondary)
-                                    Text("itemdetail.opens_in_3".localized)
-                                        .font(.system(size: 13))
-                                        .foregroundStyle(.secondary)
+                                    if item.quantity > item.effectiveOpenedQuantity && item.effectiveOpenedQuantity > 0 {
+                                        let closedCount = item.quantity - item.effectiveOpenedQuantity
+                                        let closedExp = item.unopenedExpirationDate
+                                        let openedExp = Calendar.current.date(byAdding: .day, value: 3, to: openedDate) ?? openedDate
+                                        Text(String(format: "itemdetail.portion.closed".localized, closedCount, formatDateShort(closedExp)))
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(.secondary)
+                                        Text(String(format: "itemdetail.portion.opened".localized, item.effectiveOpenedQuantity, formatDateShort(openedExp)))
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
                             }
                         }
                         
-                        if item.useAdvancedExpiry && !item.isOpened {
+                        if item.useAdvancedExpiry && item.effectiveOpenedQuantity == 0 {
                             HStack {
                                 Label("itemdetail.advanced_expiry".localized, systemImage: "clock.fill")
                                     .font(.system(size: 15))
@@ -255,6 +264,12 @@ struct ItemDetailView: View {
             .sheet(isPresented: $showingConsumedQuantitySheet) {
                 ConsumedQuantitySheet(item: item)
             }
+            .sheet(isPresented: $showingOpenedQuantitySheet) {
+                OpenedQuantitySheet(item: item) { count in
+                    applyOpened(quantity: count)
+                    showingOpenedQuantitySheet = false
+                }
+            }
             .overlay {
                 if showFridgyBravo {
                     FridgyBravoOverlay {
@@ -329,18 +344,32 @@ struct ItemDetailView: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            // Pulsante L'hai aperto? – Liquid Glass con tint arancione
+            // Pulsante L'hai aperto? (arancione) oppure Aperto (grigio, disattivato)
             if !item.isFresh {
-                Button {
-                    toggleOpenedStatus()
-                } label: {
-                    Text("itemdetail.opened.button".localized)
+                if item.effectiveOpenedQuantity > 0 {
+                    Text("itemdetail.opened.label".localized)
                         .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
+                } else {
+                    Button {
+                        if item.quantity == 1 {
+                            applyOpened(quantity: 1)
+                        } else {
+                            showingOpenedQuantitySheet = true
+                        }
+                    } label: {
+                        Text("itemdetail.opened.button".localized)
+                            .font(.system(size: 14, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                    }
+                    .buttonStyle(.plain)
+                    .glassEffect(.regular.tint(ThemeManager.naturalHomeLogoColor).interactive(), in: .capsule)
                 }
-                .buttonStyle(.plain)
-                .glassEffect(.regular.tint(ThemeManager.naturalHomeLogoColor).interactive(), in: .capsule)
             }
             
             // Pulsante Consumato – Liquid Glass con tint verde
@@ -362,24 +391,15 @@ struct ItemDetailView: View {
         }
     }
     
-    private func toggleOpenedStatus() {
-        item.isOpened.toggle()
-        
-        if item.isOpened {
-            // Se viene aperto ora, imposta la data di apertura (scade dopo 3 giorni)
-            item.openedDate = Date()
-        } else {
-            // Se viene chiuso, resetta la data di apertura (torna alla data originale)
-            item.openedDate = nil
-        }
-        
+    private func applyOpened(quantity: Int) {
+        let count = min(max(quantity, 1), item.quantity)
+        item.openedQuantity = count
+        item.openedDate = Date()
+        item.isOpened = true
         item.lastUpdated = Date()
-        
         do {
             try modelContext.save()
-            
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {
             errorTitle = "error.save_failed".localized
             errorMessage = "error.save_failed_message".localized
@@ -395,27 +415,28 @@ struct ItemDetailView: View {
         }
     }
     
-    /// Verde se prodotto aperto con giorni rimanenti (badge + barra verdi)
+    /// Verde = OK, arancione = in scadenza o aperto, rosso = scaduto (numero, barra, pill)
     private var statusColor: Color {
-        if item.isOpened && item.daysRemaining > 0 { return .green }
-        switch item.expirationStatus {
-        case .expired: return .red
-        case .today: return .orange
-        case .soon: return .orange
-        case .safe: return .green
-        }
+        if item.expirationStatus == .expired { return .red }
+        if item.effectiveOpenedQuantity > 0 { return .orange }
+        if item.expirationStatus == .today || item.expirationStatus == .soon { return .orange }
+        return .green
     }
     
-    /// Verde se prodotto aperto con giorni rimanenti, altrimenti come status (arancione/rosso)
+    /// Stessa logica: verde OK, arancione in scadenza/aperto, rosso scaduto
     private var countdownNumberColor: Color {
         if item.daysRemaining < 0 { return .red }
-        if item.daysRemaining == 0 { return .orange }
-        if item.isOpened { return .green }
-        return item.daysRemaining <= 2 ? .orange : .green
+        if item.effectiveOpenedQuantity > 0 { return .orange }
+        if item.daysRemaining <= 2 { return .orange }
+        return .green
     }
     
     private var detailAccentColor: Color {
         ThemeManager.shared.isNaturalStyle ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor
+    }
+    
+    private func formatDateShort(_ date: Date) -> String {
+        date.formatted(date: .abbreviated, time: .omitted)
     }
     
     /// Testo singolare/plurale: "1 giorno rimanente" / "X giorni rimanenti" o "1 giorno fa" / "X giorni fa"

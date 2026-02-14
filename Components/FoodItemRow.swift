@@ -102,15 +102,12 @@ struct FoodItemRow: View {
         AppTheme.color(for: item.category)
     }
     
-    /// Verde se prodotto aperto con giorni rimanenti
+    /// Verde = OK, arancione = in scadenza o aperto, rosso = scaduto
     private var statusColor: Color {
-        if item.isOpened && item.daysRemaining > 0 { return .green }
-        switch item.expirationStatus {
-        case .expired: return .red
-        case .today: return .orange
-        case .soon: return .orange
-        case .safe: return .green
-        }
+        if item.expirationStatus == .expired { return .red }
+        if item.isOpened { return .orange }
+        if item.expirationStatus == .today || item.expirationStatus == .soon { return .orange }
+        return .green
     }
 }
 

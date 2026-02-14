@@ -39,7 +39,7 @@ struct StatisticsView: View {
                             NavigationLink {
                                 WasteScoreDetailView(data: data, primaryColor: primaryColor, primaryColorDark: themeManager.primaryColorDark)
                             } label: {
-                                StatEntryCard(icon: "chart.pie.fill", title: "stats.waste_score".localized, iconColor: primaryColor)
+                                StatEntryCard(icon: "chart.pie.fill", title: "stats.waste_score".localized, iconColor: Color(red: 0.8, green: 0.55, blue: 0.1))
                             }
                             .buttonStyle(.plain)
                             
@@ -77,14 +77,14 @@ struct StatisticsView: View {
                                     StatEntryCard(icon: "eurosign.circle.fill", title: "stats.costs.title".localized, iconColor: .orange)
                                 }
                                 .buttonStyle(.plain)
-                                
-                                NavigationLink {
-                                    PriceOverviewView(data: data, primaryColor: primaryColor)
-                                } label: {
-                                    StatEntryCard(icon: "chart.line.uptrend.xyaxis", title: "stats.prices.title".localized, iconColor: .orange)
-                                }
-                                .buttonStyle(.plain)
                             }
+                            
+                            NavigationLink {
+                                PriceOverviewView(data: data, primaryColor: primaryColor)
+                            } label: {
+                                StatEntryCard(icon: "chart.line.uptrend.xyaxis", title: "stats.prices.title".localized, iconColor: .orange)
+                            }
+                            .buttonStyle(.plain)
                             
                             NavigationLink {
                                 DetailsDetailView(data: data, primaryColor: primaryColor)
@@ -876,6 +876,22 @@ private struct PriceOverviewView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 StatInBriefCard(text: "stats.prices.description".localized)
+                
+                if itemsWithPrice.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("stats.prices.empty_title".localized)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.primary)
+                        Text("stats.prices.empty_why".localized)
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(16)
+                }
                 
                 // Panoramica
                 VStack(alignment: .leading, spacing: 12) {

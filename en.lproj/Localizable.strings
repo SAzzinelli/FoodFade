@@ -123,9 +123,11 @@
 "home.kpi.total" = "Total";
 "home.kpi.expired" = "Expired";
 "home.kpi.expiring" = "Expiring soon";
+"home.category.product" = "Product";
 "home.category.products" = "%d Products";
 "home.category.expiring" = "• %d expiring";
-"home.category.all_ok" = "• All OK";
+"home.category.all_ok" = "All ok";
+"home.category.attention" = "Attention";
 "home.recent.added_today" = "Added today";
 "home.recent.added_yesterday" = "Added yesterday";
 "home.recent.empty" = "No recent products.";
@@ -151,6 +153,11 @@
 "item.accessibility.hint" = "Double tap to open details";
 "itemdetail.title" = "Product detail";
 "itemdetail.opened.button" = "Did you open it?";
+"itemdetail.opened.label" = "Opened";
+"itemdetail.opened_quantity.prompt" = "How many did you open?";
+"itemdetail.opened_quantity.confirm" = "Confirm";
+"itemdetail.portion.closed" = "%d closed (expires %@)";
+"itemdetail.portion.opened" = "%d opened (expires %@)";
 "inventory.empty.title" = "No products";
 "inventory.empty.subtitle" = "Add your first product to get started";
 "inventory.empty.button" = "Add Product";
@@ -331,6 +338,8 @@
 "stats.prices.trend" = "Spending by month";
 "stats.prices.by_product" = "By product";
 "stats.prices.no_prices" = "No products with price yet. Add a price when adding or editing a product.";
+"stats.prices.empty_title" = "Empty section";
+"stats.prices.empty_why" = "Here you will see total value, monthly trend, and price per product. It's empty because you haven't added any prices yet. When you add a product or edit an existing one, you can enter the price (optional): from then on, this section will show the statistics.";
 
 /* KPI / Status titles */
 "kpi.title.expired" = "Expired";

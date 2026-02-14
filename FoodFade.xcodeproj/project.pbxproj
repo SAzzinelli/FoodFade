@@ -83,6 +83,7 @@
 		FC21E0B42F03195F00996820 /* ShoppingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0B32F03195F00996820 /* ShoppingListView.swift */; };
 		FC21E0B62F03196000996820 /* ConsumedHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */; };
 		FC21E0B92F03196000996820 /* ConsumedQuantitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */; };
+		FC21E0BB2F03196100996820 /* OpenedQuantitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BC2F03196100996820 /* OpenedQuantitySheet.swift */; };
 		FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */; };
 		FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */; };
 		FC21E0C62F03196600996820 /* FridgyBravoOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */; };
@@ -118,6 +119,7 @@
 		FC21E0B32F03195F00996820 /* ShoppingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListView.swift; sourceTree = "<group>"; };
 		FC21E0B52F03196000996820 /* ConsumedHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumedHistoryView.swift; sourceTree = "<group>"; };
 		FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumedQuantitySheet.swift; sourceTree = "<group>"; };
+		FC21E0BC2F03196100996820 /* OpenedQuantitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenedQuantitySheet.swift; sourceTree = "<group>"; };
 		FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationDictationService.swift; sourceTree = "<group>"; };
 		FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationListeningOverlay.swift; sourceTree = "<group>"; };
 		FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyBravoOverlay.swift; sourceTree = "<group>"; };
@@ -236,6 +238,7 @@
 			children = (
 				FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */,
 				FC21E0BA2F03196000996820 /* ConsumedQuantitySheet.swift */,
+				FC21E0BC2F03196100996820 /* OpenedQuantitySheet.swift */,
 				FC21E09D2F0319A500996820 /* MagicLoadingView.swift */,
 				FC21E0952F03164800996820 /* FridgySkeletonLoader.swift */,
 				FC21E0932F030A9300996820 /* FridgyCard.swift */,
@@ -536,6 +539,7 @@
 				FC21E0B22F03195E00996820 /* ShoppingItem.swift in Sources */,
 				FC21E0B42F03195F00996820 /* ShoppingListView.swift in Sources */,
 				FC21E0B92F03196000996820 /* ConsumedQuantitySheet.swift in Sources */,
+				FC21E0BB2F03196100996820 /* OpenedQuantitySheet.swift in Sources */,
 				FC21E0C62F03196600996820 /* FridgyBravoOverlay.swift in Sources */,
 				FC21E0B62F03196000996820 /* ConsumedHistoryView.swift in Sources */,
 			);

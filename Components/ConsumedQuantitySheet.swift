@@ -132,6 +132,7 @@ struct ConsumedQuantitySheet: View {
     private func applyConsumption(amount: Int) {
         let toRemove = min(amount, item.quantity)
         item.quantity -= toRemove
+        item.openedQuantity = max(0, item.openedQuantity - toRemove)
         if item.quantity <= 0 {
             item.quantity = 0
             item.isConsumed = true

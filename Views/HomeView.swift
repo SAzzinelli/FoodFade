@@ -727,15 +727,12 @@ private struct ExpiringProductCard: View {
         return "\(days) gg"
     }
     
-    /// Verde se prodotto aperto con giorni rimanenti (3, 2, 1 gg)
+    /// Verde = OK, arancione = in scadenza o aperto, rosso = scaduto
     private var badgeColor: Color {
-        if item.isOpened && item.daysRemaining > 0 { return .green }
-        switch item.expirationStatus {
-        case .expired: return .red
-        case .today: return .orange
-        case .soon: return .orange
-        case .safe: return .green
-        }
+        if item.expirationStatus == .expired { return .red }
+        if item.isOpened { return .orange }
+        if item.expirationStatus == .today || item.expirationStatus == .soon { return .orange }
+        return .green
     }
     
     private var categoryColor: Color {
@@ -855,7 +852,7 @@ private struct SummaryCardView: View {
     }
 }
 
-// MARK: - Card categoria Home (icona, titolo, X Prodotti sotto; pill stato a destra: Tutto OK / N in scadenza)
+// MARK: - Card categoria Home (icona, titolo, X Prodotti sotto; pill: Attenzione / Tutto ok)
 private struct HomeCategoryCard: View {
     let category: FoodCategory
     let productCount: Int
@@ -874,14 +871,12 @@ private struct HomeCategoryCard: View {
     }
     
     private var productCountText: String {
-        String(format: "home.category.products".localized, productCount)
+        productCount == 1 ? "1 \("home.category.product".localized)" : String(format: "home.category.products".localized, productCount)
     }
     
+    /// Pill: "Attenzione" se almeno un prodotto in scadenza, altrimenti "Tutto ok"
     private var statusPillText: String {
-        if expiringCount == 0 {
-            return "home.category.all_ok".localized.replacingOccurrences(of: "• ", with: "")
-        }
-        return String(format: "home.category.expiring".localized, expiringCount).replacingOccurrences(of: "• ", with: "")
+        expiringCount == 0 ? "home.category.all_ok".localized : "home.category.attention".localized
     }
     
     private var statusPillColor: Color {
@@ -901,12 +896,16 @@ private struct HomeCategoryCard: View {
                 Text(category.rawValue)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
                 Text(productCountText)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.secondary)
             }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            .layoutPriority(1)
             
-            Spacer()
+            Spacer(minLength: 8)
             
             Text(statusPillText)
                 .font(.system(size: 12, weight: .semibold))
