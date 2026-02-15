@@ -17,9 +17,9 @@ final class AppSettings {
     var animationsEnabled: Bool = true
     var accentColorRaw: String = AccentColor.natural.rawValue
     var progressRingModeRaw: String = ProgressRingMode.safeItems.rawValue // ProgressRingMode.rawValue
-    var homeSummaryStyleRaw: String = HomeSummaryStyle.ring.rawValue     // ring = anello, compact = solo riepilogo
+    var homeSummaryStyleRaw: String = HomeSummaryStyle.expiryControlCard.rawValue  // default: Centro controllo scadenze
     var expirationInputMethodRaw: String = ExpirationInputMethod.calendar.rawValue
-    var shoppingListTabEnabled: Bool = false // Voce "Lista della spesa" in tab bar (off di default)
+    var shoppingListTabEnabled: Bool = true // Voce "Spesa" in tab bar (on di default)
     /// Beta: OCR per leggere la data di scadenza dalla fotocamera (solo la data, esclude il resto)
     var ocrExpirationEnabled: Bool = false
     
@@ -53,7 +53,7 @@ final class AppSettings {
     
     var homeSummaryStyle: HomeSummaryStyle {
         get {
-            HomeSummaryStyle(rawValue: homeSummaryStyleRaw) ?? .ring
+            HomeSummaryStyle(rawValue: homeSummaryStyleRaw) ?? .expiryControlCard
         }
         set {
             homeSummaryStyleRaw = newValue.rawValue
@@ -80,10 +80,10 @@ final class AppSettings {
         animationsEnabled: Bool = true,
         accentColor: AccentColor = .natural,
         progressRingMode: ProgressRingMode = .safeItems,
-        homeSummaryStyle: HomeSummaryStyle = .ring,
+        homeSummaryStyle: HomeSummaryStyle = .expiryControlCard,
         expirationInputMethod: ExpirationInputMethod = .calendar,
         hasChosenCloudUsage: Bool = false,
-        shoppingListTabEnabled: Bool = false,
+        shoppingListTabEnabled: Bool = true,
         ocrExpirationEnabled: Bool = false
     ) {
         self.id = id

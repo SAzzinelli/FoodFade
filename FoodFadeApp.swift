@@ -60,7 +60,9 @@ struct FoodFadeApp: App {
                 UserProfile.self,
                 CustomFoodType.self,
                 ShoppingList.self,
-                ShoppingItem.self
+                ShoppingItem.self,
+                FridgyChat.self,
+                FridgyMessage.self
             ])
             
             // Leggi la scelta dell'utente da UserDefaults
@@ -148,7 +150,9 @@ struct FoodFadeApp: App {
                     UserProfile.self,
                     CustomFoodType.self,
                     ShoppingList.self,
-                    ShoppingItem.self
+                    ShoppingItem.self,
+                    FridgyChat.self,
+                    FridgyMessage.self
                 ])
                 let fallbackConfig = ModelConfiguration(
                     isStoredInMemoryOnly: false,
@@ -164,7 +168,9 @@ struct FoodFadeApp: App {
                         UserProfile.self,
                         CustomFoodType.self,
                         ShoppingList.self,
-                        ShoppingItem.self
+                        ShoppingItem.self,
+                        FridgyChat.self,
+                        FridgyMessage.self
                     ])
                     let inMemoryConfig = ModelConfiguration(isStoredInMemoryOnly: true)
                     return try ModelContainer(for: inMemorySchema, configurations: [inMemoryConfig])
@@ -187,14 +193,14 @@ struct ContentView: View {
     @Query private var allItems: [FoodItem]
 
     private var shoppingListTabEnabled: Bool {
-        settings.first?.shoppingListTabEnabled ?? false
+        settings.first?.shoppingListTabEnabled ?? true
     }
 
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {
-                    Label("nav.home", systemImage: "leaf.fill")
+                    Label("nav.home", systemImage: "circle.grid.2x2.topleft.checkmark.filled")
                 }
                 .tag(0)
             
@@ -207,7 +213,7 @@ struct ContentView: View {
             if shoppingListTabEnabled {
                 ShoppingListView()
                     .tabItem {
-                        Label("shopping.title", systemImage: "cart.fill")
+                        Label("nav.shopping", systemImage: "cart.fill")
                     }
                     .tag(2)
             }

@@ -15,6 +15,7 @@ struct WelcomeView: View {
     @State private var isiCloudAvailable = false
     @State private var firstName: String = ""
     @State private var saveError: String?
+    @State private var backgroundAnimationOffset: CGFloat = 0
     
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     
@@ -40,8 +41,8 @@ struct WelcomeView: View {
                     Color(.systemGroupedBackground)
                         .ignoresSafeArea()
                     
-                    // Background animato con simboli cibo/foglie
-                    AnimatedFoodBackground()
+                    // Background animato con simboli cibo/foglie (stato nel parent = loop continuo)
+                    AnimatedFoodBackground(animationOffset: $backgroundAnimationOffset)
                         .opacity(0.08)
                         .ignoresSafeArea()
                     
@@ -375,9 +376,10 @@ private struct WelcomeStep1View: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(ThemeManager.shared.onboardingButtonColor)
-                        .cornerRadius(12)
+                        .contentShape(Capsule())
                 }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.shared.onboardingButtonColor).interactive(), in: .capsule)
                 .padding(.horizontal, 40)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
@@ -442,9 +444,10 @@ private struct WelcomeStep2View: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(ThemeManager.shared.onboardingButtonColor)
-                        .cornerRadius(12)
+                        .contentShape(Capsule())
                 }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.shared.onboardingButtonColor).interactive(), in: .capsule)
                 .padding(.horizontal, 40)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
@@ -556,14 +559,15 @@ private struct WelcomeStep3CloudView: View {
             Button {
                 onNext()
             } label: {
-            Text(ctaText)
+                Text(ctaText)
                     .font(.system(size: 17, weight: .semibold, design: .default))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(selectedOption != nil ? ThemeManager.shared.onboardingButtonColor : Color.gray)
-                    .cornerRadius(12)
+                    .contentShape(Capsule())
             }
+            .buttonStyle(.plain)
+            .glassEffect(.regular.tint(selectedOption != nil ? ThemeManager.shared.onboardingButtonColor : Color.gray).interactive(), in: .capsule)
             .disabled(selectedOption == nil)
             .padding(.horizontal, 40)
         .padding(.top, 12)
@@ -720,21 +724,20 @@ private struct WelcomeStep4NotificationsView: View {
                 VStack(spacing: 12) {
                     // CTA PRIMARIA
                     if !notificationPermissionGranted {
-                Button {
-                    Task {
-                        await requestNotificationPermission()
-                    }
-                } label: {
-                    HStack {
-                        Text("onboarding.notifications.enable".localized)
-                            .font(.system(size: 17, weight: .semibold, design: .default))
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(ThemeManager.shared.onboardingButtonColor)
-                    .cornerRadius(12)
-                }
+                        Button {
+                            Task {
+                                await requestNotificationPermission()
+                            }
+                        } label: {
+                            Text("onboarding.notifications.enable".localized)
+                                .font(.system(size: 17, weight: .semibold, design: .default))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .contentShape(Capsule())
+                        }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.shared.onboardingButtonColor).interactive(), in: .capsule)
                         .padding(.horizontal, 40)
                     } else {
                         // Stato attivato - solo indicatore, non bottone
@@ -747,8 +750,8 @@ private struct WelcomeStep4NotificationsView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color(.secondarySystemGroupedBackground))
-                        .cornerRadius(12)
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.interactive(), in: .capsule)
                         .padding(.horizontal, 40)
                     }
                     
@@ -771,9 +774,10 @@ private struct WelcomeStep4NotificationsView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .background(ThemeManager.shared.onboardingButtonColor)
-                                .cornerRadius(12)
+                                .contentShape(Capsule())
                         }
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.tint(ThemeManager.shared.onboardingButtonColor).interactive(), in: .capsule)
                         .padding(.horizontal, 40)
                     }
                 }
@@ -796,6 +800,7 @@ private struct WelcomeStep4NotificationsView: View {
 }
 
 // MARK: - Step 5: Nome
+
 private struct WelcomeStep5NameView: View {
     let currentStep: Int
     let totalSteps: Int
@@ -830,14 +835,10 @@ private struct WelcomeStep5NameView: View {
                 
                 TextField("onboarding.name.placeholder".localized, text: $firstName)
                     .font(.system(size: 18, weight: .regular, design: .default))
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 20)
                     .padding(.vertical, 14)
                     .background(Color(.secondarySystemGroupedBackground))
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(firstName.isEmpty ? Color.clear : ThemeManager.shared.onboardingButtonColor, lineWidth: 2)
-                    )
+                    .clipShape(Capsule())
             }
                     .padding(.horizontal, 40)
                     .padding(.bottom, 20)
@@ -854,9 +855,10 @@ private struct WelcomeStep5NameView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(firstName.isEmpty ? Color.gray : ThemeManager.shared.onboardingButtonColor)
-                        .cornerRadius(12)
+                        .contentShape(Capsule())
                 }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(firstName.isEmpty ? Color.gray : ThemeManager.shared.onboardingButtonColor).interactive(), in: .capsule)
                 .disabled(firstName.isEmpty)
                 .padding(.horizontal, 40)
                 .padding(.top, 12)
@@ -881,29 +883,21 @@ private struct WelcomeStep6StartView: View {
             
             ScrollView {
                 VStack(spacing: 40) {
-                    // Checkmark animato
-                    ZStack {
-                        // Checkmark animato
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(ThemeManager.shared.onboardingButtonColor)
-                            .scaleEffect(checkmarkScale)
-                            .opacity(checkmarkOpacity)
-                            .overlay(
-                                Circle()
-                                    .stroke(ThemeManager.shared.onboardingButtonColor, lineWidth: 3)
-                                    .scaleEffect(checkmarkScale * 1.2)
-                                    .opacity(checkmarkOpacity * 0.5)
-                            )
-                    }
-                    .frame(height: 120)
-                    .padding(.top, 20)
-                    .onAppear {
-                        withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
-                            checkmarkScale = 1.0
-                            checkmarkOpacity = 1.0
+                    // Fridgy Bravo (immagine esistente)
+                    Image("FridgyBravo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: 200, maxHeight: 200)
+                        .scaleEffect(checkmarkScale)
+                        .opacity(checkmarkOpacity)
+                        .frame(height: 160)
+                        .padding(.top, 20)
+                        .onAppear {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
+                                checkmarkScale = 1.0
+                                checkmarkOpacity = 1.0
+                            }
                         }
-                    }
                 
                 // Titolo
                 Text("onboarding.start.title".localized)
@@ -912,14 +906,44 @@ private struct WelcomeStep6StartView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                 
-                // Testo
+                // Sottotitolo
                 Text("onboarding.start.text".localized)
                     .font(.system(size: 17, weight: .regular, design: .default))
                     .foregroundColor(.secondary)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal, 40)
-                    .padding(.bottom, 20)
+                
+                // 3 punti riassuntivi
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(ThemeManager.shared.onboardingButtonColor)
+                        Text("onboarding.start.bullet1".localized)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.primary)
+                    }
+                    HStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(ThemeManager.shared.onboardingButtonColor)
+                        Text("onboarding.start.bullet2".localized)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.primary)
+                    }
+                    HStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(ThemeManager.shared.onboardingButtonColor)
+                        Text("onboarding.start.bullet3".localized)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.primary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
                 }
             }
             .safeAreaInset(edge: .bottom) {
@@ -931,9 +955,10 @@ private struct WelcomeStep6StartView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(ThemeManager.shared.onboardingButtonColor)
-                        .cornerRadius(12)
+                        .contentShape(Capsule())
                 }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(ThemeManager.shared.onboardingButtonColor).interactive(), in: .capsule)
                 .padding(.horizontal, 40)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
@@ -944,8 +969,7 @@ private struct WelcomeStep6StartView: View {
 
 // MARK: - Animated Food Background
 private struct AnimatedFoodBackground: View {
-    @State private var animationOffset: CGFloat = 0
-    @State private var timer: Timer?
+    @Binding var animationOffset: CGFloat
     
     let foodIcons = ["leaf.fill", "carrot.fill", "heart.fill", "leaf.circle.fill", "drop.fill", "flame.fill"]
     
@@ -970,13 +994,15 @@ private struct AnimatedFoodBackground: View {
             }
         }
         .task {
-            // Animazione continua che non riparte da zero quando la vista si resetta
-            // Usa un task che continua anche quando la vista si aggiorna
+            // Loop infinito: nessun reset. sin/cos sono periodici, il valore cresce e il movimento è continuo.
+            // Reset solo per precisione floating point dopo moltissimi cicli (invisibile).
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 16_000_000) // ~60fps
-                animationOffset += 0.01
-                if animationOffset > .pi * 2 {
-                    animationOffset = 0
+                await MainActor.run {
+                    animationOffset += 0.01
+                    if animationOffset > 1000 * .pi * 2 {
+                        animationOffset -= 1000 * .pi * 2
+                    }
                 }
             }
         }

@@ -21,9 +21,9 @@ class SettingsViewModel: ObservableObject {
     @Published var animationsEnabled: Bool = true
     @Published var accentColor: AccentColor = .natural
     @Published var progressRingMode: ProgressRingMode = .safeItems
-    @Published var homeSummaryStyle: HomeSummaryStyle = .ring
+    @Published var homeSummaryStyle: HomeSummaryStyle = .expiryControlCard
     @Published var expirationInputMethod: ExpirationInputMethod = .calendar
-    @Published var shoppingListTabEnabled: Bool = false
+    @Published var shoppingListTabEnabled: Bool = true
     @Published var ocrExpirationEnabled: Bool = false
     
     private var modelContext: ModelContext?

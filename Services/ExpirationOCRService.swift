@@ -35,69 +35,75 @@ final class ExpirationOCRService {
         let lowercased = text.lowercased()
         let keywords = ["scadenza", "scade", "da consumare", "use by", "best before", "exp", "data", "validità", "preferibilmente"]
         
-        // Pattern per date: DD/MM/YYYY, DD-MM-YY, DD.MM.YY, YYYY-MM-DD, DD MMM YYYY, ecc.
+        // Riduci interferenza numeri di lotto: normalizza spazi e segnala contesto (L + cifre = lotto, da ignorare)
+        let sanitized = textWithLottoAwareness(text: lowercased)
+        
+        // Pattern per date: DD/MM/YYYY, DD-MM-YY, MM/YYYY (solo mese/anno → giorno 1), YYYY-MM-DD, DD MMM YYYY, ecc.
         typealias DateParser = ([String]) -> Date?
-        let patterns: [(String, DateParser)] = [
-            (#"(\d{1,2})/(\d{1,2})/(\d{2,4})"#, { g in
-                guard g.count >= 3 else { return nil as Date? }
-                return Self.dateFromDMY(day: g[0], month: g[1], year: g[2])
-            }),
-            (#"(\d{1,2})-(\d{1,2})-(\d{2,4})"#, { g in
-                guard g.count >= 3 else { return nil as Date? }
-                return Self.dateFromDMY(day: g[0], month: g[1], year: g[2])
-            }),
-            (#"(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, { g in
-                guard g.count >= 3 else { return nil as Date? }
-                return Self.dateFromDMY(day: g[0], month: g[1], year: g[2])
-            }),
-            (#"(\d{4})-(\d{1,2})-(\d{1,2})"#, { g in
-                guard g.count >= 3 else { return nil as Date? }
-                return Self.dateFromYMD(year: g[0], month: g[1], day: g[2])
-            }),
-            (#"(\d{1,2})\s+(gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic|jan|may|jun|jul|aug|sep|oct|dec)\w*\s+(\d{2,4})"#, { g in
-                guard g.count >= 3 else { return nil as Date? }
-                return Self.dateFromDDMonYYYY(day: g[0], month: g[1], year: g[2])
-            })
+        let patterns: [(String, Int, DateParser)] = [
+            // Con giorno: DD/MM/YYYY, DD-MM-YY, DD.MM.YY
+            (#"(\d{1,2})/(\d{1,2})/(\d{2,4})"#, 3, { g in Self.dateFromDMY(day: g[0], month: g[1], year: g[2]) }),
+            (#"(\d{1,2})-(\d{1,2})-(\d{2,4})"#, 3, { g in Self.dateFromDMY(day: g[0], month: g[1], year: g[2]) }),
+            (#"(\d{1,2})\.(\d{1,2})\.(\d{2,4})"#, 3, { g in Self.dateFromDMY(day: g[0], month: g[1], year: g[2]) }),
+            // Solo MESE/ANNO (senza giorno) → usiamo il 1° del mese
+            (#"(\d{1,2})/(\d{2,4})"#, 2, { g in Self.dateFromMonthYear(month: g[0], year: g[1]) }),
+            (#"(\d{1,2})-(\d{2,4})"#, 2, { g in Self.dateFromMonthYear(month: g[0], year: g[1]) }),
+            (#"(\d{1,2})\.(\d{2,4})"#, 2, { g in Self.dateFromMonthYear(month: g[0], year: g[1]) }),
+            (#"(\d{4})-(\d{1,2})-(\d{1,2})"#, 3, { g in Self.dateFromYMD(year: g[0], month: g[1], day: g[2]) }),
+            (#"(\d{1,2})\s+(gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic|jan|may|jun|jul|aug|sep|oct|dec)\w*\s+(\d{2,4})"#, 3, { g in Self.dateFromDDMonYYYY(day: g[0], month: g[1], year: g[2]) })
         ]
         
-        var candidates: [(date: Date, nearKeyword: Bool)] = []
+        var candidates: [(date: Date, nearKeyword: Bool, hasDay: Bool)] = []
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         
-        for (pattern, parser) in patterns {
+        for (pattern, requiredGroups, parser) in patterns {
             let regex = try? NSRegularExpression(pattern: pattern)
-            let range = NSRange(lowercased.startIndex..., in: lowercased)
-            let nsText = lowercased as NSString
-            regex?.enumerateMatches(in: lowercased, options: [], range: range) { result, _, _ in
-                guard let result = result, result.numberOfRanges >= 2 else { return }
+            let range = NSRange(sanitized.startIndex..., in: sanitized)
+            let nsText = sanitized as NSString
+            regex?.enumerateMatches(in: sanitized, options: [], range: range) { result, _, _ in
+                guard let result = result, result.numberOfRanges > requiredGroups else { return }
                 var groups: [String] = []
-                for i in 1..<result.numberOfRanges {
+                for i in 1...requiredGroups {
                     let r = result.range(at: i)
                     if r.location != NSNotFound, r.location + r.length <= nsText.length {
                         groups.append(nsText.substring(with: r))
                     }
                 }
-                guard groups.count >= 3, let date = parser(groups) else { return }
+                guard groups.count == requiredGroups, let date = parser(groups) else { return }
                 let startOfDate = calendar.startOfDay(for: date)
-                // Scarta date troppo nel passato (più di 1 anno fa) o troppo nel futuro (più di 10 anni)
-                if startOfDate < calendar.date(byAdding: .year, value: -1, to: today) ?? today { return }
-                if startOfDate > calendar.date(byAdding: .year, value: 10, to: today) ?? today { return }
+                // Accetta qualsiasi data plausibile su una confezione (anche scaduta): da 2010 a 2035
+                guard let minYear = calendar.date(from: DateComponents(year: 2010, month: 1, day: 1)),
+                      let maxYear = calendar.date(from: DateComponents(year: 2035, month: 12, day: 31)) else { return }
+                if startOfDate < minYear || startOfDate > maxYear { return }
                 
-                let textAround = textAroundMatch(text: lowercased, range: result.range)
+                let textAround = textAroundMatch(text: sanitized, range: result.range)
                 let nearKeyword = keywords.contains { textAround.lowercased().contains($0) }
-                candidates.append((date, nearKeyword))
+                let hasDay = requiredGroups >= 3
+                candidates.append((date, nearKeyword, hasDay))
             }
         }
         
-        // Preferisci date vicine a parole chiave, poi date future più vicine a oggi
+        // Preferisci: vicine a parole chiave, poi date con giorno (esplicito) rispetto a solo mese/anno, poi future, poi più vicine a oggi
         let sorted = candidates.sorted { a, b in
             if a.nearKeyword != b.nearKeyword { return a.nearKeyword }
+            if a.hasDay != b.hasDay { return a.hasDay }
             let aFuture = a.date >= today
             let bFuture = b.date >= today
             if aFuture != bFuture { return aFuture }
             return abs(a.date.timeIntervalSince(today)) < abs(b.date.timeIntervalSince(today))
         }
         return sorted.first?.date
+    }
+    
+    /// Riduce interferenza da numeri di lotto (es. L25302, L5272): sostituisce "L" + cifre con spazio così le date restano isolate.
+    private func textWithLottoAwareness(text: String) -> String {
+        let lottoPattern = "l\\d{2,}"
+        guard let regex = try? NSRegularExpression(pattern: lottoPattern, options: .caseInsensitive) else { return text }
+        let range = NSRange(text.startIndex..., in: text)
+        let mutable = NSMutableString(string: text)
+        regex.replaceMatches(in: mutable, options: [], range: range, withTemplate: " ")
+        return mutable as String
     }
     
     private func textAroundMatch(text: String, range: NSRange) -> String {
@@ -108,6 +114,19 @@ final class ExpirationOCRService {
         let r = NSRange(location: start, length: len)
         guard r.upperBound <= ns.length else { return ns.substring(from: start) }
         return ns.substring(with: r)
+    }
+    
+    /// Solo MESE/ANNO (senza giorno) → giorno 1 del mese (es. 10/2028 → 1 ottobre 2028).
+    private static func dateFromMonthYear(month: String, year: String) -> Date? {
+        let m = Int(month) ?? 0
+        var y = Int(year) ?? 0
+        if y < 100 { y += 2000; if y > 2050 { y -= 100 } }
+        guard (1...12).contains(m), y >= 2010, y <= 2035 else { return nil }
+        var comp = DateComponents()
+        comp.year = y
+        comp.month = m
+        comp.day = 1
+        return Calendar.current.date(from: comp)
     }
     
     private static func dateFromDMY(day: String, month: String, year: String) -> Date? {

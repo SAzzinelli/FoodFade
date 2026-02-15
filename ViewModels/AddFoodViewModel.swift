@@ -50,19 +50,7 @@ class AddFoodViewModel: ObservableObject {
     var canSave: Bool {
         guard !name.isEmpty else { return false }
         guard quantity >= 1 else { return false }
-        
-        // Se non è fresco, valida la data
-        if !isFresh {
-            // Verifica che la data non sia nel passato
-            let calendar = Calendar.current
-            let startOfToday = calendar.startOfDay(for: Date())
-            let startOfExpiration = calendar.startOfDay(for: expirationDate)
-            
-            if startOfExpiration < startOfToday {
-                return false
-            }
-        }
-        
+        // La data può essere nel passato: il prodotto verrà aggiunto come scaduto
         return true
     }
     
@@ -139,19 +127,32 @@ class AddFoodViewModel: ObservableObject {
         let startOfExpiration = calendar.startOfDay(for: expirationDate)
         
         if startOfExpiration < startOfToday {
-            dateValidationError = "La data non può essere nel passato"
+            dateValidationError = "La data è passata: il prodotto verrà aggiunto come scaduto."
         } else {
             dateValidationError = nil
         }
+    }
+    
+    /// Normalizza il codice a barre: rimuove spazi e tiene solo le cifre (es. "8 013355 999143" → "8013355999143").
+    static func normalizeBarcode(_ raw: String) -> String {
+        raw.filter { $0.isNumber }
+    }
+    
+    /// Avvia il lookup prodotto se il barcode inserito a mano ha lunghezza valida (es. EAN-8, EAN-13).
+    func triggerLookupForEnteredBarcode() {
+        guard let b = barcode, !b.isEmpty, b.count >= 8 else { return }
+        handleBarcodeScanned(b)
     }
     
     func handleBarcodeScanned(_ barcode: String) {
         #if DEBUG
         print("📱 AddFoodViewModel - Barcode scanned: \(barcode)")
         #endif
-        self.barcode = barcode
+        let normalized = Self.normalizeBarcode(barcode)
+        self.barcode = normalized.isEmpty ? nil : normalized
+        guard !normalized.isEmpty else { return }
         Task {
-            await lookupProduct(barcode: barcode)
+            await lookupProduct(barcode: normalized)
         }
     }
     
@@ -248,17 +249,7 @@ class AddFoodViewModel: ObservableObject {
             throw ValidationError.noContext
         }
         
-        // Validazione data (solo se non è fresco)
-        if !isFresh {
-            let calendar = Calendar.current
-            let startOfToday = calendar.startOfDay(for: Date())
-            let startOfExpiration = calendar.startOfDay(for: expirationDate)
-            
-            if startOfExpiration < startOfToday {
-                throw ValidationError.dateInPast
-            }
-        }
-        
+        // La data può essere nel passato: il prodotto viene salvato come scaduto (nessun blocco).
         // Converti l'immagine in Data se presente
         let photoData = selectedPhoto?.jpegData(compressionQuality: 0.8)
         

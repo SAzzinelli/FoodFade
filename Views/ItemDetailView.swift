@@ -17,6 +17,9 @@ struct ItemDetailView: View {
     @State private var showingError = false
     @State private var errorTitle = ""
     @State private var errorMessage = ""
+    @State private var showingExpiredOpenedAlert = false
+    @State private var showingExpiredConsumedAlert = false
+    @State private var pendingOpenedQuantity: Int? = nil
     
     var body: some View {
         List {
@@ -216,6 +219,13 @@ struct ItemDetailView: View {
                                     }
                                     .padding(.top, 2)
                                 }
+                                Button {
+                                    revertToUnopened()
+                                } label: {
+                                    Label("itemdetail.revert_to_unopened".localized, systemImage: "lock.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                             .padding(.vertical, 4)
                         }
@@ -308,8 +318,14 @@ struct ItemDetailView: View {
             }
             .sheet(isPresented: $showingOpenedQuantitySheet) {
                 OpenedQuantitySheet(item: item) { count in
-                    applyOpened(quantity: count)
-                    showingOpenedQuantitySheet = false
+                    if item.expirationStatus == .expired {
+                        pendingOpenedQuantity = count
+                        showingOpenedQuantitySheet = false
+                        showingExpiredOpenedAlert = true
+                    } else {
+                        applyOpened(quantity: count)
+                        showingOpenedQuantitySheet = false
+                    }
                 }
             }
             .overlay {
@@ -337,6 +353,33 @@ struct ItemDetailView: View {
                 Button("common.ok".localized, role: .cancel) {}
             } message: {
                 Text(errorMessage)
+            }
+            .alert("itemdetail.expired_open_alert.title".localized, isPresented: $showingExpiredOpenedAlert) {
+                Button("common.annulla".localized, role: .cancel) {
+                    pendingOpenedQuantity = nil
+                }
+                Button("common.ok".localized) {
+                    if let q = pendingOpenedQuantity {
+                        applyOpened(quantity: q)
+                        pendingOpenedQuantity = nil
+                    } else {
+                        if item.quantity == 1 {
+                            applyOpened(quantity: 1)
+                        } else {
+                            showingOpenedQuantitySheet = true
+                        }
+                    }
+                }
+            } message: {
+                Text("itemdetail.expired_open_alert.message".localized)
+            }
+            .alert("itemdetail.expired_consume_alert.title".localized, isPresented: $showingExpiredConsumedAlert) {
+                Button("common.annulla".localized, role: .cancel) {}
+                Button("itemdetail.expired_consume_alert.confirm".localized) {
+                    markAsConsumed()
+                }
+            } message: {
+                Text("itemdetail.expired_consume_alert.message".localized)
             }
             .task {
                 await viewModel.loadFridgy(for: item)
@@ -386,10 +429,12 @@ struct ItemDetailView: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            // Pulsante L'hai aperto? (sempre attivo: puoi aprire altre unità in qualsiasi momento)
+            // Pulsante L'hai aperto? (se scaduto → alert prima di procedere)
             if !item.isFresh {
                 Button {
-                    if item.quantity == 1 {
+                    if item.expirationStatus == .expired {
+                        showingExpiredOpenedAlert = true
+                    } else if item.quantity == 1 {
                         applyOpened(quantity: 1)
                     } else {
                         showingOpenedQuantitySheet = true
@@ -404,10 +449,12 @@ struct ItemDetailView: View {
                 .glassEffect(.regular.tint(ThemeManager.naturalHomeLogoColor).interactive(), in: .capsule)
             }
             
-            // Pulsante Consumato – Liquid Glass con tint verde
+            // Pulsante Consumato (se scaduto → alert prima di procedere)
             Button {
                 if item.quantity > 1 {
                     showingConsumedQuantitySheet = true
+                } else if item.expirationStatus == .expired {
+                    showingExpiredConsumedAlert = true
                 } else {
                     markAsConsumed()
                 }
@@ -420,6 +467,23 @@ struct ItemDetailView: View {
             .buttonStyle(.plain)
             .glassEffect(.regular.tint(.green).interactive(), in: .capsule)
             .disabled(item.isConsumed)
+        }
+    }
+    
+    /// Riporta il prodotto allo stato "da aprire" (nessuna unità aperta).
+    private func revertToUnopened() {
+        item.openedQuantity = 0
+        item.openedDate = nil
+        item.isOpened = false
+        item.lastUpdated = Date()
+        do {
+            try modelContext.save()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            rescheduleNotificationsForCurrentItem()
+        } catch {
+            errorTitle = "error.save_failed".localized
+            errorMessage = "error.save_failed_message".localized
+            showingError = true
         }
     }
     

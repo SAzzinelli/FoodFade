@@ -59,15 +59,17 @@ enum AppearanceMode: String, Codable {
     }
 }
 
-/// Stile del riepilogo in Home: anello con percentuale oppure solo testo
+/// Stile del riepilogo in Home: anello con percentuale, card controllo scadenze, oppure solo testo
 enum HomeSummaryStyle: String, Codable, CaseIterable {
-    case ring = "ring"           // Anello con % e messaggi
-    case compact = "compact"     // Solo riepilogo testuale (niente anello)
+    case ring = "ring"                    // Anello con % e messaggi
+    case compact = "compact"              // Solo riepilogo testuale (niente anello)
+    case expiryControlCard = "expiryControlCard"  // Card "Centro controllo scadenze" con barra segmentata
     
     var displayName: String {
         switch self {
         case .ring: return "Anello"
         case .compact: return "Solo riepilogo"
+        case .expiryControlCard: return "Centro controllo scadenze"
         }
     }
     
@@ -75,6 +77,7 @@ enum HomeSummaryStyle: String, Codable, CaseIterable {
         switch self {
         case .ring: return "Mostra l'anello con percentuale e messaggio"
         case .compact: return "Mostra solo i numeri (es. 1 da consumare · 1 tutto ok)"
+        case .expiryControlCard: return "Card con stato, numero da controllare e barra segmentata"
         }
     }
 }
@@ -93,8 +96,8 @@ enum ProgressRingMode: String, Codable, CaseIterable {
     
     var description: String {
         switch self {
-        case .safeItems: return "Mostra la percentuale di prodotti che scadono dopo 3+ giorni"
-        case .atRisk: return "Mostra la percentuale di prodotti che scadono presto o sono scaduti"
+        case .safeItems: return "Anello pieno = prodotti con margine (tutto ok o nei prossimi giorni)"
+        case .atRisk: return "Anello pieno = molti prodotti in scadenza o da consumare"
         }
     }
 }

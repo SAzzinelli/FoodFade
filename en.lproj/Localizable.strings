@@ -115,12 +115,38 @@
 "home.ring.subtitle.risk.one" = "⚠️ One product not to forget";
 "home.ring.subtitle.risk.many" = "⚠️ %d products to check";
 
+"home.expiry_control.title" = "Expiry control centre";
+"home.expiry_control.badge.calm" = "All clear";
+"home.expiry_control.badge.attention" = "Attention";
+"home.expiry_control.badge.urgent" = "Urgent";
+"home.expiry_control.badge.incoming" = "Coming up";
+"home.expiry_control.hero.under_control" = "All under control";
+"home.expiry_control.hero.incoming" = "Some expirations coming up";
+"home.expiry_control.hero.to_check" = "%d to check";
+"home.expiry_control.summary.today" = "today";
+"home.expiry_control.summary.tomorrow" = "tomorrow";
+"home.expiry_control.summary.incoming" = "in the next few days";
+"home.expiry_control.summary.ok" = "ok";
+
+"home.oggi_per_te.title" = "Today for you";
+"home.oggi_per_te.consume_today_one" = "%@ expires today";
+"home.oggi_per_te.consume_today_many" = "%d products expire today";
+"home.oggi_per_te.consume_tomorrow_one" = "%@ expires tomorrow";
+"home.oggi_per_te.consume_in_days_one" = "%@ expires within %d days";
+"home.oggi_per_te.consume_tomorrow_many" = "%d products expire by tomorrow";
+"home.oggi_per_te.incoming_soon" = "Some expirations in the next few days";
+"home.oggi_per_te.fridge_ok" = "All under control 👌";
+"home.oggi_per_te.fridge_ok_alt1" = "You're good for today";
+"home.oggi_per_te.fridge_ok_alt2" = "No rush today";
+"home.oggi_per_te.no_urgency" = "No urgency today 👌";
+
 "home.rings.ok" = "OK";
 "home.rings.inscadenza" = "Expiring soon";
 "home.rings.scaduti" = "Expired";
 "home.expiring.section.title" = "Products expiring soon";
 "home.see.all" = "See all";
 "home.kpi.total" = "Total";
+"home.kpi.in_home" = "In home";
 "home.kpi.expired" = "Expired";
 "home.kpi.expiring" = "Expiring soon";
 "home.category.product" = "Product";
@@ -136,6 +162,7 @@
 /* Navigation */
 "nav.home" = "Home";
 "nav.inventory" = "In casa";
+"nav.shopping" = "Shopping";
 "nav.statistics" = "Statistics";
 "nav.settings" = "Settings";
 
@@ -161,6 +188,12 @@
 "itemdetail.portion.closed.count" = "%d closed";
 "itemdetail.portion.opened.count" = "%d opened";
 "itemdetail.portion.expires" = "Expires %@";
+"itemdetail.revert_to_unopened" = "Mark as unopened";
+"itemdetail.expired_open_alert.title" = "Product expired";
+"itemdetail.expired_open_alert.message" = "This product is already expired. Do you still want to mark it as opened?";
+"itemdetail.expired_consume_alert.title" = "Warning: product expired";
+"itemdetail.expired_consume_alert.message" = "This product has expired. Do you want to mark it as consumed? Only consume it if you're sure it's safe.";
+"itemdetail.expired_consume_alert.confirm" = "Yes, mark as consumed";
 "inventory.empty.title" = "No products";
 "inventory.empty.subtitle" = "Add your first product to get started";
 "inventory.empty.button" = "Add Product";
@@ -201,12 +234,14 @@
 "addfood.foodtype.add.message" = "Enter the name of the new category";
 "addfood.foodtype.add.name" = "Category name";
 "addfood.barcode" = "Barcode";
+"addfood.barcode.footer" = "Scanning adds name, image and ingredients automatically.\nYou need to enter the expiry date.";
 "addfood.photo" = "Product photo";
 "addfood.photo.optional" = "Product photo (optional)";
 "addfood.photo.take" = "Take Photo";
 "addfood.photo.library" = "Photo Library";
 "addfood.photo.file" = "File";
 "addfood.expiration" = "Expiration date";
+"addfood.expiration.placeholder" = "Enter expiry date";
 "addfood.quantity" = "Quantity: %d";
 "addfood.quantity_section" = "Quantity";
 "addfood.price" = "Price";
@@ -363,7 +398,7 @@
 "settings.app_icon.changed.title" = "Icon changed";
 "settings.app_icon.changed.message" = "You changed the icon to %@.";
 "settings.beta" = "Beta";
-"settings.ocr_expiration.title" = "OCR expiration from photo";
+"settings.ocr_expiration.title" = "Detect expiration from photo";
 "settings.ocr_expiration.footer" = "In Add Product, you can scan the expiration date from a photo. Only the date is read; other text is ignored. May not work on all packages.";
 "settings.notifications" = "Notifications";
 "settings.notifications.enable" = "Notifications";
@@ -442,9 +477,12 @@
 "onboarding.name.placeholder" = "Your name";
 "onboarding.name.continue" = "Continue";
 
-"onboarding.start.title" = "You're ready!";
-"onboarding.start.text" = "Everything is set up. Start using FoodFade!";
-"onboarding.start.button" = "Let's go!";
+"onboarding.start.title" = "All set!";
+"onboarding.start.text" = "The app is set up. Start managing expiry dates and products with more control.";
+"onboarding.start.bullet1" = "Reduce waste";
+"onboarding.start.bullet2" = "Avoid forgotten expiry dates";
+"onboarding.start.bullet3" = "Keep everything under control";
+"onboarding.start.button" = "Let's go";
 
 /* Welcome / Save error */
 "welcome.save.error.title" = "Save error";
@@ -492,16 +530,20 @@
 "fridgy.apple.intelligence" = "Apple Intelligence";
 "fridgy.available" = "Available";
 "fridgy.unavailable" = "Not available";
-"fridgy.footer.enabled.available" = "Fridgy provides personalized suggestions and tips based on your inventory.";
-"fridgy.footer.enabled.unavailable" = "Fridgy is not available on this device.";
-"fridgy.footer.disabled" = "Fridgy is disabled. The app works at 100% without intelligent suggestions.";
-"fridgy.footer.beta" = "This feature is in beta: it may change and can make mistakes. Suggestions do not replace common sense in the kitchen.";
+"fridgy.footer.enabled.available" = "Suggestions and tips based on your inventory.";
+"fridgy.footer.enabled.unavailable" = "Not available on this device.";
+"fridgy.footer.disabled" = "Disabled: the app works without intelligent suggestions.";
+"fridgy.footer.beta" = "Beta: may make mistakes. Advice does not replace common sense.";
 "fridgy.loading" = "Loading a Fridgy suggestion…";
 "fridgy.chat.title" = "Chat with Fridgy";
 "fridgy.chat.placeholder" = "Ask about food, storage, waste…";
 "fridgy.chat.send" = "Send";
 "fridgy.chat.unavailable" = "Enable Fridgy in Settings to chat here.";
 "fridgy.chat.error_reply" = "Sorry, I couldn't reply. Please try again.";
+"fridgy.chat.new_title" = "New chat";
+"fridgy.chat.no_messages" = "No messages";
+"fridgy.chat.empty_prompt" = "Start a chat with Fridgy for advice on food, expiry dates and more!*";
+"fridgy.chat.empty_disclaimer" = "* The information provided is in beta and under development; it should not be considered reliable or a substitute for common sense.";
 
 /* Assistente (Settings - no Apple Intelligence mention) */
 "assistant.section.title" = "Assistant";

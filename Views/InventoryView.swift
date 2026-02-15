@@ -34,7 +34,6 @@ struct InventoryView: View {
                 if filteredItems.isEmpty {
                     ScrollView {
                         VStack(spacing: 20) {
-                            categoryPills
                             emptyContent
                         }
                         .padding(.horizontal, 20)
@@ -43,12 +42,6 @@ struct InventoryView: View {
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 12) {
-                        categoryPills
-                        if selectedCategory != nil {
-                            Text(String(format: "inventory.results.count".localized, filteredItems.count))
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-                        }
                         List {
                             Section {
                                 ForEach(filteredItems) { item in
@@ -187,11 +180,6 @@ struct InventoryView: View {
                 viewModel.filterStatus = filterStatus
                 viewModel.loadData()
             }
-            .onChange(of: selectedCategory) { _, newValue in
-                viewModel.selectedCategory = newValue
-                viewModel.filterStatus = filterStatus
-                viewModel.loadData()
-            }
             .onChange(of: searchText) { _, newValue in
                 viewModel.searchText = newValue
                 viewModel.filterStatus = filterStatus
@@ -202,33 +190,6 @@ struct InventoryView: View {
                 viewModel.loadData()
             }
             .tint(ThemeManager.shared.primaryColor)
-        }
-    }
-    
-    // MARK: - Filtri categoria
-    private var categoryPills: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                InventoryFilterPill(
-                    title: "common.all".localized,
-                    icon: "square.grid.2x2.fill",
-                    isSelected: selectedCategory == nil,
-                    color: accentColor
-                ) {
-                    withAnimation(.easeInOut(duration: 0.2)) { selectedCategory = nil }
-                }
-                ForEach(FoodCategory.allCases, id: \.self) { category in
-                    InventoryFilterPill(
-                        title: category.rawValue,
-                        icon: category.iconFill,
-                        isSelected: selectedCategory == category,
-                        color: AppTheme.color(for: category)
-                    ) {
-                        withAnimation(.easeInOut(duration: 0.2)) { selectedCategory = category }
-                    }
-                }
-            }
-            .padding(.horizontal, 2)
         }
     }
     
@@ -283,32 +244,6 @@ struct InventoryView: View {
             Spacer(minLength: 60)
         }
         .frame(maxWidth: .infinity)
-    }
-}
-
-// MARK: - Pill filtro categoria
-private struct InventoryFilterPill: View {
-    let title: String
-    let icon: String
-    let isSelected: Bool
-    let color: Color
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                Text(title)
-                    .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
-            }
-            .foregroundStyle(isSelected ? .white : .primary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(isSelected ? color : Color(.tertiarySystemFill))
-            .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
     }
 }
 

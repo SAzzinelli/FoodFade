@@ -6,15 +6,13 @@ struct AppIconPickerView: View {
     @AppStorage(AppIconManager.userDefaultsKey) private var appIconName: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var showSuccessAlert = false
-    @State private var successIconName = ""
-    
+
     @Environment(\.colorScheme) private var colorScheme
-    
+
     private var selectedIconRaw: String {
         appIconName.isEmpty ? AppIconManager.Option.primary.rawValue : appIconName
     }
-    
+
     var body: some View {
         List {
             ForEach(AppIconManager.Option.allCases, id: \.rawValue) { option in
@@ -42,82 +40,65 @@ struct AppIconPickerView: View {
         } message: {
             Text(errorMessage)
         }
-        .alert("settings.app_icon.changed.title".localized, isPresented: $showSuccessAlert) {
-            Button("common.ok".localized, role: .cancel) {}
-        } message: {
-            Text(String(format: "settings.app_icon.changed.message".localized, successIconName))
-        }
     }
-    
+
     private func selectIcon(_ option: AppIconManager.Option) {
         AppIconManager.setIcon(option) { success, error in
-            if success {
-                successIconName = option.displayName
-                showSuccessAlert = true
-            } else {
+            if !success {
                 errorMessage = error?.localizedDescription ?? "settings.app_icon.error".localized
                 showError = true
             }
+            // Successo: non mostriamo alert (iOS mostra già quello di sistema)
         }
     }
 }
 
-// MARK: - Anteprima icona (60x60, stile icona app)
+// MARK: - Anteprima icona (60x60): mostra le vere icone dall’asset catalog
 private struct AppIconThumbnail: View {
     let option: AppIconManager.Option
-    @StateObject private var themeManager = ThemeManager.shared
-    
+
+    private let cornerRadius: CGFloat = 13
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(backgroundColor)
-            .overlay {
-                imageContent
-            }
-            .frame(width: 60, height: 60)
-    }
-    
-    @ViewBuilder
-    private var imageContent: some View {
-        switch option {
-        case .primary:
-            Image("AppIconLogo")
+        ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(iconGradient)
+            Image(option.previewImageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 36, height: 36)
-        case .opt1:
-            Image(systemName: "leaf.fill")
-                .font(.system(size: 28))
-                .foregroundStyle(.white)
-        case .opt2:
-            Image(systemName: "snowflake")
-                .font(.system(size: 26))
-                .foregroundStyle(.white)
+                .frame(width: imageSize, height: imageSize)
+        }
+        .frame(width: 60, height: 60)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+
+    private var imageSize: CGFloat {
+        switch option {
+        case .opt1: return 44
+        default: return 56
         }
     }
-    
-    private var backgroundColor: some ShapeStyle {
+
+    private var iconGradient: LinearGradient {
         switch option {
         case .primary:
-            return AnyShapeStyle(LinearGradient(
-                colors: [
-                    themeManager.primaryColor,
-                    themeManager.primaryColor.opacity(0.8)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ))
+            return LinearGradient(
+                colors: [Color(red: 0.35, green: 0.95, blue: 0.85), Color(red: 0.1, green: 0.5, blue: 0.95)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         case .opt1:
-            return AnyShapeStyle(LinearGradient(
-                colors: [Color(red: 0.2, green: 0.6, blue: 0.3), Color(red: 0.15, green: 0.5, blue: 0.25)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ))
+            return LinearGradient(
+                colors: [Color(red: 1, green: 0.9, blue: 0.55), Color(red: 0.95, green: 0.55, blue: 0.25)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         case .opt2:
-            return AnyShapeStyle(LinearGradient(
-                colors: [Color(red: 0.4, green: 0.75, blue: 1.0), Color(red: 0.3, green: 0.65, blue: 0.95)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ))
+            return LinearGradient(
+                colors: [Color(red: 1, green: 0.6, blue: 0.2), Color(red: 0.95, green: 0.8, blue: 0.7)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         }
     }
 }

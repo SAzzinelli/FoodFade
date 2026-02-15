@@ -13,6 +13,7 @@ struct ConsumedQuantitySheet: View {
     @State private var quantityToConsume: Int = 1
     @State private var showingSaveError = false
     @State private var showFridgyBravo = false
+    @State private var showingExpiredConsumeAlert = false
     private var maxQuantity: Int { item.quantity }
     
     var body: some View {
@@ -93,11 +94,23 @@ struct ConsumedQuantitySheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Conferma") {
-                        confirm()
+                        if item.expirationStatus == .expired {
+                            showingExpiredConsumeAlert = true
+                        } else {
+                            confirm()
+                        }
                     }
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 }
+            }
+            .alert("itemdetail.expired_consume_alert.title".localized, isPresented: $showingExpiredConsumeAlert) {
+                Button("common.annulla".localized, role: .cancel) {}
+                Button("itemdetail.expired_consume_alert.confirm".localized) {
+                    confirm()
+                }
+            } message: {
+                Text("itemdetail.expired_consume_alert.message".localized)
             }
             .onAppear {
                 quantityToConsume = 1

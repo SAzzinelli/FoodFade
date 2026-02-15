@@ -12,6 +12,7 @@
 		FC1A9ADA2F395401000C55CA /* FoodFade_principale.icon in Resources */ = {isa = PBXBuildFile; fileRef = FC1A9AD82F395401000C55CA /* FoodFade_principale.icon */; };
 		FC1A9ADB2F395401000C55CA /* FoodFade_opt1.icon in Resources */ = {isa = PBXBuildFile; fileRef = FC1A9AD92F395401000C55CA /* FoodFade_opt1.icon */; };
 		FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */; };
+		FC21E0D02F03196B00996821 /* ExpiryControlCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D12F03196B00996821 /* ExpiryControlCardView.swift */; };
 		FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE82F029671006D9CF0 /* CategoryPicker.swift */; };
 		FC2128D52F029921001A2A52 /* EnhancedProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */; };
 		FC2128D62F029921001A2A52 /* EnhancedSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */; };
@@ -86,6 +87,9 @@
 		FC21E0BB2F03196100996820 /* OpenedQuantitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BC2F03196100996820 /* OpenedQuantitySheet.swift */; };
 		FC21E0D22F03197100996820 /* ChatWithFridgyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D12F03197100996820 /* ChatWithFridgyView.swift */; };
 		FC21E0D72F03197200996820 /* ExpirationOCRSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D32F03197200996820 /* ExpirationOCRSheet.swift */; };
+		FC21E0D92F03197300996820 /* FridgyChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D82F03197300996820 /* FridgyChat.swift */; };
+		FC21E0DB2F03197300996820 /* FridgyChatListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0DA2F03197300996820 /* FridgyChatListView.swift */; };
+		FC21E0DD2F03197300996820 /* FridgyChatDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0DC2F03197300996820 /* FridgyChatDetailView.swift */; };
 		FC21E0C02F03196300996820 /* ExpirationDictationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */; };
 		FC21E0D42F03197200996820 /* ExpirationOCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0D52F03197200996820 /* ExpirationOCRService.swift */; };
 		FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */; };
@@ -126,6 +130,9 @@
 		FC21E0D12F03197100996820 /* ChatWithFridgyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatWithFridgyView.swift; sourceTree = "<group>"; };
 		FC21E0BF2F03196300996820 /* ExpirationDictationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationDictationService.swift; sourceTree = "<group>"; };
 		FC21E0D32F03197200996820 /* ExpirationOCRSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationOCRSheet.swift; sourceTree = "<group>"; };
+		FC21E0D82F03197300996820 /* FridgyChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyChat.swift; sourceTree = "<group>"; };
+		FC21E0DA2F03197300996820 /* FridgyChatListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyChatListView.swift; sourceTree = "<group>"; };
+		FC21E0DC2F03197300996820 /* FridgyChatDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyChatDetailView.swift; sourceTree = "<group>"; };
 		FC21E0D52F03197200996820 /* ExpirationOCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpirationOCRService.swift; sourceTree = "<group>"; };
 		FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationListeningOverlay.swift; sourceTree = "<group>"; };
 		FC21E0C52F03196600996820 /* FridgyBravoOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FridgyBravoOverlay.swift; sourceTree = "<group>"; };
@@ -137,6 +144,7 @@
 		FC6DB9842F02A6AB00FA5652 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
 		FC994EE62F029671006D9CF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedProgressRing.swift; sourceTree = "<group>"; };
+		FC21E0D12F03196B00996821 /* ExpiryControlCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpiryControlCardView.swift; sourceTree = "<group>"; };
 		FC994EE82F029671006D9CF0 /* CategoryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPicker.swift; sourceTree = "<group>"; };
 		FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProgressRing.swift; sourceTree = "<group>"; };
 		FC994EEA2F029671006D9CF0 /* EnhancedSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedSummaryCard.swift; sourceTree = "<group>"; };
@@ -250,6 +258,7 @@
 				FC21E0932F030A9300996820 /* FridgyCard.swift */,
 				FC21E0852F0301FE00996820 /* FridgyBadge.swift */,
 				FC994EE72F029671006D9CF0 /* AnimatedProgressRing.swift */,
+				FC21E0D12F03196B00996821 /* ExpiryControlCardView.swift */,
 				FC994EE82F029671006D9CF0 /* CategoryPicker.swift */,
 				FC21E0C42F03196500996820 /* DictationListeningOverlay.swift */,
 				FC994EE92F029671006D9CF0 /* EnhancedProgressRing.swift */,
@@ -287,6 +296,7 @@
 				FC994EFD2F029671006D9CF0 /* AppSettings.swift */,
 				FC994EFE2F029671006D9CF0 /* CustomFoodType.swift */,
 				FC994EFF2F029671006D9CF0 /* FoodItem.swift */,
+				FC21E0D82F03197300996820 /* FridgyChat.swift */,
 				FC21E0AD2F03195E00996820 /* ShoppingList.swift */,
 				FC21E0B12F03195E00996820 /* ShoppingItem.swift */,
 				FC994F002F029671006D9CF0 /* ThemeSettings.swift */,
@@ -364,6 +374,8 @@
 				FC994F1D2F029671006D9CF0 /* HomeView.swift */,
 				FC994F1E2F029671006D9CF0 /* IncomingView.swift */,
 				FC21E0D12F03197100996820 /* ChatWithFridgyView.swift */,
+				FC21E0DA2F03197300996820 /* FridgyChatListView.swift */,
+				FC21E0DC2F03197300996820 /* FridgyChatDetailView.swift */,
 				FC21E0D32F03197200996820 /* ExpirationOCRSheet.swift */,
 				FC994F1F2F029671006D9CF0 /* InventoryView.swift */,
 				FC994F202F029671006D9CF0 /* ItemDetailView.swift */,
@@ -477,6 +489,7 @@
 				F2A0A28FE18743FBB8C822DD /* FoodFadeApp.swift in Sources */,
 				FC21E0982F03191E00996820 /* RecipesView.swift in Sources */,
 				FC2128D32F029921001A2A52 /* AnimatedProgressRing.swift in Sources */,
+				FC21E0D02F03196B00996821 /* ExpiryControlCardView.swift in Sources */,
 				FC2128D42F029921001A2A52 /* CategoryPicker.swift in Sources */,
 				FC21E0C32F03196500996820 /* DictationListeningOverlay.swift in Sources */,
 				FC2128D52F029921001A2A52 /* EnhancedProgressRing.swift in Sources */,
@@ -535,7 +548,9 @@
 				FC2128FA2F029921001A2A52 /* InventoryView.swift in Sources */,
 				FC21E0D22F03197100996820 /* ChatWithFridgyView.swift in Sources */,
 				FC21E0D72F03197200996820 /* ExpirationOCRSheet.swift in Sources */,
-				FC21E0D42F03197200996820 /* ExpirationOCRService.swift in Sources */,
+				FC21E0DB2F03197300996820 /* FridgyChatListView.swift in Sources */,
+				FC21E0DD2F03197300996820 /* FridgyChatDetailView.swift in Sources */,
+				FC21E0D92F03197300996820 /* FridgyChat.swift in Sources */,
 				FC2128FB2F029921001A2A52 /* ItemDetailView.swift in Sources */,
 				FC21E0902F03096D00996820 /* AddFoodView.swift in Sources */,
 				FC2128FC2F029921001A2A52 /* KPIStatusView.swift in Sources */,
@@ -729,7 +744,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = FoodFade.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 9747WYS86R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -753,7 +768,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.food.fade.FoodFade;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -778,7 +793,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = FoodFade.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 9747WYS86R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -802,7 +817,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.food.fade.FoodFade;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

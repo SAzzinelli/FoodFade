@@ -235,7 +235,7 @@ class BackupService {
                 animationsEnabled: backupSettings.animationsEnabled,
                 accentColor: (backupSettings.accentColorRaw == "default" ? .orange : AccentColor(rawValue: backupSettings.accentColorRaw) ?? .natural),
                 progressRingMode: ProgressRingMode(rawValue: backupSettings.progressRingModeRaw) ?? .safeItems,
-                homeSummaryStyle: HomeSummaryStyle(rawValue: backupSettings.homeSummaryStyleRaw ?? HomeSummaryStyle.ring.rawValue) ?? .ring,
+                homeSummaryStyle: HomeSummaryStyle(rawValue: backupSettings.homeSummaryStyleRaw ?? HomeSummaryStyle.expiryControlCard.rawValue) ?? .expiryControlCard,
                 expirationInputMethod: ExpirationInputMethod(rawValue: backupSettings.expirationInputMethodRaw ?? ExpirationInputMethod.calendar.rawValue) ?? .calendar,
                 hasChosenCloudUsage: backupSettings.hasChosenCloudUsage ?? false,
                 shoppingListTabEnabled: backupSettings.shoppingListTabEnabled ?? false

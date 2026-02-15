@@ -91,6 +91,13 @@ struct ExpirationOCRSheet: View {
             } message: {
                 Text("addfood.ocr.no_date.message".localized)
             }
+            .presentationDetents([.height(340)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground {
+                UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20)
+                    .fill(.ultraThinMaterial)
+            }
+            .presentationCompactAdaptation(.popover)
         }
     }
     

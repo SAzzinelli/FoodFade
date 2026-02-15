@@ -110,17 +110,26 @@ class FridgyServiceImpl: FridgyService {
         throw FridgyError.appleIntelligenceNotAvailable
     }
     
+    /// Limite scambi in storia per non superare il context window del modello ("Exceeded model context window size").
+    private static let maxHistoryPairs = 5
+    private static let maxMessageLength = 280
+    
     @available(iOS 26.0, macOS 26.0, *)
     private func generateChatReplyWithAppleIntelligence(userMessage: String, history: [(user: String, assistant: String)]) async throws -> String {
         #if canImport(FoundationModels)
         let model = SystemLanguageModel.default
         switch model.availability {
         case .available:
-            var conversation = ""
-            for (u, a) in history {
-                conversation += "Utente: \(u)\nFridgy: \(a)\n"
+            let truncated = { (s: String) in
+                if s.count <= Self.maxMessageLength { return s }
+                return String(s.prefix(Self.maxMessageLength)) + "..."
             }
-            conversation += "Utente: \(userMessage)\nFridgy:"
+            let recent = Array(history.suffix(Self.maxHistoryPairs))
+            var conversation = ""
+            for (u, a) in recent {
+                conversation += "Utente: \(truncated(u))\nFridgy: \(truncated(a))\n"
+            }
+            conversation += "Utente: \(truncated(userMessage))\nFridgy:"
             let session = LanguageModelSession(instructions: """
                 Sei Fridgy, la mascotte amichevole dell'app FoodFade. Rispondi alle domande dell'utente su conservazione del cibo, riduzione degli sprechi, scadenze, idee per ricette o utilizzo degli ingredienti. Sii breve (1-3 frasi), utile e non giudicante. Non dare consigli medici o nutrizionali. Se la domanda è fuori tema (non cibo/ FoodFade), rispondi con gentilezza che puoi aiutare soprattutto su cibo e sprechi.
                 """)

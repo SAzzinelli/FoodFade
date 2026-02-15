@@ -2,401 +2,40 @@ import SwiftUI
 import SwiftData
 import UIKit
 
-/// Vista delle impostazioni - VERSIONE FINALE LOCKATA
+/// Vista impostazioni – header Fridgy, sezioni a card, grafica rivista
 struct SettingsView: View {
-    /// Blu Fridgy (tonalità più scura per toggle e icone)
     private static let fridgyBlue = Color(red: 100/255, green: 175/255, blue: 230/255)
-    
+    private let cardCornerRadius: CGFloat = 16
+    private let cardHorizontalPadding: CGFloat = 20
+
     @Query private var settings: [AppSettings]
     @StateObject private var viewModel = SettingsViewModel()
     @State private var showingCustomDaysPicker = false
     @State private var showingResetAlert = false
+    @State private var showingFridgyChat = false
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     @AppStorage("hasShownFirstAddPrompt") private var hasShownFirstAddPrompt = false
-    
+
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
-    
-    /// In dark mode i dropdown/picker devono essere bianchi, non arancioni
+
     private var listTint: Color {
         colorScheme == .dark ? Color.primary : ThemeManager.shared.primaryColor
     }
-    
+
     var body: some View {
         NavigationStack {
             List {
-                // 0. INTRODUZIONE (Fridgy + titolo e descrizione centrati)
-                Section {
-                    VStack(spacing: 12) {
-                        Image("FridgySettingsHeader")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 220, maxHeight: 220)
-                        VStack(spacing: 4) {
-                            Text("Personalizza la tua esperienza")
-                                .font(.system(size: 16, weight: .semibold, design: .default))
-                                .foregroundColor(.primary)
-                            Text("Configura aspetto, notifiche e sincronizzazione.")
-                                .font(.system(size: 13, weight: .regular, design: .default))
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(2)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                }
-                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 8, trailing: 20))
-                .listRowBackground(Color(.secondarySystemGroupedBackground))
-                
-                // 1. RIEPILOGO IN HOME
-                Section {
-                    Picker(selection: $viewModel.homeSummaryStyle) {
-                        ForEach(HomeSummaryStyle.allCases, id: \.self) { style in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(style.displayName)
-                                    .font(.system(size: 16, weight: .medium))
-                                Text(style.description)
-                                    .font(.system(size: 13))
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(style)
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "chart.pie.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
-                            Text("Riepilogo in Home")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .onChange(of: viewModel.homeSummaryStyle) { oldValue, newValue in
-                        viewModel.saveSettings()
-                    }
-                    
-                    if viewModel.homeSummaryStyle == .ring {
-                        Picker(selection: $viewModel.progressRingMode) {
-                            ForEach(ProgressRingMode.allCases, id: \.self) { mode in
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(mode.displayName)
-                                        .font(.system(size: 16, weight: .medium))
-                                    Text(mode.description)
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.secondary)
-                                }
-                                .tag(mode)
-                            }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "circle.lefthalf.filled")
-                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
-                                Text("Modalità anello")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        .onChange(of: viewModel.progressRingMode) { oldValue, newValue in
-                            viewModel.saveSettings()
-                        }
-                    }
-                    
-                    Toggle(isOn: $viewModel.shoppingListTabEnabled) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "cart.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsRing))
-                            Text("Lista della spesa")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsRing))
-                    .onChange(of: viewModel.shoppingListTabEnabled) { oldValue, newValue in
-                        viewModel.saveSettings()
-                    }
-                } header: {
-                    Text("Funzionalità")
-                } footer: {
-                    Text("Scegli se mostrare l'anello con stato (tutto ok, da tenere d'occhio...) oppure solo il riepilogo numerico in Home. Le opzioni della barra in basso sono separate.")
-                }
-                
-                // 2. AVVISI
-                Section {
-                    Toggle(isOn: $viewModel.notificationsEnabled) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "bell.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
-                            Text("Prima della scadenza")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
-                    .onChange(of: viewModel.notificationsEnabled) { oldValue, newValue in
-                        viewModel.saveSettings()
-                    }
-                    
-                    if viewModel.notificationsEnabled {
-                        // Picker per "Quanto prima"
-                        Picker(selection: $viewModel.notificationDaysBefore) {
-                            Text("1 giorno prima").tag(1)
-                            Text("2 giorni prima").tag(2)
-                            Text("Personalizzato").tag(-1)
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "calendar")
-                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCalendar))
-                                Text("Quanto prima?")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        .onChange(of: viewModel.notificationDaysBefore) { oldValue, newValue in
-                            if newValue == -1 {
-                                showingCustomDaysPicker = true
-                            } else {
-                                viewModel.saveSettings()
-                            }
-                        }
-                        
-                        // Mostra i giorni custom se selezionato
-                        if viewModel.notificationDaysBefore == -1 {
-                            Button {
-                                showingCustomDaysPicker = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "calendar")
-                                        .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCalendar))
-                                    Text("Giorni personalizzati")
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    Text("\(viewModel.customNotificationDays) \(viewModel.customNotificationDays == 1 ? "giorno" : "giorni")")
-                                        .foregroundColor(.secondary)
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text("Avvisi")
-                } footer: {
-                    if viewModel.notificationsEnabled {
-                        Text("Ti avvisiamo solo se c'è qualcosa da consumare")
-                    }
-                }
-                
-                // 3. FRIDGY (descrizioni sotto senza menzione Apple Intelligence)
-                Section {
-                    Toggle(isOn: $viewModel.intelligenceEnabled) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "sparkles")
-                                .foregroundColor(Self.fridgyBlue)
-                            Text("fridgy.toggle".localized)
-                                .foregroundColor(.primary)
-                            Text("BETA")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(Self.fridgyBlue)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .tint(Self.fridgyBlue)
-                    .onChange(of: viewModel.intelligenceEnabled) { oldValue, newValue in
-                        viewModel.saveSettings()
-                        IntelligenceManager.shared.isEnabled = newValue
-                    }
-                    
-                    if viewModel.isAppleIntelligenceAvailable {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(Self.fridgyBlue)
-                            Text("fridgy.title".localized)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text("fridgy.available".localized)
-                                .font(.system(size: 13))
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        HStack {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
-                            Text("fridgy.title".localized)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text("fridgy.unavailable".localized)
-                                .font(.system(size: 13))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    if viewModel.intelligenceEnabled && viewModel.isAppleIntelligenceAvailable {
-                        NavigationLink {
-                            ChatWithFridgyView()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "bubble.left.and.bubble.right.fill")
-                                    .foregroundColor(Self.fridgyBlue)
-                                Text("fridgy.chat.title".localized)
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                    }
-                } header: {
-                    Text("fridgy.title".localized)
-                } footer: {
-                    VStack(alignment: .leading, spacing: 8) {
-                        if viewModel.intelligenceEnabled {
-                            if viewModel.isAppleIntelligenceAvailable {
-                                Text("fridgy.footer.enabled.available".localized)
-                            } else {
-                                Text("fridgy.footer.enabled.unavailable".localized)
-                            }
-                        } else {
-                            Text("fridgy.footer.disabled".localized)
-                        }
-                        Text("fridgy.footer.beta".localized)
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                // 3b. BETA – OCR data di scadenza da foto
-                Section {
-                    Toggle(isOn: $viewModel.ocrExpirationEnabled) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "camera.viewfinder")
-                                .foregroundColor(Self.fridgyBlue)
-                            Text("settings.ocr_expiration.title".localized)
-                                .foregroundColor(.primary)
-                            Text("BETA")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(Self.fridgyBlue)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .tint(Self.fridgyBlue)
-                    .onChange(of: viewModel.ocrExpirationEnabled) { _, _ in
-                        viewModel.saveSettings()
-                    }
-                } header: {
-                    Text("settings.beta".localized)
-                } footer: {
-                    Text("settings.ocr_expiration.footer".localized)
-                }
-                
-                // 4. ASPETTO
-                Section {
-                    NavigationLink {
-                        AppearanceSettingsView()
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "paintbrush.fill")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsAppearance))
-                            Text("Personalizza")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                } header: {
-                    Text("Aspetto")
-                } footer: {
-                    Text("Personalizza l'aspetto e i colori dell'interfaccia")
-                }
-                
-                // 5. SINCRONIZZAZIONE (iCloud + backup manuale)
-                Section {
-                    HStack {
-                        Image(systemName: "icloud.fill")
-                            .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
-                        Text("Sincronizzazione iCloud")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Text(viewModel.iCloudStatus)
-                            .font(.system(size: 15))
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    if viewModel.iCloudStatus == "Attiva" {
-                        Button {
-                            viewModel.restoreFromiCloud()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.down.circle")
-                                    .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsCloud))
-                                Text("Ripristina dati da iCloud")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                    }
-                    
-                    NavigationLink {
-                        BackupRestoreView()
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsBackup))
-                            Text("Backup e Ripristino")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                } header: {
-                    Text("Sincronizzazione")
-                } footer: {
-                    if viewModel.iCloudStatus == "Attiva" {
-                        Text("I tuoi dati vengono sincronizzati automaticamente tra i dispositivi con lo stesso Apple ID. Puoi anche esportare o importare manualmente per backup locali.")
-                    } else {
-                        Text("iCloud non è disponibile su questo dispositivo. Puoi esportare o importare i dati manualmente per backup locali.")
-                    }
-                }
-
-                // 6. INFORMAZIONI
-                Section {
-                    HStack {
-                        Image(systemName: "info.circle.fill")
-                            .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsInfo))
-                        Text("Versione")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Text("1.0")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("FoodFade")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                        
-                        Text("Riduci gli sprechi alimentari con consapevolezza e semplicità")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                        
-                        Text("© 2026 - Simone Azzinelli")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                            .padding(.top, 4)
-                    }
-                } header: {
-                    Text("Informazioni")
-                }
-                
-                // 9. RIPRISTINO
-                Section {
-                    Button {
-                        showingResetAlert = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.counterclockwise")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsReset))
-                            Text("Ripristina FoodFade")
-                                .foregroundColor(ThemeManager.shared.semanticIconColor(for: .settingsReset))
-                        }
-                    }
-                } footer: {
-                    Text("settings.reset.footer".localized)
-                }
+                fridgyHeaderSection
+                homeSection
+                notificationsSection
+                fridgySection
+                appearanceSection
+                dataSection
+                infoSection
+                resetSection
             }
+            .listStyle(.insetGrouped)
             .contentMargins(.top, AppTheme.spacingBelowLargeTitle, for: .scrollContent)
             .tint(listTint)
             .navigationTitle("Impostazioni")
@@ -416,10 +55,20 @@ struct SettingsView: View {
             .sheet(isPresented: $showingCustomDaysPicker) {
                 CustomDaysPickerView(customDays: $viewModel.customNotificationDays)
                     .onDisappear {
-                        if viewModel.notificationDaysBefore == -1 {
-                            viewModel.saveSettings()
-                        }
+                        if viewModel.notificationDaysBefore == -1 { viewModel.saveSettings() }
                     }
+            }
+            .sheet(isPresented: $showingFridgyChat) {
+                NavigationStack {
+                    FridgyChatListView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("common.close".localized) {
+                                    showingFridgyChat = false
+                                }
+                            }
+                        }
+                }
             }
             .onAppear {
                 viewModel.setup(modelContext: modelContext)
@@ -427,68 +76,368 @@ struct SettingsView: View {
             }
             .alert("Ripristinare FoodFade?", isPresented: $showingResetAlert) {
                 Button("Annulla", role: .cancel) { }
-                Button("Ripristina", role: .destructive) {
-                    performReset()
-                }
+                Button("Ripristina", role: .destructive) { performReset() }
             } message: {
                 Text("Tutti i prodotti, le statistiche e le impostazioni verranno cancellati. Questa azione non può essere annullata.")
             }
-            }
+        }
         .tint(listTint)
     }
-    
+
+    // MARK: - Header con Fridgy
+
+    private var fridgyHeaderSection: some View {
+        Section {
+            VStack(spacing: 16) {
+                Image("FridgySettingsHeader")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 200, maxHeight: 200)
+                VStack(spacing: 6) {
+                    Text("Personalizza la tua esperienza")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primary)
+                    Text("Configura aspetto, notifiche e sincronizzazione.")
+                        .font(.system(size: 14, weight: .regular, design: .default))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+        }
+        .listRowInsets(EdgeInsets(top: 0, leading: cardHorizontalPadding, bottom: 8, trailing: cardHorizontalPadding))
+        .listRowBackground(
+            RoundedRectangle(cornerRadius: cardCornerRadius)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+        .listRowSeparator(.hidden)
+    }
+
+    // MARK: - Sezioni a card
+
+    private var homeSection: some View {
+        Section {
+            Picker(selection: $viewModel.homeSummaryStyle) {
+                ForEach(HomeSummaryStyle.allCases, id: \.self) { style in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(style.displayName).font(.system(size: 16, weight: .medium))
+                        Text(style.description).font(.system(size: 13)).foregroundColor(.secondary)
+                    }
+                    .tag(style)
+                }
+            } label: {
+                SettingsRowLabel(icon: "chart.pie.fill", semantic: .settingsRing, text: "Riepilogo")
+            }
+            .onChange(of: viewModel.homeSummaryStyle) { _, _ in viewModel.saveSettings() }
+
+            if viewModel.homeSummaryStyle == .ring {
+                Picker(selection: $viewModel.progressRingMode) {
+                    ForEach(ProgressRingMode.allCases, id: \.self) { mode in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(mode.displayName).font(.system(size: 16, weight: .medium))
+                            Text(mode.description).font(.system(size: 13)).foregroundColor(.secondary)
+                        }
+                        .tag(mode)
+                    }
+                } label: {
+                    SettingsRowLabel(icon: "circle.lefthalf.filled", semantic: .settingsRing, text: "Modalità anello")
+                }
+                .onChange(of: viewModel.progressRingMode) { _, _ in viewModel.saveSettings() }
+            }
+
+            Toggle(isOn: $viewModel.shoppingListTabEnabled) {
+                SettingsRowLabel(icon: "cart.fill", semantic: .settingsRing, text: "Lista della spesa")
+            }
+            .tint(toggleTint)
+            .onChange(of: viewModel.shoppingListTabEnabled) { _, _ in viewModel.saveSettings() }
+
+            Toggle(isOn: $viewModel.ocrExpirationEnabled) {
+                SettingsRowLabel(icon: "camera.viewfinder", semantic: .settingsRing, text: "settings.ocr_expiration.title".localized)
+            }
+            .tint(toggleTint)
+            .onChange(of: viewModel.ocrExpirationEnabled) { _, _ in viewModel.saveSettings() }
+        } header: {
+            sectionHeader(icon: "slider.horizontal.3", title: "Funzionalità")
+        } footer: {
+            Text("Cosa mostrare in Home, barra in basso e in Aggiungi prodotto.")
+        }
+    }
+
+    private var notificationsSection: some View {
+        Section {
+            Toggle(isOn: $viewModel.notificationsEnabled) {
+                SettingsRowLabel(icon: "bell.fill", semantic: .settingsAlerts, text: "Avvisi prima della scadenza")
+            }
+            .tint(ThemeManager.shared.semanticIconColor(for: .settingsAlerts))
+            .onChange(of: viewModel.notificationsEnabled) { _, _ in viewModel.saveSettings() }
+
+            if viewModel.notificationsEnabled {
+                Picker(selection: $viewModel.notificationDaysBefore) {
+                    Text("1 giorno prima").tag(1)
+                    Text("2 giorni prima").tag(2)
+                    Text("Personalizzato").tag(-1)
+                } label: {
+                    SettingsRowLabel(icon: "calendar", semantic: .settingsCalendar, text: "Quanto prima")
+                }
+                .onChange(of: viewModel.notificationDaysBefore) { _, newValue in
+                    if newValue == -1 { showingCustomDaysPicker = true }
+                    else { viewModel.saveSettings() }
+                }
+
+                if viewModel.notificationDaysBefore == -1 {
+                    Button {
+                        showingCustomDaysPicker = true
+                    } label: {
+                        HStack {
+                            SettingsRowLabel(icon: "calendar", semantic: .settingsCalendar, text: "Giorni personalizzati")
+                            Spacer()
+                            Text("\(viewModel.customNotificationDays) \(viewModel.customNotificationDays == 1 ? "giorno" : "giorni")")
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
+                    }
+                }
+            }
+        } header: {
+            sectionHeader(icon: "bell.badge.fill", title: "Notifiche")
+        } footer: {
+            if viewModel.notificationsEnabled {
+                Text("Ricevi un avviso quando c'è qualcosa da consumare.")
+            }
+        }
+    }
+
+    private var fridgySection: some View {
+        Section {
+            // 1. Disponibilità
+            HStack {
+                Image(systemName: viewModel.isAppleIntelligenceAvailable ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundColor(viewModel.isAppleIntelligenceAvailable ? Self.fridgyBlue : .secondary)
+                Text("fridgy.title".localized).foregroundColor(.primary)
+                Spacer()
+                Text(viewModel.isAppleIntelligenceAvailable ? "fridgy.available".localized : "fridgy.unavailable".localized)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            // 2. Suggerimenti
+            Toggle(isOn: $viewModel.intelligenceEnabled) {
+                SettingsRowLabel(icon: "sparkles", color: Self.fridgyBlue, text: "fridgy.toggle".localized)
+            }
+            .tint(Self.fridgyBlue)
+            .onChange(of: viewModel.intelligenceEnabled) { _, newValue in
+                viewModel.saveSettings()
+                IntelligenceManager.shared.isEnabled = newValue
+            }
+
+            // 3. Chatta con Fridgy (in sheet per evitare schermata bianca al ritorno)
+            if viewModel.intelligenceEnabled && viewModel.isAppleIntelligenceAvailable {
+                Button {
+                    showingFridgyChat = true
+                } label: {
+                    HStack {
+                        SettingsRowLabel(icon: "bubble.left.and.bubble.right.fill", color: Self.fridgyBlue, text: "fridgy.chat.title".localized)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(.tertiaryLabel))
+                    }
+                }
+            }
+        } header: {
+            HStack(spacing: 8) {
+                sectionHeader(icon: "sparkles", title: "fridgy.title".localized)
+                Text("BETA")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Self.fridgyBlue)
+                    .clipShape(Capsule())
+            }
+        } footer: {
+            VStack(alignment: .leading, spacing: 6) {
+                if viewModel.intelligenceEnabled {
+                    Text(viewModel.isAppleIntelligenceAvailable ? "fridgy.footer.enabled.available".localized : "fridgy.footer.enabled.unavailable".localized)
+                } else {
+                    Text("fridgy.footer.disabled".localized)
+                }
+                Text("fridgy.footer.beta".localized)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private var appearanceSection: some View {
+        Section {
+            NavigationLink {
+                AppearanceModeView()
+            } label: {
+                SettingsRowLabel(icon: "circle.lefthalf.filled", semantic: .settingsAppearance, text: "Aspetto app")
+            }
+            NavigationLink {
+                AccentColorSettingsView()
+            } label: {
+                SettingsRowLabel(icon: "paintpalette.fill", semantic: .settingsAppearance, text: "Colori applicazione")
+            }
+            if UIApplication.shared.supportsAlternateIcons {
+                NavigationLink {
+                    AppIconPickerView()
+                } label: {
+                    SettingsRowLabel(icon: "app.badge.fill", semantic: .settingsAppearance, text: "settings.app_icon.section".localized)
+                }
+            }
+        } header: {
+            sectionHeader(icon: "paintbrush.pointed.fill", title: "Aspetto")
+        }
+    }
+
+    private var dataSection: some View {
+        Section {
+            HStack {
+                SettingsRowLabel(icon: "icloud.fill", semantic: .settingsCloud, text: "iCloud")
+                Spacer()
+                Text(viewModel.iCloudStatus).foregroundColor(.secondary)
+            }
+
+            if viewModel.iCloudStatus == "Attiva" {
+                Button {
+                    viewModel.restoreFromiCloud()
+                } label: {
+                    SettingsRowLabel(icon: "arrow.down.circle", semantic: .settingsCloud, text: "settings.icloud.restore".localized)
+                }
+            }
+
+            NavigationLink {
+                BackupRestoreView()
+            } label: {
+                SettingsRowLabel(icon: "arrow.triangle.2.circlepath", semantic: .settingsBackup, text: "Backup e Ripristino")
+            }
+        } header: {
+            sectionHeader(icon: "externaldrive.fill", title: "Dati")
+        } footer: {
+            if viewModel.iCloudStatus == "Attiva" {
+                Text("Sincronizzazione automatica tra dispositivi. Puoi anche esportare/importare backup locali.")
+            } else {
+                Text("Esporta o importa i dati manualmente per backup locali.")
+            }
+        }
+    }
+
+    private var infoSection: some View {
+        Section {
+            HStack {
+                Text("settings.version".localized)
+                    .foregroundColor(.primary)
+                Spacer()
+                Text(viewModel.appVersion)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            HStack {
+                Text("FoodFade © 2026")
+                    .font(.subheadline)
+                    .foregroundColor(Color(.tertiaryLabel))
+                Spacer()
+            }
+        } header: {
+            sectionHeader(icon: "info.circle.fill", title: "settings.info".localized)
+        }
+    }
+
+    private var resetSection: some View {
+        Section {
+            Button {
+                showingResetAlert = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.counterclockwise")
+                    Text("Ripristina FoodFade")
+                }
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.red)
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+        } footer: {
+            Text("settings.reset.footer".localized)
+                .padding(.bottom, 24)
+        }
+    }
+
+    // MARK: - Stili condivisi
+
+    private func sectionHeader(icon: String, title: String) -> some View {
+        Label(title, systemImage: icon)
+            .font(.system(size: 15, weight: .semibold, design: .rounded))
+            .foregroundColor(.primary)
+    }
+
+    private var toggleTint: Color {
+        colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.semanticIconColor(for: .settingsRing)
+    }
+
     private func performReset() {
-        // Cancella tutti i FoodItem
         let foodItemDescriptor = FetchDescriptor<FoodItem>()
         if let foodItems = try? modelContext.fetch(foodItemDescriptor) {
-            for item in foodItems {
-                modelContext.delete(item)
-            }
+            for item in foodItems { modelContext.delete(item) }
         }
-        
-        // Cancella tutti i UserProfile
         let userProfileDescriptor = FetchDescriptor<UserProfile>()
         if let profiles = try? modelContext.fetch(userProfileDescriptor) {
-            for profile in profiles {
-                modelContext.delete(profile)
-            }
+            for profile in profiles { modelContext.delete(profile) }
         }
-        
-        // Cancella tutti i CustomFoodType
         let customFoodTypeDescriptor = FetchDescriptor<CustomFoodType>()
         if let customTypes = try? modelContext.fetch(customFoodTypeDescriptor) {
-            for type in customTypes {
-                modelContext.delete(type)
-            }
+            for type in customTypes { modelContext.delete(type) }
         }
-        
-        // Cancella tutte le AppSettings (e ricrea quelle di default dopo)
         let settingsDescriptor = FetchDescriptor<AppSettings>()
         if let existingSettings = try? modelContext.fetch(settingsDescriptor) {
-            for setting in existingSettings {
-                modelContext.delete(setting)
-            }
+            for setting in existingSettings { modelContext.delete(setting) }
         }
-        
-        // Salva le cancellazioni
         try? modelContext.save()
-        
-        // Ricrea le impostazioni di default
+
         let defaultSettings = AppSettings.defaultSettings()
         modelContext.insert(defaultSettings)
         try? modelContext.save()
-        
-        // Resetta gli AppStorage
+
         hasSeenWelcome = false
         hasShownFirstAddPrompt = false
-        
-        // Resetta il ThemeManager ai valori di default
         ThemeManager.shared.accentColor = .natural
         ThemeManager.shared.appearanceMode = .system
         ThemeManager.shared.animationsEnabled = true
-        
-        // Forza l'app a tornare all'onboarding postando una notifica
         NotificationCenter.default.post(name: NSNotification.Name("AppResetPerformed"), object: nil)
+    }
+}
+
+// MARK: - Row label (icon + text)
+private struct SettingsRowLabel: View {
+    var icon: String
+    var semantic: SemanticIconContext? = nil
+    var color: Color? = nil
+    var text: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundColor(resolvedColor)
+            Text(text).foregroundColor(.primary)
+        }
+    }
+
+    private var resolvedColor: Color {
+        if let color { return color }
+        if let semantic { return ThemeManager.shared.semanticIconColor(for: semantic) }
+        return .secondary
     }
 }
 

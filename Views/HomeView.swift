@@ -237,10 +237,28 @@ struct HomeView: View {
                 progressEmptyState
             } else if currentHomeSummaryStyle == .compact {
                 compactSummaryView
+            } else if currentHomeSummaryStyle == .expiryControlCard {
+                progressSectionExpiryControlCard
             } else {
                 progressSectionWithRing
             }
         }
+    }
+
+    /// Card "Oggi per te": frase suggerita + sottotitolo + barra distribuzione
+    private var progressSectionExpiryControlCard: some View {
+        ExpiryControlCardView(
+            suggestion: viewModel.oggiPerTeSuggestion,
+            subtitle: viewModel.oggiPerTeSubtitle,
+            scadonoOggi: viewModel.expiringToday.count,
+            daConsumare: viewModel.toConsume.count,
+            neiProssimiGiorni: viewModel.incoming.count,
+            tuttoOk: viewModel.allOk.count,
+            totaleProdottiAttivi: viewModel.totalActiveItems
+        )
+        .frame(maxWidth: .infinity)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(16)
     }
     
     private var progressSectionWithRing: some View {
@@ -286,7 +304,7 @@ struct HomeView: View {
         return VStack(spacing: 14) {
             VStack(spacing: 10) {
                 CompactSummaryRow(label: "Scadono oggi", count: a, total: total, color: .red, microIcon: a > 0 ? "exclamationmark.triangle.fill" : nil)
-                CompactSummaryRow(label: "Da consumare", count: b, total: total, color: .orange, microIcon: b > 0 ? "fork.knife" : nil)
+                CompactSummaryRow(label: "Da consumare", count: b, total: total, color: AppTheme.accentOrange, microIcon: b > 0 ? "fork.knife" : nil)
                 CompactSummaryRow(label: "Nei prossimi giorni", count: c, total: total, color: Color(red: 0.85, green: 0.75, blue: 0.2), microIcon: nil)
                 CompactSummaryRow(label: "Tutto ok", count: d, total: total, color: .green, microIcon: nil)
             }
@@ -329,7 +347,7 @@ struct HomeView: View {
     }
     
     private var currentHomeSummaryStyle: HomeSummaryStyle {
-        settings.first?.homeSummaryStyle ?? .ring
+        settings.first?.homeSummaryStyle ?? .expiryControlCard
     }
     
     /// Didascalia sotto l'anello (user friendly)
@@ -408,24 +426,24 @@ struct HomeView: View {
         HStack(spacing: 12) {
             HomeKPICard(
                 icon: "square.stack.3d.up.fill",
-                label: "home.kpi.total".localized,
+                label: "home.kpi.in_home".localized,
                 value: viewModel.totalActiveItems,
-                color: .green,
-                glowWhenPositive: false
+                color: AppTheme.accentBlue,
+                highlightWhenPositive: false
             )
             HomeKPICard(
                 icon: "trash.fill",
                 label: "home.kpi.expired".localized,
                 value: viewModel.expiredCount,
                 color: .red,
-                glowWhenPositive: true
+                highlightWhenPositive: true
             )
             HomeKPICard(
                 icon: "clock.fill",
                 label: "home.kpi.expiring".localized,
                 value: viewModel.inScadenzaCount,
-                color: .orange,
-                glowWhenPositive: true
+                color: AppTheme.accentOrange,
+                highlightWhenPositive: false
             )
         }
     }
@@ -681,36 +699,36 @@ private struct HomeKPICard: View {
     let label: String
     let value: Int
     let color: Color
-    /// Se true, quando value > 0 applica un glow esterno del colore della card (solo Scaduti / In scadenza).
-    var glowWhenPositive: Bool = false
+    /// Glow e fondo colorato solo per Scaduti (value > 0).
+    var highlightWhenPositive: Bool = false
     
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 24, weight: .medium))
+                .font(.system(size: 18, weight: .medium))
                 .foregroundColor(color)
             Text(label)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.secondary)
             Text("\(value)")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundColor(.primary)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 8)
         .background {
             ZStack {
                 Color(.secondarySystemGroupedBackground)
-                if glowWhenPositive && value > 0 {
-                    color.opacity(0.16)
+                if highlightWhenPositive && value > 0 {
+                    color.opacity(0.14)
                 }
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(
-            color: glowWhenPositive && value > 0 ? color.opacity(0.35) : .clear,
-            radius: 10
+            color: highlightWhenPositive && value > 0 ? color.opacity(0.3) : .clear,
+            radius: 6
         )
     }
 }
@@ -724,14 +742,14 @@ private struct ExpiringProductCard: View {
         if days < 0 { return "Scaduto" }
         if days == 0 { return "Oggi" }
         if days == 1 { return "Domani" }
-        return "\(days) gg"
+        return "\(days) giorni"
     }
     
     /// Verde = OK, arancione = in scadenza o aperto, rosso = scaduto
     private var badgeColor: Color {
         if item.expirationStatus == .expired { return .red }
-        if item.isOpened { return .orange }
-        if item.expirationStatus == .today || item.expirationStatus == .soon { return .orange }
+        if item.isOpened { return AppTheme.accentOrange }
+        if item.expirationStatus == .today || item.expirationStatus == .soon { return AppTheme.accentOrange }
         return .green
     }
     
@@ -880,7 +898,7 @@ private struct HomeCategoryCard: View {
     }
     
     private var statusPillColor: Color {
-        expiringCount == 0 ? .green : .orange
+        expiringCount == 0 ? .green : AppTheme.accentOrange
     }
     
     var body: some View {

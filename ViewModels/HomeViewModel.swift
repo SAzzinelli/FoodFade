@@ -31,11 +31,23 @@ enum KPICardType: String, CaseIterable, Codable, Hashable {
     var color: Color {
         switch self {
         case .expiringToday: return .red
-        case .toConsume: return .orange
-        case .incoming: return .yellow.opacity(0.7)
+        case .toConsume: return AppTheme.accentOrange
+        case .incoming: return AppTheme.accentYellow
         case .allOk: return .green
         }
     }
+}
+
+/// Suggerimento "Oggi per te": una frase dinamica, prossima azione (la View risolve in stringa localizzata).
+enum OggiPerTeSuggestion {
+    case consumeTodayOne(name: String)
+    case consumeTodayMany(count: Int)
+    case consumeTomorrowOne(name: String)
+    case consumeInDaysOne(name: String, days: Int)
+    case consumeTomorrowMany(count: Int)
+    case incomingSoon        // solo "nei prossimi giorni" → niente di urgente oggi, ma non "tutto sotto controllo"
+    case fridgeUnderControl  // solo "tutto ok" → davvero tutto sotto controllo
+    case noUrgency           // inventario vuoto o solo tutto ok (alias)
 }
 
 @MainActor
@@ -170,7 +182,9 @@ class HomeViewModel: ObservableObject {
         }
     }
     
-    /// Percentuale per l'anello di progresso (calcolata in base alla modalità selezionata)
+    /// Percentuale per l'anello di progresso (calcolata in base alla modalità selezionata).
+    /// - safeItems: prodotti "con margine" (tutto ok + nei prossimi giorni) / totale → anello pieno = inventario sotto controllo.
+    /// - atRisk: prodotti a rischio (scadono oggi + da consumare + nei prossimi giorni) / totale.
     var progressRingPercentage: Double {
         let total = expiringToday.count + toConsume.count + incoming.count + allOk.count
         guard total > 0 else {
@@ -179,7 +193,8 @@ class HomeViewModel: ObservableObject {
         
         switch progressRingMode {
         case .safeItems:
-            return Double(allOk.count) / Double(total)
+            let withMargin = allOk.count + incoming.count
+            return Double(withMargin) / Double(total)
         case .atRisk:
             let atRiskCount = expiringToday.count + toConsume.count + incoming.count
             return Double(atRiskCount) / Double(total)
@@ -204,6 +219,47 @@ class HomeViewModel: ObservableObject {
     /// Conteggi per i 3 anelli: OK, in scadenza, scaduti
     var activityRingCounts: (ok: Int, inScadenza: Int, expired: Int) {
         (allOk.count, inScadenzaCount, expiredCount)
+    }
+    
+    /// Suggerimento "Oggi per te": una sola frase, prossima azione (no numeri, no grafici).
+    /// Priorità: 1) scadono oggi 2) da consumare (domani) 3) nei prossimi giorni 4) solo tutto ok.
+    /// "Tutto sotto controllo" solo quando ci sono solo prodotti tutto ok (o inventario vuoto). Se ci sono "nei prossimi giorni" → incomingSoon, non fridgeUnderControl.
+    var oggiPerTeSuggestion: OggiPerTeSuggestion {
+        if !expiringToday.isEmpty {
+            let first = expiringToday.first!
+            return (expiringToday.count == 1 && !first.name.isEmpty)
+                ? .consumeTodayOne(name: first.name)
+                : .consumeTodayMany(count: expiringToday.count)
+        }
+        if !toConsume.isEmpty {
+            let first = toConsume.first!
+            let days = first.daysRemaining
+            if toConsume.count == 1 && !first.name.isEmpty {
+                if days == 1 { return .consumeTomorrowOne(name: first.name) }
+                return .consumeInDaysOne(name: first.name, days: days)
+            }
+            return .consumeTomorrowMany(count: toConsume.count)
+        }
+        if !incoming.isEmpty {
+            return .incomingSoon
+        }
+        return .fridgeUnderControl
+    }
+
+    /// Sottotitolo opzionale per la card "Oggi per te" (es. "Frigorifero • 1 pz") quando il suggerimento riguarda un singolo prodotto.
+    var oggiPerTeSubtitle: String? {
+        let first: FoodItem?
+        if !expiringToday.isEmpty, expiringToday.count == 1, !expiringToday.first!.name.isEmpty {
+            first = expiringToday.first
+        } else if !toConsume.isEmpty, toConsume.count == 1, !toConsume.first!.name.isEmpty {
+            first = toConsume.first
+        } else {
+            first = nil
+        }
+        guard let item = first else { return nil }
+        let cat = item.category.rawValue
+        let qty = item.quantity
+        return "\(cat) • \(qty) pz"
     }
     
     /// Carica il suggerimento Fridgy per la home usando la nuova architettura

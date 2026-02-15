@@ -41,10 +41,10 @@ struct AddFoodView: View {
         NavigationStack {
             ZStack(alignment: .top) {
                 Form {
-                    storageSection
                     nameAndPhotoSection
                     barcodeSection
                     expirationSection
+                    storageSection
                     quantitySection
                     priceSection
                     labelsSection
@@ -257,15 +257,20 @@ struct AddFoodView: View {
                 Image(systemName: "barcode")
                     .font(.system(size: 18))
                     .foregroundColor(.secondary)
-                if let barcode = viewModel.barcode {
-                    Text(barcode)
-                        .font(.system(.body, design: .monospaced))
-                        .foregroundColor(.primary)
-                } else {
-                    Text("addfood.barcode.placeholder".localized)
-                        .foregroundColor(.secondary)
+                TextField("addfood.barcode.placeholder".localized, text: Binding(
+                    get: { viewModel.barcode ?? "" },
+                    set: { newValue in
+                        let normalized = AddFoodViewModel.normalizeBarcode(newValue)
+                        viewModel.barcode = normalized.isEmpty ? nil : normalized
+                    }
+                ))
+                .font(.system(.body, design: .monospaced))
+                .keyboardType(.numbersAndPunctuation)
+                .autocorrectionDisabled()
+                .submitLabel(.done)
+                .onSubmit {
+                    viewModel.triggerLookupForEnteredBarcode()
                 }
-                Spacer()
                 Button {
                     showingScanner = true
                 } label: {
@@ -282,6 +287,10 @@ struct AddFoodView: View {
         } header: {
             Text("addfood.barcode".localized)
                 .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+        } footer: {
+            Text("addfood.barcode.footer".localized)
+                .font(.system(size: 13))
                 .foregroundColor(.secondary)
         }
     }
@@ -366,13 +375,13 @@ struct AddFoodView: View {
                     .buttonStyle(.plain)
                 }
                 
-                if let errorMessage = viewModel.dateValidationError {
+                if let message = viewModel.dateValidationError {
                     HStack(spacing: 8) {
-                        Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundColor(.red)
-                        Text(errorMessage)
+                        Image(systemName: "info.circle.fill")
+                            .foregroundColor(.orange)
+                        Text(message)
                             .font(.system(size: 13))
-                            .foregroundColor(.red)
+                            .foregroundColor(.orange)
                     }
                 }
             }

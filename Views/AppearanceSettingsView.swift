@@ -2,7 +2,72 @@ import SwiftUI
 import SwiftData
 import UIKit
 
-/// Vista delle impostazioni di aspetto (sottovista)
+/// Solo tema: Chiaro / Scuro / Sistema + Animazioni (usata da Impostazioni → Aspetto app)
+struct AppearanceModeView: View {
+    @StateObject private var viewModel = SettingsViewModel()
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        List {
+            Section {
+                AppearanceModeOption(mode: .system, icon: "gearshape.fill", title: "Sistema", isSelected: viewModel.appearanceMode == .system) {
+                    viewModel.appearanceMode = .system
+                    viewModel.saveSettings()
+                }
+                AppearanceModeOption(mode: .light, icon: "sun.max.fill", title: "Chiaro", isSelected: viewModel.appearanceMode == .light) {
+                    viewModel.appearanceMode = .light
+                    viewModel.saveSettings()
+                }
+                AppearanceModeOption(mode: .dark, icon: "moon.fill", title: "Scuro", isSelected: viewModel.appearanceMode == .dark) {
+                    viewModel.appearanceMode = .dark
+                    viewModel.saveSettings()
+                }
+            } header: { Text("Tema") }
+
+            Section {
+                Toggle(isOn: $viewModel.animationsEnabled) {
+                    Label("Animazioni", systemImage: "sparkles")
+                }
+                .onChange(of: viewModel.animationsEnabled) { _, _ in viewModel.saveSettings() }
+            } header: { Text("Animazioni") } footer: {
+                Text("Abilita o disabilita le animazioni e gli effetti visivi")
+            }
+        }
+        .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+        .navigationTitle("Aspetto app")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { viewModel.setup(modelContext: modelContext) }
+    }
+}
+
+/// Solo colori applicazione (usata da Impostazioni → Colori applicazione)
+struct AccentColorSettingsView: View {
+    @StateObject private var viewModel = SettingsViewModel()
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(AccentColor.allCases, id: \.self) { color in
+                    AccentColorOption(color: color, isSelected: viewModel.accentColor == color) {
+                        viewModel.accentColor = color
+                        viewModel.saveSettings()
+                    }
+                }
+            } header: { Text("Colore principale") } footer: {
+                Text("Naturale: icone a colori. Gli altri stili usano un unico colore accent.")
+            }
+        }
+        .tint(colorScheme == .dark ? ThemeManager.naturalHomeLogoColor : ThemeManager.shared.primaryColor)
+        .navigationTitle("Colori applicazione")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { viewModel.setup(modelContext: modelContext) }
+    }
+}
+
+/// Vista delle impostazioni di aspetto (sottovista) – tutto in una
 struct AppearanceSettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @StateObject private var themeManager = ThemeManager.shared

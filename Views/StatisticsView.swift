@@ -21,86 +21,89 @@ struct StatisticsView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if let data = statsData {
-                    VStack(spacing: 20) {
-                        // Card informativa introduttiva (Fridgy in base al Waste Score + testo)
-                        StatisticsIntroCard()
-                        
-                        // Card di ingresso alle viste dettaglio (solo titoli)
-                        VStack(spacing: 12) {
-                            NavigationLink {
-                                TrophiesView()
-                            } label: {
-                                StatEntryCard(icon: "trophy.fill", title: "trophy.title".localized, iconColor: primaryColor)
-                            }
-                            .buttonStyle(.plain)
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Card informativa introduttiva (Fridgy in base al Waste Score + testo)
+                            StatisticsIntroCard()
                             
-                            NavigationLink {
-                                WasteScoreDetailView(data: data, primaryColor: primaryColor, primaryColorDark: themeManager.primaryColorDark)
-                            } label: {
-                                StatEntryCard(icon: "chart.pie.fill", title: "stats.waste_score".localized, iconColor: Color(red: 0.8, green: 0.55, blue: 0.1))
-                            }
-                            .buttonStyle(.plain)
-                            
-                            if data.hasChartData {
+                            // Card di ingresso alle viste dettaglio (solo titoli)
+                            VStack(spacing: 12) {
                                 NavigationLink {
-                                    UsedVsWastedDetailView(data: data, primaryColor: primaryColor)
+                                    TrophiesView()
                                 } label: {
-                                    StatEntryCard(icon: "chart.bar.fill", title: "stats.food_waste".localized, iconColor: .blue)
+                                    StatEntryCard(icon: "trophy.fill", title: "trophy.title".localized, iconColor: primaryColor)
+                                }
+                                .buttonStyle(.plain)
+                                
+                                NavigationLink {
+                                    WasteScoreDetailView(data: data, primaryColor: primaryColor, primaryColorDark: themeManager.primaryColorDark)
+                                } label: {
+                                    StatEntryCard(icon: "chart.pie.fill", title: "stats.waste_score".localized, iconColor: .red)
+                                }
+                                .buttonStyle(.plain)
+                                
+                                if data.hasChartData {
+                                    NavigationLink {
+                                        UsedVsWastedDetailView(data: data, primaryColor: primaryColor)
+                                    } label: {
+                                        StatEntryCard(icon: "chart.bar.fill", title: "stats.food_waste".localized, iconColor: .blue)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                
+                                if data.hasCategoryStats {
+                                    NavigationLink {
+                                        CategoryDetailView(data: data, primaryColor: primaryColor)
+                                    } label: {
+                                        StatEntryCard(icon: "square.grid.2x2.fill", title: "stats.categories".localized, iconColor: .green)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                
+                                if data.averageConsumptionDays != nil {
+                                    NavigationLink {
+                                        AverageDaysDetailView(data: data, primaryColor: primaryColor)
+                                    } label: {
+                                        StatEntryCard(icon: "clock.badge.checkmark", title: "stats.how_long_products".localized, iconColor: Color(red: 0.2, green: 0.6, blue: 0.7))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                
+                                if data.costStatsWeek != nil || data.costStatsMonth != nil || data.costStatsYear != nil {
+                                    NavigationLink {
+                                        CostDetailView(data: data, primaryColor: primaryColor)
+                                    } label: {
+                                        StatEntryCard(icon: "eurosign.circle.fill", title: "stats.costs.title".localized, iconColor: .orange)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                
+                                NavigationLink {
+                                    PriceOverviewView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(icon: "chart.line.uptrend.xyaxis", title: "stats.prices.title".localized, iconColor: .orange)
+                                }
+                                .buttonStyle(.plain)
+                                
+                                NavigationLink {
+                                    DetailsDetailView(data: data, primaryColor: primaryColor)
+                                } label: {
+                                    StatEntryCard(icon: "list.bullet.rectangle", title: "stats.in_detail".localized, iconColor: Color(red: 0.5, green: 0.4, blue: 0.8))
                                 }
                                 .buttonStyle(.plain)
                             }
-                            
-                            if data.hasCategoryStats {
-                                NavigationLink {
-                                    CategoryDetailView(data: data, primaryColor: primaryColor)
-                                } label: {
-                                    StatEntryCard(icon: "square.grid.2x2.fill", title: "stats.categories".localized, iconColor: .green)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            
-                            if data.averageConsumptionDays != nil {
-                                NavigationLink {
-                                    AverageDaysDetailView(data: data, primaryColor: primaryColor)
-                                } label: {
-                                    StatEntryCard(icon: "clock.badge.checkmark", title: "stats.how_long_products".localized, iconColor: Color(red: 0.2, green: 0.6, blue: 0.7))
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            
-                            if data.costStatsWeek != nil || data.costStatsMonth != nil || data.costStatsYear != nil {
-                                NavigationLink {
-                                    CostDetailView(data: data, primaryColor: primaryColor)
-                                } label: {
-                                    StatEntryCard(icon: "eurosign.circle.fill", title: "stats.costs.title".localized, iconColor: .orange)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            
-                            NavigationLink {
-                                PriceOverviewView(data: data, primaryColor: primaryColor)
-                            } label: {
-                                StatEntryCard(icon: "chart.line.uptrend.xyaxis", title: "stats.prices.title".localized, iconColor: .orange)
-                            }
-                            .buttonStyle(.plain)
-                            
-                            NavigationLink {
-                                DetailsDetailView(data: data, primaryColor: primaryColor)
-                            } label: {
-                                StatEntryCard(icon: "list.bullet.rectangle", title: "stats.in_detail".localized, iconColor: Color(red: 0.5, green: 0.4, blue: 0.8))
-                            }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, AppTheme.spacingBelowLargeTitle)
+                        .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, AppTheme.spacingBelowLargeTitle)
-                    .padding(.bottom, AppTheme.spacingBelowLargeTitle)
                 } else {
                     emptyState
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Statistiche")
             .navigationBarTitleDisplayMode(.large)
